@@ -1,0 +1,8 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+.gitattributes
+extras
+standalone
+.travis.yml
+^\.git
+deploy.sh
