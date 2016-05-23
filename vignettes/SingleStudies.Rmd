@@ -1,0 +1,345 @@
+---
+title: "Single studies using the CaseControl package"
+author: "Martijn J. Schuemie"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    number_sections: yes
+    toc: yes
+  html_document:
+    number_sections: yes
+    toc: yes
+vignette: >
+  %\VignetteIndexEntry{Single studies using CaseControl}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}      
+---
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(CaseControl)
+knitr::opts_chunk$set(
+  cache=FALSE,
+  comment = "#>",
+  error = FALSE,
+  tidy = FALSE)
+```
+# Introduction
+
+This vignette describes how you can use the `CaseControl` package to perform a single case-control study. We will walk through all the steps needed to perform an exemplar study, and we have selected the well-studied topic of the effect of NSAIDs on gastrointestinal (GI) bleeding-related hospitalization. For simplicity, we focus on one NSAID: diclofenac.
+
+# Installation instructions
+
+Before installing the `CaseControl` package make sure you have Java available.  Java can be downloaded from [www.java.com](http://www.java.com). For Windows users, RTools is also necessary.  RTools can be downloaded from [CRAN](http://cran.r-project.org/bin/windows/Rtools/).
+
+The `CaseControl` package is currently maintained in a [Github repository](https://github.com/OHDSI/CaseControl), and has dependencies on other packages in Github. All of these packages can be downloaded and installed from within R using the `devtools` package:
+
+```{r tidy=TRUE,eval=FALSE}
+install.packages("devtools")
+library(devtools)
+install_github("ohdsi/OhdsiRTools") 
+install_github("ohdsi/SqlRender") 
+install_github("ohdsi/DatabaseConnector") 
+install_github("ohdsi/Cyclops") 
+install_github("ohdsi/CaseControl") 
+```
+
+Once installed, you can type `library(CaseControl)` to load the package.
+
+# Overview
+
+In the `CaseControl` package a study requires at least five steps:
+
+1. Loading data on the cases and potential controls from the database needed for matching.
+2. Selecting controls per case.
+3. Loading exposure information for cases and controls.
+4. Determining exposure status for cases and controls based on a definition of the risk window.
+5. Fitting the model using conditional logistic regression.
+
+In the following sections these steps will be demonstrated.
+
+# Configuring the connection to the server
+
+We need to tell R how to connect to the server where the data are. `CaseControl` uses the `DatabaseConnector` package, which provides the `createConnectionDetails` function. Type `?createConnectionDetails` for the specific settings required for the various database management systems (DBMS). For example, one might connect to a PostgreSQL database using this code:
+
+```{r tidy=FALSE,eval=FALSE}
+connectionDetails <- createConnectionDetails(dbms = "postgresql", 
+                                             server = "localhost/ohdsi", 
+                                             user = "joe", 
+                                             password = "supersecret")
+
+cdmDatabaseSchema <- "my_cdm_data"
+cohortDatabaseSchema <- "my_results"
+cohortTable <- "my_cohorts"
+cdmVersion <- "5"
+```
+
+The last three lines define the `cdmDatabaseSchema` and `cohortDatabaseSchema` variables,as well as the CDM version. We'll use these later to tell R where the data in CDM format live, where we have stored our cohorts of interest, and what version CDM is used. Note that for Microsoft SQL Server, databaseschemas need to specify both the database and the schema, so for example `cdmDatabaseSchema <- "my_cdm_data.dbo"`.
+
+# Preparing the health outcome of interest and nesting cohort
+
+We need to define the exposures and outcomes for our study. Additionally, we can specify a cohort in which to nest the study. The CDM also already contains standard cohorts in the `drug_era` and `condition_era` table that could be used if those meet the requirement of the study, but often we require custom cohort definitions. One way to define cohorts is by writing SQL statements against the OMOP CDM that populate a table of events in which we are interested. The resulting table should have the same structure as the `cohort` table in the CDM, meaning it should have the fields `cohort_definition_id`, `cohort_start_date`, `cohort_end_date`,and `subject_id`. 
+
+For our example study, we will rely on `drug_era` to define exposures, and we have created a file called *vignette.sql* with the following contents to define the outcome and the nesting cohort:
+
+```sql
+/***********************************
+File vignette.sql 
+***********************************/
+
+IF OBJECT_ID('@cohortDatabaseSchema.@cohortTable', 'U') IS NOT NULL
+  DROP TABLE @cohortDatabaseSchema.@cohortTable;
+
+SELECT 1 AS cohort_definition_id,
+	condition_start_date AS cohort_start_date,
+	condition_end_date AS cohort_end_date,
+	condition_occurrence.person_id AS subject_id
+INTO @cohortDatabaseSchema.@cohortTable
+FROM @cdmDatabaseSchema.condition_occurrence
+INNER JOIN @cdmDatabaseSchema.visit_occurrence
+	ON condition_occurrence.visit_occurrence_id = visit_occurrence.visit_occurrence_id
+WHERE condition_concept_id IN (
+		SELECT descendant_concept_id
+		FROM @cdmDatabaseSchema.concept_ancestor
+		WHERE ancestor_concept_id = 192671 -- GI - Gastrointestinal haemorrhage
+		)
+	AND visit_occurrence.visit_concept_id IN (9201, 9203);
+	
+INSERT INTO @cohortDatabaseSchema.@cohortTable 
+(cohort_definition_id, cohort_start_date, cohort_end_date, subject_id)
+SELECT 2 AS cohort_definition_id,
+	MIN(condition_start_date) AS cohort_start_date,
+	NULL AS cohort_end_date,
+	person_id AS subject_id
+FROM @cdmDatabaseSchema.condition_occurrence
+WHERE condition_concept_id IN (
+		SELECT descendant_concept_id
+		FROM @cdmDatabaseSchema.concept_ancestor
+		WHERE ancestor_concept_id = 80809 -- rheumatoid arthritis
+		)
+GROUP BY person_id;
+```
+This is parameterized SQL which can be used by the `SqlRender` package. We use parameterized SQL so we do not have to pre-specify the names of the CDM and cohort schemas. That way, if we want to run the SQL on a different schema, we only need to change the parameter values; we do not have to change the SQL code. By also making use of translation functionality in `SqlRender`, we can make sure the SQL code can be run in many different environments.
+
+```{r tidy=FALSE,eval=FALSE}
+library(SqlRender)
+sql <- readSql("vignette.sql")
+sql <- renderSql(sql,
+                 cdmDatabaseSchema = cdmDatabaseSchema, 
+                 cohortDatabaseSchema = cohortDatabaseSchema
+                 cohortTable = cohortTable)$sql
+sql <- translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+
+connection <- connect(connectionDetails)
+executeSql(connection, sql)
+```
+
+In this code, we first read the SQL from the file into memory. In the next line, we replace the three parameter names with the actual values. We then translate the SQL into the dialect appropriate for the DBMS we already specified in the `connectionDetails`. Next, we connect to the server, and submit the rendered and translated SQL.
+
+If all went well, we now have a table with the outcome of interest and the nesting cohort. We can see how many events:
+
+```{r tidy=FALSE,eval=FALSE}
+sql <- paste("SELECT cohort_definition_id, COUNT(*) AS count",
+             "FROM @cohortDatabaseSchema.@cohortTable",
+             "GROUP BY cohort_definition_id")
+sql <- renderSql(sql, 
+                 cohortDatabaseSchema = cohortDatabaseSchema, 
+                 cohortTable = cohortTable)$sql
+sql <- translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+
+querySql(connection, sql)
+```
+```{r echo=FALSE,message=FALSE}
+data.frame(cohort_definition_id = c(1,2),count=c(422274, 118430))
+```
+
+# Extracting the data from the server
+
+Now we can tell `CaseControl` to extract the necessary data on cases and potential controls:
+
+```{r tidy=FALSE,eval=FALSE}
+caseData <- getDbCaseData(connectionDetails = connectionDetails,
+                          cdmDatabaseSchema = cdmDatabaseSchema,
+                          oracleTempSchema = oracleTempSchema,
+                          outcomeDatabaseSchema = cohortDatabaseSchema,
+                          cohortTable = cohortTable,
+                          outcomeId = 1,
+                          useNestingCohort = TRUE,
+                          nestingCohortDatabaseSchema = cohortDatabaseSchema,
+                          nestingCohortTable = cohortTable,
+                          nestingCohortId = 2,
+                          useObservationEndAsNestingEndDate = TRUE,
+                          getVisits = TRUE)
+caseData
+```
+```{r echo=FALSE,message=FALSE,eval=TRUE}
+if (file.exists("s:/temp/vignetteCaseControl")){
+  caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
+} 
+```
+```{r echo=FALSE,message=FALSE}
+if (file.exists("s:/temp/vignetteCaseControl")){
+  caseData
+}
+```
+
+There are many parameters, but they are all documented in the `CaseControl` manual. In short, we are pointing the function to the table created earlier and indicating which concept ID in that table identifies the outcome. Note that it is possible to fetch the data for multiple outcomes at once for efficiency. We furthermore specify a nesting cohort in the same table, meaning that people will be eligible to be cases or controls if and when they fall inside the specified cohort. In this case, the nesting cohort starts when people have their first diagnosis of rheumatoid arthritis. We use the `useObservationEndAsNestingEndDate` argument to indicate people will stay eligible until the end of their observation period. We furthermore specify we want to retrieve data on patient visits, which will be used later on for matching.
+
+Data about the cases and potential controls are extracted from the server and stored in the `caseData` object. This object uses the package `ff` to store information in a way that ensures R does not run out of memory, even when the data are large. 
+
+We can use the generic `summary()` function to view some more information of the data we extracted:
+
+```{r tidy=TRUE,eval=FALSE}
+summary(caseData)
+```
+```{r echo=FALSE,message=FALSE}
+if (file.exists("s:/temp/vignetteCaseControl")){
+  summary(caseData)
+}
+```
+
+## Saving the data to file
+
+Creating the `caseData` object can take considerable computing time, and it is probably a good idea to save it for future sessions. Because `caseData` uses `ff`, we cannot use R's regular save function. Instead, we'll have to use the `saveCaseData()` function:
+
+```{r tidy=TRUE,eval=FALSE}
+saveCaseData(caseData, "GiBleed")
+```
+
+We can use the `loadCaseData()` function to load the data in a future session.
+
+# Selecting controls
+
+Next, we can use the data to select matched controls per case:
+
+```{r tidy=FALSE,eval=FALSE}
+caseControls <- selectControls(caseData = caseData,
+                               outcomeId = 1,
+                               firstOutcomeOnly = TRUE,
+                               washoutPeriod = 180,
+                               controlsPerCase = 2,
+                               matchOnAge = TRUE,
+                               ageCaliper = 2,
+                               matchOnGender = TRUE,
+                               matchOnProvider = FALSE,
+                               matchOnVisitDate = TRUE,
+                               visitDateCaliper = 30)
+```
+
+In this example, we specify a washout period of 180 days, meaning that both cases and controls are required to have a minimum of 180 days of observation prior to the index date. We also specify we will only consider the first outcome per person. If a person's first outcome is within the washout period, that person will be removed from the analysis. We match on calendar time (implicit), age, gender, and visit date, and randomly sample up to two controls per case. Matching on visit date implies that the control should have a visit within n days from the index date of the case (n = 30 in this example), and the index date for the control will be set to the visit date. The purpose of this is to make the index dates more similar between cases and control, because almost by definition we would expect the case to have a visit on the index date.
+
+The `caseControls` object is a data frame with four columns:
+
+```{r echo=TRUE,message=FALSE,eval=FALSE}
+head(caseControls)
+```
+```{r echo=FALSE,message=FALSE}
+data.frame(personId = c(3,123,345,6,234,567),
+           indexDate = c("2009-10-10", "2009-10-11", "2009-10-09", "2010-05-04", "2010-05-04", "2010-05-05"), 
+           isCase = c(TRUE, FALSE, FALSE, TRUE, FALSE, FALSE), 
+           stratumId = c(1,1,1,2,2,2))
+```
+
+# Loading exposure data
+
+Next, we load information on the exposures of the cases and controls.
+
+```{r tidy=FALSE,eval=FALSE}
+caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
+                                          caseControls = caseControls,
+                                          oracleTempSchema = oracleTempSchema,
+                                          exposureDatabaseSchema = cdmDatabaseSchema,
+                                          exposureTable = "drug_era",
+                                          exposureIds = 1124300)
+```
+
+Here we specify that we will use the `drug_era` table to identify exposures, and will only retrieve data on exposure to Diclofenac (concept ID 1124300).
+
+The `caseControlsExposure` object is a standard R object and can be saved as usual, for example:
+
+```{r tidy=TRUE,eval=FALSE}
+saveRDS(caseControlsExposure, "caseControlsExposure.rds")
+```
+
+# Creating case-control data
+
+We can now use the exposure data to determine exposure status for the cases and controls. (The reason why fetching exposure data and determining exposure status is split up is that this is more efficient when we want to evaluate several risk window definitions.)
+
+```{r tidy=FALSE,eval=FALSE}
+caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExposure,
+                                         exposureId = 1124300,
+                                         firstExposureOnly = FALSE,
+                                         riskWindowStart = 0,
+                                         riskWindowEnd = 0)
+```
+
+Here we specify we are intested in all exposures, not just the first one, and that the exposure should overlap with the index date (the risk window starts and ends on day 0, the index date). The `caseControlData` object is a data frame with five columns:
+			  
+```{r echo=TRUE,message=FALSE,eval=FALSE}
+head(caseControlData)
+```
+```{r echo=FALSE,message=FALSE}
+data.frame(personId = c(3,123,345,6,234,567),
+           indexDate = c("2009-10-10", "2009-10-11", "2009-10-09", "2010-05-04", "2010-05-04", "2010-05-05"), 
+           isCase = c(TRUE, FALSE, FALSE, TRUE, FALSE, FALSE), 
+           stratumId = c(1,1,1,2,2,2), 
+           exposed = c(1,0,0,0,0,0))
+```
+
+# Fitting the model
+
+We can now fit the model, which is a logistic regression conditioned on the matched sets:
+
+```{r tidy=FALSE,eval=FALSE}
+fit <- fitCaseControlModel(caseControlData)
+
+fit
+```
+```{r echo=FALSE,message=FALSE}
+if (file.exists("s:/temp/vignetteCaseControl")){
+  fit <- readRDS("s:/temp/vignetteCaseControl/fit.rds")
+  fit
+}
+```
+
+The generic functions `summary`, `coef`, and `confint` are implemented for the `fit` object:
+
+```{r tidy=FALSE,eval=FALSE}
+summary(fit)
+```
+```{r echo=FALSE,message=FALSE}
+if (file.exists("s:/temp/vignetteCaseControl")){
+  summary(fit)
+}
+```
+
+```{r tidy=FALSE,eval=FALSE}
+coef(fit)
+```
+```{r echo=FALSE,message=FALSE}
+if (file.exists("s:/temp/vignetteCaseControl")){
+  coef(fit)
+}
+```
+
+```{r tidy=FALSE,eval=FALSE}
+confint(fit)
+```
+```{r echo=FALSE,message=FALSE}
+if (file.exists("s:/temp/vignetteCaseControl")){
+  confint(fit)
+}
+```
+
+# Acknowledgments
+
+Considerable work has been dedicated to provide the `CaseControl` package.
+
+```{r tidy=TRUE,eval=TRUE}
+citation("CaseControl")
+```
+
+Furthermore, `CaseControl` makes use of the `Cyclops` package.
+
+```{r tidy=TRUE,eval=TRUE}
+citation("Cyclops")
+```

@@ -34,14 +34,18 @@ INNER JOIN (
 	  drug_era_start_date AS exposure_start_date,
 	  drug_era_end_date AS exposure_end_date
 	FROM @exposure_database_schema.@exposure_table
+{@exposure_ids != ''} ? {
 	WHERE drug_concept_id IN (@exposure_ids)
+}
 } : {
 SELECT subject_id AS person_id,
 	  cohort_definition_id AS exposure_id,
 	  cohort_start_date AS exposure_start_date,
 	  cohort_end_date AS exposure_end_date
 	FROM @exposure_database_schema.@exposure_table
+{@exposure_ids != ''} ? {
 	WHERE cohort_definition_id IN (@exposure_ids)
+}
 }
 	) exposure
 ON case_controls.person_id = exposure.person_id

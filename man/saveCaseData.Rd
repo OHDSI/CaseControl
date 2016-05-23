@@ -7,19 +7,15 @@
 saveCaseData(caseData, folder)
 }
 \arguments{
+\item{caseData}{An object of type \code{caseData} as generated using \code{\link{getDbCaseData}}.}
+
 \item{folder}{The name of the folder where the data will be written. The folder should not yet
 exist.}
-
-\item{sccsData}{An object of type \code{caseData} as generated using \code{\link{getDbCaseData}}.}
 }
 \description{
 \code{saveCaseData} saves an object of type caseData to folder.
 }
 \details{
 The data will be written to a set of files in the specified folder.
-}
-\examples{
-# todo
-
 }
 

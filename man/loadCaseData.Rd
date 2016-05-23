@@ -12,7 +12,7 @@ loadCaseData(folder, readOnly = TRUE)
 \item{readOnly}{If true, the data is opened read only.}
 }
 \value{
-An object of class caseData
+An object of class \code{caseData}.
 }
 \description{
 \code{loadCaseData} loads an object of type caseData from a folder in the file system.

@@ -170,15 +170,12 @@ getDbCaseData <- function(connectionDetails,
 #' @description
 #' \code{saveCaseData} saves an object of type caseData to folder.
 #'
-#' @param sccsData   An object of type \code{caseData} as generated using \code{\link{getDbCaseData}}.
+#' @param caseData   An object of type \code{caseData} as generated using \code{\link{getDbCaseData}}.
 #' @param folder     The name of the folder where the data will be written. The folder should not yet
 #'                   exist.
 #'
 #' @details
 #' The data will be written to a set of files in the specified folder.
-#'
-#' @examples
-#' # todo
 #'
 #' @export
 saveCaseData <- function(caseData, folder) {
@@ -216,7 +213,7 @@ saveCaseData <- function(caseData, folder) {
 #' The data will be written to a set of files in the folder specified by the user.
 #'
 #' @return
-#' An object of class caseData
+#' An object of class \code{caseData}.
 #'
 #' @export
 loadCaseData <- function(folder, readOnly = TRUE) {
@@ -358,4 +355,3 @@ insertDbPopulation <- function(caseControls,
   writeLines(paste("Inserting rows took", signif(delta, 3), attr(delta, "units")))
   invisible(TRUE)
 }
-

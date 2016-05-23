@@ -102,6 +102,3 @@ selectControls <- function(caseData,
   attr(caseControls, "metaData") <- metaData
   return(caseControls)
 }
-
-
-
