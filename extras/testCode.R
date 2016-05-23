@@ -8,9 +8,9 @@ matchOnAge = TRUE
 ageCaliper = 2
 matchOnGender = TRUE
 matchOnProvider = FALSE
-matchOnVisitDate = FALSE
+matchOnVisitDate = TRUE
 visitDateCaliper = 30
-caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
+caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData2")
 
 library(CaseControl)
 setwd("s:/temp")
@@ -58,14 +58,14 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
                           outcomeDatabaseSchema = cohortDatabaseSchema,
                           outcomeTable = outcomeTable,
                           outcomeId = 1,
-                          useNestingCohort = TRUE,
+                          useNestingCohort = F,
                           nestingCohortDatabaseSchema = cohortDatabaseSchema,
                           nestingCohortTable = outcomeTable,
-                          nestingCohortId = 2,
+                          #nestingCohortId = 2,
                           useObservationEndAsNestingEndDate = TRUE,
                           getVisits = TRUE)
 
-saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseData")
+saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseData2")
 
 caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
 
@@ -106,6 +106,9 @@ caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExpo
                                          riskWindowStart = 0,
                                          riskWindowEnd = 0)
 
-model <-  fitCaseControlModel(caseControlData)
+fit <- fitCaseControlModel(caseControlData)
 
+coef(fit)
+
+summary(fit)
 

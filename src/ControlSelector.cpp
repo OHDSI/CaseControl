@@ -39,7 +39,12 @@ ControlSelector::ControlSelector(const List& _nestingCohorts, const List& _cases
                                  matchOnVisitDate(_matchOnVisitDate), visitDateCaliper(_visitDateCaliper), nestingCohortDatas(), personId2CaseData(),
                                  generator(), stratumId(0) {
                                    //Load all data in memory structures:
-                                   NestingCohortDataIterator nestingCohortDataIterator(_nestingCohorts, _cases, _visits);
+                                   if (_matchOnVisitDate) {
+                                     Environment base = Environment::namespace_env("base");
+                                     Function writeLines = base["writeLines"];
+                                     writeLines("Loading visit data into memory");
+                                   }
+                                   NestingCohortDataIterator nestingCohortDataIterator(_nestingCohorts, _cases, _visits, _matchOnVisitDate);
                                    while (nestingCohortDataIterator.hasNext()){
                                      NestingCohortData nestingCohortData = nestingCohortDataIterator.next();
                                      if (!matchOnProvider || nestingCohortData.providerId != NA_INTEGER) {
@@ -49,13 +54,27 @@ ControlSelector::ControlSelector(const List& _nestingCohorts, const List& _cases
                                          personId2CaseData.insert(std::pair<int64_t,CaseData>(nestingCohortData.personId, caseData));
                                        }
                                        for (int date : nestingCohortData.indexDates) {
-                                         IndexDate indexDate(date, date >= nestingCohortData.observationPeriodStartDate + washoutPeriod);
+                                         IndexDate indexDate(date, date < nestingCohortData.observationPeriodStartDate + washoutPeriod);
                                          personId2CaseData[nestingCohortData.personId].indexDates.push_back(indexDate);
                                        }
                                      }
                                    }
                                    distribution = new std::uniform_int_distribution<int>(0,nestingCohortDatas.size() - 1);
                                  }
+
+int ControlSelector::binarySearch(const std::vector<int>& vector, const int& key) {
+  int lowerbound = 0;
+  int upperbound = vector.size();
+  int index = (lowerbound + upperbound) / 2;
+  while((vector[index] != key) && (lowerbound <= upperbound)) {
+    if (vector[index] > key)
+      upperbound = index - 1;
+    else
+      lowerbound = index + 1;
+    index = (lowerbound + upperbound) / 2;
+  }
+  return vector[lowerbound];
+}
 
 int ControlSelector::isMatch(const NestingCohortData& controlData, const CaseData& caseData, const int& indexDate) {
   if (indexDate < controlData.startDate || indexDate > controlData.endDate || indexDate < controlData.observationPeriodStartDate + washoutPeriod)
@@ -85,11 +104,13 @@ int ControlSelector::isMatch(const NestingCohortData& controlData, const CaseDat
   }
 
   if (matchOnVisitDate) {
-    for (int visitDate : controlData.visitDates) {
-      if (abs(visitDate - indexDate) <= visitDateCaliper)
-        return visitDate;
-    }
-    return NO_MATCH;
+    if (controlData.visitDates.size() == 0)
+      return NO_MATCH;
+    int visitDate = binarySearch(controlData.visitDates, indexDate);
+    if (abs(visitDate - indexDate) <= visitDateCaliper)
+      return visitDate;
+    else
+      return NO_MATCH;
   }
 
   return 0;
@@ -158,6 +179,10 @@ DataFrame ControlSelector::selectControls() {
   Function txtProgressBar = utils["txtProgressBar"];
   Function setTxtProgressBar = utils["setTxtProgressBar"];
   Function close = base["close"];
+  Function writeLines = base["writeLines"];
+
+  writeLines("Finding controls per case");
+
   List progressBar = txtProgressBar(0,personId2CaseData.size(),0,"=", NA_REAL, "" ,"", 3, "");
 
   int i = 0;

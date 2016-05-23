@@ -7,7 +7,8 @@ CaseControl is an R package for performing (nested) matched case-control analyse
 
 Features
 ========
-- Extracts the necessary data from a database in OMOP Common Data Model format.
+- Extracts the necessary data from a database in OMOP Common Data Model format
+- Nesting in a cohort of interest (e.g. people with a particular prior condition)
 - Matching on age, gender, provider, and/or visit
 - Sampling of controls per case
 - Fitting outcome models using conditional logisitc regression
@@ -37,7 +38,7 @@ Getting Started
 1. On Windows, make sure [RTools](http://cran.r-project.org/bin/windows/Rtools/) is installed.
 2. The DatabaseConnector and SqlRender packages require Java. Java can be downloaded from
 <a href="http://www.java.com" target="_blank">http://www.java.com</a>.
-3. In R, use the following commands to download and install SelfControlledCaseSeries:
+3. In R, use the following commands to download and install CaseControl:
 
   ```r
   install.packages("devtools")

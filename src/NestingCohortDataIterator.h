@@ -49,7 +49,7 @@ struct NestingCohortData {
 
 class NestingCohortDataIterator {
 public:
-  NestingCohortDataIterator(const List& _nestingCohorts, const List& _cases, const List& _visits);
+  NestingCohortDataIterator(const List& _nestingCohorts, const List& _cases, const List& _visits, const bool& showVisitProgress);
   bool hasNext();
   NestingCohortData next();
 private:

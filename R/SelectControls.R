@@ -73,14 +73,17 @@ selectControls <- function(caseData,
 
   if(matchOnVisitDate && caseData$metaData$hasVisits) {
     visits <- caseData$visits
-    rownames(visits) <- NULL #Needs to be null or the ordering of ffdf will fail
-    visits <- visits[ff::ffdforder(visits[c("nestingCohortId")]),]
+    if (!Cyclops::isSorted(visits, c("nestingCohortId", "visitStartDate"))) {
+      writeLines("- Sorting visits")
+      rownames(visits) <- NULL #Needs to be null or the ordering of ffdf will fail
+      visits <- visits[ff::ffdforder(visits[c("nestingCohortId", "visitStartDate")]),]
+    }
   } else {
     # Use one dummy visit so code won't break:
     visits <- ff::as.ffdf(data.frame(nestingCohortId = -1, visitStartDate = "1900-01-01"))
   }
 
-  caseControls <- .selectControls(nestingCohorts, cases, visits, firstOutcomeOnly, washoutPeriod, controlsPerCase, matchOnAge, ageCaliper, matchOnGender, matchOnProvider, matchOnVisitDate, visitDateCaliper)
+  caseControls <- CaseControl:::.selectControls(nestingCohorts, cases, visits, firstOutcomeOnly, washoutPeriod, controlsPerCase, matchOnAge, ageCaliper, matchOnGender, matchOnProvider, matchOnVisitDate, visitDateCaliper)
   caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
   delta <- Sys.time() - start
   writeLines(paste("Selection took", signif(delta, 3), attr(delta, "units")))

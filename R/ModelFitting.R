@@ -89,28 +89,13 @@ print.summary.outcomeModel <- function(x, ...) {
 
   writeLines("")
   writeLines("Counts")
-  d <- x$populationCounts
-  row.names(d) <- "Count"
-  d$description <- NULL
-  printCoefmat(d)
-
-  writeLines("")
-  writeLines("Outcome counts")
   d <- x$outcomeCounts
-  row.names(d) <- "Count"
-  if (x$outcomeModelType != "poisson") {
-    d$treatedOutcomes <- NULL
-    d$comparatorOutcomes <- NULL
-  }
+  colnames(d) <- c("Cases", "Controls", "Exposed cases", "Exposed controls")
+  rownames(d) <- "Count"
+
   printCoefmat(d)
 
-  if (x$outcomeModelType == "poisson" || x$outcomeModelType == "cox") {
-    writeLines("")
-    writeLines("Time at risk")
-    d <- x$timeAtRisk
-    row.names(d) <- "Days"
-    printCoefmat(d)
-  }
+
 }
 
 #' @export
@@ -128,13 +113,8 @@ confint.outcomeModel <- function(object, parm, level = 0.95, ...) {
 
 #' @export
 print.outcomeModel <- function(x, ...) {
-  writeLines(paste("Model type:", x$outcomeModelType))
-  writeLines(paste("Stratified:", x$outcomeModelStratified))
-  writeLines(paste("Use covariates:", x$outcomeModelUseCovariates))
+  writeLines("Case-Control fitted model")
   writeLines(paste("Status:", x$outcomeModelStatus))
-  if (!is.na(x$outcomeModelPriorVariance)) {
-    writeLines(paste("Prior variance:", x$outcomeModelPriorVariance))
-  }
   writeLines("")
   d <- x$outcomeModelTreatmentEstimate
   output <- data.frame(exp(d$logRr), exp(d$logLb95), exp(d$logUb95), d$logRr, d$seLogRr)

@@ -30,8 +30,8 @@ using namespace Rcpp;
 namespace ohdsi {
 namespace caseControl {
 
-NestingCohortDataIterator::NestingCohortDataIterator(const List& _nestingCohorts, const List& _cases, const List& _visits) :
-nestingCohortsIterator(_nestingCohorts, false), casesIterator(_cases, false), visitsIterator(_visits, false), nestingCohortsCursor(0), casesCursor(0), visitsCursor(0) {
+NestingCohortDataIterator::NestingCohortDataIterator(const List& _nestingCohorts, const List& _cases, const List& _visits, const bool& showVisitProgress) :
+nestingCohortsIterator(_nestingCohorts, false), casesIterator(_cases, false), visitsIterator(_visits, showVisitProgress), nestingCohortsCursor(0), casesCursor(0), visitsCursor(0) {
   loadNextNestingCohorts();
   loadNextCases();
   loadNextVisits();
@@ -88,6 +88,7 @@ NestingCohortData NestingCohortDataIterator::next() {
       }
     }
   }
+  nextNestingCohortData.indexDates.shrink_to_fit();
   while (visitsCursor < visitsNestingCohortId.length() && visitsNestingCohortId[visitsCursor] == nestingCohortId) {
     nextNestingCohortData.visitDates.push_back(visitsVisitStartDate[visitsCursor]);
     visitsCursor++;
@@ -100,6 +101,7 @@ NestingCohortData NestingCohortDataIterator::next() {
       }
     }
   }
+  nextNestingCohortData.visitDates.shrink_to_fit();
   return nextNestingCohortData;
 }
 }
