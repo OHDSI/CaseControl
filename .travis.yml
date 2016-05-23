@@ -36,7 +36,8 @@ install:
   - Rscript -e 'if(!"bit" %in% rownames(installed.packages())) { install.packages("bit", dependencies = TRUE) }'
   - Rscript -e 'if(!"ff" %in% rownames(installed.packages())) { install.packages("ff", dependencies = TRUE) }'
   - Rscript -e 'if(!"ffbase" %in% rownames(installed.packages())) { install.packages("ffbase", dependencies = TRUE) }'
-  - Rscript -e 'if(!"splines" %in% rownames(installed.packages())) { install.packages("splines", dependencies = TRUE) }'
+  - Rscript -e 'if(!"plyr" %in% rownames(installed.packages())) { install.packages("plyr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"survival" %in% rownames(installed.packages())) { install.packages("survival", dependencies = TRUE) }'
 
   # Install OHDSI dependencies
   - Rscript -e 'devtools::install_github("OHDSI/SqlRender")'

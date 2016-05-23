@@ -23,6 +23,7 @@
 #' @importFrom Rcpp evalCpp
 #' @importFrom SqlRender loadRenderTranslateSql translateSql
 #' @importFrom RJDBC dbDisconnect
+#' @importFrom survival strata
 #' @import bit
 #' @import Cyclops
 #' @import DatabaseConnector

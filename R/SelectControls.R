@@ -26,7 +26,7 @@
 #' @param outcomeId         The outcome ID of the cases for which we need to pick controls.
 #' @param firstOutcomeOnly  Use the first outcome per person?
 #' @param washoutPeriod     Minimum required numbers of days of observation for inclusion as either case or control.
-#' @param controlsPercase   Maximum number of controls to select per case.
+#' @param controlsPerCase   Maximum number of controls to select per case.
 #' @param matchOnAge        Match on age?
 #' @param ageCaliper        Maximum difference (in years) in age when matching on age.
 #' @param matchOnGender     Match on gender?
@@ -83,7 +83,7 @@ selectControls <- function(caseData,
     visits <- ff::as.ffdf(data.frame(nestingCohortId = -1, visitStartDate = "1900-01-01"))
   }
 
-  caseControls <- CaseControl:::.selectControls(nestingCohorts, cases, visits, firstOutcomeOnly, washoutPeriod, controlsPerCase, matchOnAge, ageCaliper, matchOnGender, matchOnProvider, matchOnVisitDate, visitDateCaliper)
+  caseControls <- .selectControls(nestingCohorts, cases, visits, firstOutcomeOnly, washoutPeriod, controlsPerCase, matchOnAge, ageCaliper, matchOnGender, matchOnProvider, matchOnVisitDate, visitDateCaliper)
   caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
   delta <- Sys.time() - start
   writeLines(paste("Selection took", signif(delta, 3), attr(delta, "units")))

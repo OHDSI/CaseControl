@@ -18,6 +18,8 @@ selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
 
 \item{washoutPeriod}{Minimum required numbers of days of observation for inclusion as either case or control.}
 
+\item{controlsPerCase}{Maximum number of controls to select per case.}
+
 \item{matchOnAge}{Match on age?}
 
 \item{ageCaliper}{Maximum difference (in years) in age when matching on age.}
@@ -29,8 +31,6 @@ selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
 \item{matchOnVisitDate}{Should the index date of the control be changed to the nearest visit date?}
 
 \item{visitDateCaliper}{Maximum difference (in days) between the index date and the visit date when matching on visit date.}
-
-\item{controlsPercase}{Maximum number of controls to select per case.}
 }
 \value{
 A data frame with these columns:
