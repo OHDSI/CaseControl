@@ -65,7 +65,7 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
                           useObservationEndAsNestingEndDate = TRUE,
                           getVisits = TRUE)
 
-saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseData2")
+saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseData")
 
 caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
 

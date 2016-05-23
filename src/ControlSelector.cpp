@@ -62,20 +62,6 @@ ControlSelector::ControlSelector(const List& _nestingCohorts, const List& _cases
                                    distribution = new std::uniform_int_distribution<int>(0,nestingCohortDatas.size() - 1);
                                  }
 
-int ControlSelector::binarySearch(const std::vector<int>& vector, const int& key) {
-  int lowerbound = 0;
-  int upperbound = vector.size();
-  int index = (lowerbound + upperbound) / 2;
-  while((vector[index] != key) && (lowerbound <= upperbound)) {
-    if (vector[index] > key)
-      upperbound = index - 1;
-    else
-      lowerbound = index + 1;
-    index = (lowerbound + upperbound) / 2;
-  }
-  return vector[lowerbound];
-}
-
 int ControlSelector::isMatch(const NestingCohortData& controlData, const CaseData& caseData, const int& indexDate) {
   if (indexDate < controlData.startDate || indexDate > controlData.endDate || indexDate < controlData.observationPeriodStartDate + washoutPeriod)
     return NO_MATCH;
@@ -106,7 +92,7 @@ int ControlSelector::isMatch(const NestingCohortData& controlData, const CaseDat
   if (matchOnVisitDate) {
     if (controlData.visitDates.size() == 0)
       return NO_MATCH;
-    int visitDate = binarySearch(controlData.visitDates, indexDate);
+    int visitDate = *std::lower_bound(controlData.visitDates.begin(), controlData.visitDates.end(), indexDate);
     if (abs(visitDate - indexDate) <= visitDateCaliper)
       return visitDate;
     else

@@ -78,7 +78,6 @@ private:
   void processCase(const int64_t& personId, CaseData& caseData);
   void findControls(const int64_t& personId, const CaseData& caseData, const int& indexDate, const int& stratumId);
   int isMatch(const NestingCohortData& controlData, const CaseData& caseData, const int& indexDate);
-  int binarySearch(const std::vector<int>& vector, const int& key);
   std::vector<NestingCohortData> nestingCohortDatas;
   std::map<int64_t, CaseData> personId2CaseData;
   bool firstOutcomeOnly;
