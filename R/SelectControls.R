@@ -88,6 +88,35 @@ selectControls <- function(caseData,
   delta <- Sys.time() - start
   writeLines(paste("Selection took", signif(delta, 3), attr(delta, "units")))
 
+  # Create counts
+  counts <- data.frame()
+
+  cases <- caseData$cases[caseData$cases$outcomeId == outcomeId, "nestingCohortId"]
+  eventCount <- length(cases)
+  if (eventCount == 0) {
+    caseCount <- 0
+  } else {
+    t <- is.na(ffbase::ffmatch(caseData$nestingCohorts$nestingCohortId, ff::as.ff(cases)))
+    caseCount<- length(ffbase::unique.ff(caseData$nestingCohorts[ffbase::ffwhich(t, t == FALSE), "personId"]))
+  }
+  counts <- rbind(counts, data.frame(description = "Original counts",
+                                     eventCount = eventCount,
+                                     caseCount = caseCount))
+
+  if (firstOutcomeOnly) {
+    counts <- rbind(counts, data.frame(description = "First event only",
+                                       eventCount = caseCount,
+                                       caseCount = caseCount))
+  }
+
+  if (washoutPeriod != 0) {
+    eventCount <- sum(caseControls$isCase)
+    caseCount <- length(unique(caseControls$personId[caseControls$isCase]))
+    counts <- rbind(counts, data.frame(description = paste("Require", washoutPeriod, "days of prior obs."),
+                                       eventCount = eventCount,
+                                       caseCount = caseCount))
+  }
+
   metaData <- list(nestingCohortId = caseData$metaData$nestingCohortId,
                    outcomeId = outcomeId,
                    firstOutcomeOnly = firstOutcomeOnly,
@@ -98,7 +127,10 @@ selectControls <- function(caseData,
                    matchOnGender = matchOnGender,
                    matchOnProvider = matchOnProvider,
                    matchOnVisitDate = matchOnVisitDate,
-                   visitDateCaliper = visitDateCaliper)
+                   visitDateCaliper = visitDateCaliper,
+                   counts = counts)
   attr(caseControls, "metaData") <- metaData
   return(caseControls)
 }
+
+

@@ -10,7 +10,7 @@ matchOnGender = TRUE
 matchOnProvider = FALSE
 matchOnVisitDate = TRUE
 visitDateCaliper = 30
-caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData2")
+caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
 
 library(CaseControl)
 setwd("s:/temp")
