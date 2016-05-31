@@ -162,7 +162,7 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
                           oracleTempSchema = oracleTempSchema,
                           outcomeDatabaseSchema = cohortDatabaseSchema,
                           cohortTable = cohortTable,
-                          outcomeId = 1,
+                          outcomeIds = 1,
                           useNestingCohort = TRUE,
                           nestingCohortDatabaseSchema = cohortDatabaseSchema,
                           nestingCohortTable = cohortTable,
@@ -222,10 +222,11 @@ caseControls <- selectControls(caseData = caseData,
                                matchOnGender = TRUE,
                                matchOnProvider = FALSE,
                                matchOnVisitDate = TRUE,
-                               visitDateCaliper = 30)
+                               visitDateCaliper = 30,
+                               removedUnmatchedCases = TRUE)
 ```
 
-In this example, we specify a washout period of 180 days, meaning that both cases and controls are required to have a minimum of 180 days of observation prior to the index date. We also specify we will only consider the first outcome per person. If a person's first outcome is within the washout period, that person will be removed from the analysis. We match on calendar time (implicit), age, gender, and visit date, and randomly sample up to two controls per case. Matching on visit date implies that the control should have a visit within n days from the index date of the case (n = 30 in this example), and the index date for the control will be set to the visit date. The purpose of this is to make the index dates more similar between cases and control, because almost by definition we would expect the case to have a visit on the index date.
+In this example, we specify a washout period of 180 days, meaning that both cases and controls are required to have a minimum of 180 days of observation prior to the index date. We also specify we will only consider the first outcome per person. If a person's first outcome is within the washout period, that person will be removed from the analysis. We match on calendar time (implicit), age, gender, and visit date, and randomly sample up to two controls per case. Matching on visit date implies that the control should have a visit within n days from the index date of the case (n = 30 in this example), and the index date for the control will be set to the visit date. The purpose of this is to make the index dates more similar between cases and control, because almost by definition we would expect the case to have a visit on the index date. Finally, we ask that cases for which no matching control was found be removed from the analysis.
 
 The `caseControls` object is a data frame with four columns:
 
@@ -237,6 +238,22 @@ data.frame(personId = c(3,123,345,6,234,567),
            indexDate = c("2009-10-10", "2009-10-11", "2009-10-09", "2010-05-04", "2010-05-04", "2010-05-05"), 
            isCase = c(TRUE, FALSE, FALSE, TRUE, FALSE, FALSE), 
            stratumId = c(1,1,1,2,2,2))
+```
+
+We can show the attrition to see why cases and events were filtered:
+
+```{r tidy=FALSE,eval=FALSE}
+getAttritionTable(caseControls)
+```
+```{r echo=FALSE,message=FALSE,eval=TRUE}
+if (file.exists("s:/temp/vignetteCaseControl")){
+  caseControls <- loadCaseData("s:/temp/vignetteCaseControl/caseControls.rds")
+} 
+```
+```{r echo=FALSE,message=FALSE}
+if (file.exists("s:/temp/vignetteCaseControl")){
+  getAttritionTable(caseControls)
+}
 ```
 
 # Loading exposure data

@@ -40,12 +40,12 @@
 #'                                        exposureTable are included as exposures.
 #'
 #' @export
-getDbExposureData <- function(connectionDetails,
-                            caseControls,
-                            oracleTempSchema = NULL,
-                            exposureDatabaseSchema,
-                            exposureTable = "drug_era",
-                            exposureIds = c()) {
+getDbExposureData <- function(caseControls,
+                              connectionDetails,
+                              oracleTempSchema = NULL,
+                              exposureDatabaseSchema,
+                              exposureTable = "drug_era",
+                              exposureIds = c()) {
   connection <- DatabaseConnector::connect(connectionDetails)
   writeLines("Uploading cases and controls to database temp table")
   start <- Sys.time()

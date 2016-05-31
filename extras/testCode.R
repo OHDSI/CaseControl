@@ -8,8 +8,9 @@ matchOnAge = TRUE
 ageCaliper = 2
 matchOnGender = TRUE
 matchOnProvider = FALSE
-matchOnVisitDate = TRUE
+matchOnVisitDate = FALSE
 visitDateCaliper = 30
+removedUnmatchedCases = TRUE
 caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
 
 library(CaseControl)

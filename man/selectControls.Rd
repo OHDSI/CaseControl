@@ -7,7 +7,8 @@
 selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
   washoutPeriod = 180, controlsPerCase = 2, matchOnAge = TRUE,
   ageCaliper = 2, matchOnGender = TRUE, matchOnProvider = FALSE,
-  matchOnVisitDate = FALSE, visitDateCaliper = 30)
+  matchOnVisitDate = FALSE, visitDateCaliper = 30,
+  removedUnmatchedCases = TRUE)
 }
 \arguments{
 \item{caseData}{An object of type \code{caseData} as generated using the \code{\link{getDbCaseData}} function.}
@@ -31,6 +32,8 @@ selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
 \item{matchOnVisitDate}{Should the index date of the control be changed to the nearest visit date?}
 
 \item{visitDateCaliper}{Maximum difference (in days) between the index date and the visit date when matching on visit date.}
+
+\item{removedUnmatchedCases}{Should cases with no matched controls be removed?}
 }
 \value{
 A data frame with these columns:
