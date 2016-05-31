@@ -14,15 +14,17 @@ test_that("Washout period for cases", {
                                                            providerId = c(1))))
 
     # Case after washout period:
-    cc <- selectControls(caseData = caseData,
-                   outcomeId = 1,
-                   washoutPeriod = 180)
-    expect_equal(cc$personId, c(1))
+  cc <- selectControls(caseData = caseData,
+                       outcomeId = 1,
+                       washoutPeriod = 180,
+                       removedUnmatchedCases = FALSE)
+  expect_equal(cc$personId, c(1))
 
     # Case before washout period:
     cc <- selectControls(caseData = caseData,
                          outcomeId = 1,
-                         washoutPeriod = 365)
+                         washoutPeriod = 365,
+                         removedUnmatchedCases = FALSE)
     expect_equal(nrow(cc), 0)
 })
 
@@ -45,7 +47,7 @@ test_that("Washout period for controls", {
                        washoutPeriod = 180)
   expect_equal(cc$personId, c(1,2))
 
-  # Both controls fterwashout period:
+  # Both controls afterwashout period:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 0)
