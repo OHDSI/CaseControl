@@ -60,6 +60,8 @@ ControlSelector::ControlSelector(const List& _nestingCohorts, const List& _cases
                                      }
                                    }
                                    distribution = new std::uniform_int_distribution<int>(0,nestingCohortDatas.size() - 1);
+                                   if (matchOnAge)
+                                     std::sort (nestingCohortDatas.begin(), nestingCohortDatas.end());
                                  }
 
 int ControlSelector::isMatch(const NestingCohortData& controlData, const CaseData& caseData, const int& indexDate) {
@@ -74,11 +76,13 @@ int ControlSelector::isMatch(const NestingCohortData& controlData, const CaseDat
     if (caseData.providerId != controlData.providerId)
       return NO_MATCH;
   }
-  if (matchOnAge) {
-    double ageDelta = abs(caseData.dateOfBirth - controlData.dateOfBirth) / 365.25;
-    if (ageDelta > ageCaliper)
-      return NO_MATCH;
-  }
+  //   if (matchOnAge) {
+  //     double ageDelta = abs(caseData.dateOfBirth - controlData.dateOfBirth) / 365.25;
+  //     if (ageDelta > ageCaliper) {
+  //       std::cout << "case Dob: " << caseData.dateOfBirth << ", control dob: " << controlData.dateOfBirth << ", delta: " << (caseData.dateOfBirth - controlData.dateOfBirth) << "\n";
+  //       return NO_MATCH;
+  //     }
+  //   }
   if (firstOutcomeOnly) {
     for (int controlIndexDate : controlData.indexDates)
       if (controlIndexDate <= indexDate)
@@ -102,14 +106,61 @@ int ControlSelector::isMatch(const NestingCohortData& controlData, const CaseDat
   return 0;
 }
 
+int ControlSelector::binarySearchDateOfBirthLowerBound(const int& key) {
+  int lowerbound = 0;
+  int upperbound = nestingCohortDatas.size() - 1;
+  int index;
+  while(lowerbound < upperbound) {
+    index = (lowerbound + upperbound) / 2;
+    //std::cout << "f1: index = " << index << ", lb = " << lowerbound << ", ub = " << upperbound << "\n";
+    if (nestingCohortDatas[index].dateOfBirth < key)
+      lowerbound = index + 1;
+    else
+      upperbound = index;
+  }
+  return lowerbound;
+}
+
+int ControlSelector::binarySearchDateOfBirthUpperBound(const int& _lowerBound, const int& key) {
+  int lowerbound = _lowerBound;
+  int upperbound = nestingCohortDatas.size() - 1;
+  int index;
+  while(lowerbound < upperbound) {
+    index = ((lowerbound + upperbound)%2) ? 1 + ((lowerbound + upperbound) / 2) : (lowerbound + upperbound) / 2; // Need ceiling value
+    //std::cout << "f2: index = " << index << ", lb = " << lowerbound << ", ub = " << upperbound << "\n";
+    if (nestingCohortDatas[index].dateOfBirth > key)
+      upperbound = index - 1;
+    else
+      lowerbound = index;
+  }
+  return lowerbound;
+}
+
+
 void ControlSelector::findControls(const int64_t& personId, const CaseData& caseData, const int& indexDate, const int& stratumId) {
   std::set<int64_t> controlPersonIds;
+  int lb;
+  int ub;
+  std::uniform_int_distribution<int> *dist;
+  if (matchOnAge) {
+    lb = binarySearchDateOfBirthLowerBound(caseData.dateOfBirth - floor(ageCaliper * 365.25));
+    ub = binarySearchDateOfBirthUpperBound(lb, caseData.dateOfBirth + floor(ageCaliper * 365.25));
+    if (ub < lb)
+      return;
+    dist = new std::uniform_int_distribution<int>(lb, ub);
+  } else {
+    lb = 0;
+    ub = nestingCohortDatas.size() - 1;
+    dist = distribution;
+  }
 
   // strategy 1: randonly pick people and see if they're a match:
+
   int iter = 0;
   while (controlPersonIds.size() < controlsPerCase && iter < MAX_ITER) {
     iter++;
-    int idx = (*distribution)(generator);
+    int idx;
+    idx = (*dist)(generator);
     NestingCohortData controlData = nestingCohortDatas[idx];
     int value = isMatch(controlData, caseData, indexDate);
     if (value != NO_MATCH && controlData.personId != personId && controlPersonIds.insert(controlData.personId).second) {
@@ -121,9 +172,11 @@ void ControlSelector::findControls(const int64_t& personId, const CaseData& case
   }
   // If max iterations hit, fallback to strategy 2: iterate over all people and see which match. Then randomly sample from matches:
   if (controlPersonIds.size() < controlsPerCase) {
+    //std::cout << "Strategy 1 failed\n";
     std::vector<int64_t> personIds;
     std::vector<int> indexDates;
-    for (NestingCohortData controlData : nestingCohortDatas) {
+    for (int i = lb; i <= ub; i++){
+      NestingCohortData controlData = nestingCohortDatas[i];
       int value = isMatch(controlData, caseData, indexDate);
       if (value != NO_MATCH && controlData.personId != personId && controlPersonIds.find(controlData.personId) == controlPersonIds.end()) {
         personIds.push_back(controlData.personId);

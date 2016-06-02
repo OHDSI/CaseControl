@@ -24,6 +24,4 @@ FROM visit_occurrence
 INNER JOIN #nesting_cohort nesting_cohort
 ON visit_occurrence.person_id = nesting_cohort.person_id
 AND visit_start_date >= nesting_cohort.start_date
-AND visit_start_date <= nesting_cohort.end_date
-ORDER BY nesting_cohort_id,
-	visit_start_date;
+AND visit_start_date <= nesting_cohort.end_date;

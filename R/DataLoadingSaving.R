@@ -118,6 +118,7 @@ getDbCaseData <- function(connectionDetails,
 
   writeLines("Fetching data from server")
   start <- Sys.time()
+  writeLines("- Fetching nesting cohorts")
   renderedSql <- SqlRender::loadRenderTranslateSql("queryNestingCohort.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
@@ -125,6 +126,7 @@ getDbCaseData <- function(connectionDetails,
   nestingCohorts <- querySql.ffdf(conn, renderedSql)
   colnames(nestingCohorts) <- SqlRender::snakeCaseToCamelCase(colnames(nestingCohorts))
 
+  writeLines("- Fetching cases")
   renderedSql <- SqlRender::loadRenderTranslateSql("queryCases.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
@@ -133,12 +135,17 @@ getDbCaseData <- function(connectionDetails,
   colnames(cases) <- SqlRender::snakeCaseToCamelCase(colnames(cases))
 
   if (getVisits) {
+    writeLines("- Fetching visits")
     renderedSql <- SqlRender::loadRenderTranslateSql("queryVisits.sql",
                                                      packageName = "CaseControl",
                                                      dbms = connectionDetails$dbms,
                                                      oracleTempSchema = oracleTempSchema)
     visits <- querySql.ffdf(conn, renderedSql)
     colnames(visits) <- SqlRender::snakeCaseToCamelCase(colnames(visits))
+
+    # Quicker to sort in ff than in the database (at least for PDW)
+    rownames(visits) <- NULL #Needs to be null or the ordering of ffdf will fail
+    visits <- visits[ff::ffdforder(visits[c("nestingCohortId", "visitStartDate")]),]
   }
 
   delta <- Sys.time() - start

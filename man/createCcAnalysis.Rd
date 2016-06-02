@@ -5,8 +5,8 @@
 \title{Create a case-control analysis specification}
 \usage{
 createCcAnalysis(analysisId = 1, description = "", exposureType = NULL,
-  outcomeType = NULL, getDbCaseDataArgs, selectControlsArgs,
-  createCaseControlDataArgs)
+  outcomeType = NULL, nestingCohortType = NULL, getDbCaseDataArgs,
+  selectControlsArgs, createCaseControlDataArgs)
 }
 \arguments{
 \item{analysisId}{An integer that will be used later to refer to this specific
@@ -22,6 +22,10 @@ analysis.}
 field should be used to select the specific outcome to use in this
 analysis.}
 
+\item{nestingCohortType}{If more than one nesting cohort is provided for each exposureOutcomeNestingCohort, this
+field should be used to select the specific nesting cohort to use in this
+analysis.}
+
 \item{getDbCaseDataArgs}{An object representing the arguments to be used when calling
 the \code{\link{createGetDbCaseDataArgs}} function.}
 
@@ -30,10 +34,6 @@ the \code{\link{createSelectControlsArgs}} function.}
 
 \item{createCaseControlDataArgs}{An object representing the arguments to be used when calling
 the \code{\link{createCreateCaseControlDataArgs}} function.}
-
-\item{nestingCohortType}{If more than one nesting cohort is provided for each exposureOutcomeNestingCohort, this
-field should be used to select the specific nesting cohort to use in this
-analysis.}
 }
 \description{
 Create a case-control analysis specification

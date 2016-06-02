@@ -8,7 +8,7 @@ matchOnAge = TRUE
 ageCaliper = 2
 matchOnGender = TRUE
 matchOnProvider = FALSE
-matchOnVisitDate = FALSE
+matchOnVisitDate = TRUE
 visitDateCaliper = 30
 removedUnmatchedCases = TRUE
 caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
@@ -23,7 +23,7 @@ server <- "JRDUSAPSCTL01"
 cdmDatabaseSchema <- "cdm_truven_mdcd_v5.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 oracleTempSchema <- NULL
-outcomeTable <- "mschuemi_sccs_vignette"
+cohortTable <- "mschuemi_cc_vignette"
 port <- 17001
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms,
@@ -39,15 +39,15 @@ sql <- SqlRender::loadRenderTranslateSql("vignette.sql",
                                          dbms = dbms,
                                          cdmDatabaseSchema = cdmDatabaseSchema,
                                          cohortDatabaseSchema = cohortDatabaseSchema,
-                                         outcomeTable = outcomeTable)
+                                         cohortTable = cohortTable)
 
 DatabaseConnector::executeSql(connection, sql)
 
 # Check number of subjects per cohort:
-sql <- "SELECT cohort_definition_id, COUNT(*) AS count FROM @cohortDatabaseSchema.@outcomeTable GROUP BY cohort_definition_id"
+sql <- "SELECT cohort_definition_id, COUNT(*) AS count FROM @cohortDatabaseSchema.@cohortTable GROUP BY cohort_definition_id"
 sql <- SqlRender::renderSql(sql,
                             cohortDatabaseSchema = cohortDatabaseSchema,
-                            outcomeTable = outcomeTable)$sql
+                            cohortTable = cohortTable)$sql
 sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
 DatabaseConnector::querySql(connection, sql)
 
@@ -57,18 +57,18 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
                           cdmDatabaseSchema = cdmDatabaseSchema,
                           oracleTempSchema = oracleTempSchema,
                           outcomeDatabaseSchema = cohortDatabaseSchema,
-                          outcomeTable = outcomeTable,
+                          outcomeTable = cohortTable,
                           outcomeId = 1,
                           useNestingCohort = F,
                           nestingCohortDatabaseSchema = cohortDatabaseSchema,
-                          nestingCohortTable = outcomeTable,
+                          nestingCohortTable = cohortTable,
                           #nestingCohortId = 2,
                           useObservationEndAsNestingEndDate = TRUE,
                           getVisits = TRUE)
 
-saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseData")
+saveCaseData(caseData, "s:/temp/vignetteCaseControl2/caseData")
 
-caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
+caseData <- loadCaseData("s:/temp/vignetteCaseControl2/caseData")
 
 caseData
 
@@ -86,7 +86,7 @@ caseControls <- selectControls(caseData = caseData,
                                matchOnVisitDate = TRUE,
                                visitDateCaliper = 30)
 
-saveRDS(caseControls, "s:/temp/vignetteCaseControl/caseControls.rds")
+saveRDS(caseControls, "s:/temp/vignetteCaseControl2/caseControls.rds")
 
 caseControls <- readRDS("s:/temp/vignetteCaseControl/caseControls.rds")
 

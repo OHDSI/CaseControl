@@ -247,7 +247,7 @@ getAttritionTable(caseControls)
 ```
 ```{r echo=FALSE,message=FALSE,eval=TRUE}
 if (file.exists("s:/temp/vignetteCaseControl")){
-  caseControls <- loadCaseData("s:/temp/vignetteCaseControl/caseControls.rds")
+  caseControls <- readRDS("s:/temp/vignetteCaseControl/caseControls.rds")
 } 
 ```
 ```{r echo=FALSE,message=FALSE}

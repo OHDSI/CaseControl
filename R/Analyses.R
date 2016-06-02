@@ -45,6 +45,7 @@ createCcAnalysis <- function(analysisId = 1,
                              description = "",
                              exposureType = NULL,
                              outcomeType = NULL,
+                             nestingCohortType = NULL,
                              getDbCaseDataArgs,
                              selectControlsArgs,
                              createCaseControlDataArgs) {
@@ -53,7 +54,7 @@ createCcAnalysis <- function(analysisId = 1,
 
   # First: get the default values:
   analysis <- list()
-  for (name in names(formals(createccAnalysis))) {
+  for (name in names(formals(createCcAnalysis))) {
     analysis[[name]] <- get(name)
   }
 

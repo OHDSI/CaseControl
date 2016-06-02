@@ -78,6 +78,8 @@ private:
   void processCase(const int64_t& personId, CaseData& caseData);
   void findControls(const int64_t& personId, const CaseData& caseData, const int& indexDate, const int& stratumId);
   int isMatch(const NestingCohortData& controlData, const CaseData& caseData, const int& indexDate);
+  int binarySearchDateOfBirthLowerBound(const int& key);
+  int binarySearchDateOfBirthUpperBound(const int& _lowerBound, const int& key);
   std::vector<NestingCohortData> nestingCohortDatas;
   std::map<int64_t, CaseData> personId2CaseData;
   bool firstOutcomeOnly;

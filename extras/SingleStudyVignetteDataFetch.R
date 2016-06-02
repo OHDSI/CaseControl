@@ -30,7 +30,7 @@ server <- "JRDUSAPSCTL01"
 cdmDatabaseSchema <- "cdm_truven_mdcd_v5.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 oracleTempSchema <- NULL
-outcomeTable <- "mschuemi_sccs_vignette"
+cohortTable <- "mschuemi_cc_vignette"
 port <- 17001
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms,
@@ -46,15 +46,15 @@ sql <- SqlRender::loadRenderTranslateSql("vignette.sql",
                                          dbms = dbms,
                                          cdmDatabaseSchema = cdmDatabaseSchema,
                                          cohortDatabaseSchema = cohortDatabaseSchema,
-                                         outcomeTable = outcomeTable)
+                                         cohortTable = cohortTable)
 
 DatabaseConnector::executeSql(connection, sql)
 
 # Check number of subjects per cohort:
-sql <- "SELECT cohort_definition_id, COUNT(*) AS count FROM @cohortDatabaseSchema.@outcomeTable GROUP BY cohort_definition_id"
+sql <- "SELECT cohort_definition_id, COUNT(*) AS count FROM @cohortDatabaseSchema.@cohortTable GROUP BY cohort_definition_id"
 sql <- SqlRender::renderSql(sql,
                             cohortDatabaseSchema = cohortDatabaseSchema,
-                            outcomeTable = outcomeTable)$sql
+                            cohortTable = cohortTable)$sql
 sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
 DatabaseConnector::querySql(connection, sql)
 
@@ -64,11 +64,11 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
                           cdmDatabaseSchema = cdmDatabaseSchema,
                           oracleTempSchema = oracleTempSchema,
                           outcomeDatabaseSchema = cohortDatabaseSchema,
-                          outcomeTable = outcomeTable,
+                          outcomeTable = cohortTable,
                           outcomeIds = 1,
                           useNestingCohort = TRUE,
                           nestingCohortDatabaseSchema = cohortDatabaseSchema,
-                          nestingCohortTable = outcomeTable,
+                          nestingCohortTable = cohortTable,
                           nestingCohortId = 2,
                           useObservationEndAsNestingEndDate = TRUE,
                           getVisits = TRUE)

@@ -35,6 +35,10 @@ struct NestingCohortData {
   providerId(_providerId), indexDates(), visitDates() {
   }
 
+  bool operator < (const NestingCohortData& other) const {
+    return (dateOfBirth < other.dateOfBirth);
+  }
+
   std::vector<int> indexDates;
   std::vector<int> visitDates;
   int64_t nestingCohortId;
