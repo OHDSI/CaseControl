@@ -43,7 +43,6 @@ createGetDbCaseDataArgs <- function(useNestingCohort = FALSE,
 #' @details
 #' Create an object defining the parameter values.
 #'
-#' @param outcomeId               The outcome ID of the cases for which we need to pick controls.
 #' @param firstOutcomeOnly        Use the first outcome per person?
 #' @param washoutPeriod           Minimum required numbers of days of observation for inclusion as
 #'                                either case or control.
@@ -59,8 +58,7 @@ createGetDbCaseDataArgs <- function(useNestingCohort = FALSE,
 #' @param removedUnmatchedCases   Should cases with no matched controls be removed?
 #'
 #' @export
-createSelectControlsArgs <- function(outcomeId,
-                                     firstOutcomeOnly = TRUE,
+createSelectControlsArgs <- function(firstOutcomeOnly = TRUE,
                                      washoutPeriod = 180,
                                      controlsPerCase = 2,
                                      matchOnAge = TRUE,

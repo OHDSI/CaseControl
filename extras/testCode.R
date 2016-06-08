@@ -1,3 +1,40 @@
+library(CaseControl)
+setwd("s:/temp")
+options(fftempdir = "s:/fftemp")
+pw <- NULL
+dbms <- "pdw"
+user <- NULL
+server <- "JRDUSAPSCTL01"
+cdmDatabaseSchema <- "cdm_truven_mdcd_v5.dbo"
+cohortDatabaseSchema <- "scratch.dbo"
+oracleTempSchema <- NULL
+cohortTable <- "mschuemi_cc_vignette"
+port <- 17001
+
+connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms,
+                                                                server = server,
+                                                                user = user,
+                                                                password = pw,
+                                                                port = port)
+
+
+oracleTempSchema = cdmDatabaseSchema
+exposureDatabaseSchema = cdmDatabaseSchema
+exposureTable = "drug_era"
+outcomeDatabaseSchema = cdmDatabaseSchema
+outcomeTable = "condition_era"
+nestingCohortDatabaseSchema = cdmDatabaseSchema
+nestingCohortTable = "condition_era"
+outputFolder = "./CcOutput"
+exposureOutcomeNestingCohortList <- loadExposureOutcomeNestingCohortList("s:/temp/ccVignette2/exposureOutcomeNestingCohortList.txt")
+ccAnalysisList <- loadCcAnalysisList("s:/temp/ccVignette2/ccAnalysisList.txt")
+getDbCaseDataThreads = 1
+selectControlsThreads = 1
+getDbExposureDataThreads = 1
+createCaseControlDataThreads = 1
+fitCaseControlModelThreads = 1
+
+
 setwd("s:/temp")
 options(fftempdir = "s:/fftemp")
 outcomeId = 1

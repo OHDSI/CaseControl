@@ -51,7 +51,7 @@ rCode <- OhdsiRTools::createArgFunction("getDbCaseData",
                                                         "nestingCohortId"),
                                         rCode = rCode)
 rCode <- OhdsiRTools::createArgFunction("selectControls",
-                                        excludeArgs = c("caseData"),
+                                        excludeArgs = c("caseData", "outcomeId"),
                                         rCode = rCode)
 rCode <- OhdsiRTools::createArgFunction("createCaseControlData",
                                         excludeArgs = c("caseControlsExposure",

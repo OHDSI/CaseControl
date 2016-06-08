@@ -49,7 +49,7 @@ createCcAnalysis <- function(analysisId = 1,
                              getDbCaseDataArgs,
                              selectControlsArgs,
                              createCaseControlDataArgs) {
-  if (selectControlsArgs$matchOnVisitDate && getDbCaseDataArgs$getVisits)
+  if (selectControlsArgs$matchOnVisitDate && !getDbCaseDataArgs$getVisits)
     stop("Requested matching on visit date, but getVisits argument for getDbCaseData is FALSE")
 
   # First: get the default values:

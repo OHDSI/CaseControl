@@ -4,15 +4,12 @@
 \alias{createSelectControlsArgs}
 \title{Create a parameter object for the function selectControls}
 \usage{
-createSelectControlsArgs(outcomeId, firstOutcomeOnly = TRUE,
-  washoutPeriod = 180, controlsPerCase = 2, matchOnAge = TRUE,
-  ageCaliper = 2, matchOnGender = TRUE, matchOnProvider = FALSE,
-  matchOnVisitDate = FALSE, visitDateCaliper = 30,
-  removedUnmatchedCases = TRUE)
+createSelectControlsArgs(firstOutcomeOnly = TRUE, washoutPeriod = 180,
+  controlsPerCase = 2, matchOnAge = TRUE, ageCaliper = 2,
+  matchOnGender = TRUE, matchOnProvider = FALSE, matchOnVisitDate = FALSE,
+  visitDateCaliper = 30, removedUnmatchedCases = TRUE)
 }
 \arguments{
-\item{outcomeId}{The outcome ID of the cases for which we need to pick controls.}
-
 \item{firstOutcomeOnly}{Use the first outcome per person?}
 
 \item{washoutPeriod}{Minimum required numbers of days of observation for inclusion as
