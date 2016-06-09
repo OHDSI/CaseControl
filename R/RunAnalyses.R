@@ -61,7 +61,7 @@
 #' @param ccAnalysisList                 A list of objects of type \code{ccAnalysis} as created
 #'                                         using the \code{\link{createCcAnalysis}} function.
 #' @param exposureOutcomeNestingCohortList              A list of objects of type \code{exposureOutcomeNestingCohort} as created
-#'                                         using the \code{\link{createexposureOutcomeNestingCohort}} function.
+#'                                         using the \code{\link{createExposureOutcomeNestingCohort}} function.
 #' @param outputFolder                     Name of the folder where all the outputs will written to.
 #' @param getDbCaseDataThreads             The number of parallel threads to use for building the
 #'                                         caseData objects.
@@ -179,11 +179,11 @@ runCcAnalyses <- function(connectionDetails,
   }
 
   ccObjectsToCreate <- list()
-  getSelectControlsArgsList <- unique(OhdsiRTools::selectFromList(ccAnalysisList,
+  selectControlsArgsList <- unique(OhdsiRTools::selectFromList(ccAnalysisList,
                                                                   c("selectControlsArgs")))
-  for (i in 1:length(getSelectControlsArgsList)) {
-    getSelectControlsArgs <- getSelectControlsArgsList[[i]]
-    analyses <- OhdsiRTools::matchInList(ccAnalysisList, getSelectControlsArgs)
+  for (i in 1:length(selectControlsArgsList)) {
+    selectControlsArgs <- selectControlsArgsList[[i]]
+    analyses <- OhdsiRTools::matchInList(ccAnalysisList, selectControlsArgs)
     analysesIds <- unlist(OhdsiRTools::selectFromList(analyses, "analysisId"))
     cdDataFileNames <- unique(outcomeReference$caseDataFolder[outcomeReference$analysisId %in% analysesIds])
     for (cdDataFileName in cdDataFileNames) {
@@ -195,7 +195,7 @@ runCcAnalyses <- function(connectionDetails,
         outcomeReference$caseControlsFile[idx & outcomeReference$outcomeId == outcomeId] <- ccFilename
         if (!file.exists(ccFilename)) {
           args <- list(outcomeId = outcomeId)
-          args <- append(args, getSelectControlsArgs$getSelectControlsArgs)
+          args <- append(args, selectControlsArgs$selectControlsArgs)
           ccObjectsToCreate[[length(ccObjectsToCreate) + 1]] <- list(args = args,
                                                                      cdDataFileName = cdDataFileName,
                                                                      ccFilename = ccFilename)
@@ -211,7 +211,6 @@ runCcAnalyses <- function(connectionDetails,
     outcomeReference$exposureDataFile[outcomeReference$caseControlsFile == ccFilename] <- edFilename
     if (!file.exists(edFilename)) {
       args <- list(connectionDetails = connectionDetails,
-                   cdmDatabaseSchema = cdmDatabaseSchema,
                    oracleTempSchema = oracleTempSchema,
                    exposureDatabaseSchema = exposureDatabaseSchema,
                    exposureTable = exposureTable,
@@ -237,8 +236,7 @@ runCcAnalyses <- function(connectionDetails,
       ccdFilename <- .createCaseControlDataFileName(analysisFolder, exposureId, outcomeId)
       outcomeReference$caseControlDataFile[i] <- ccdFilename
       if (!file.exists(ccdFilename)) {
-        args <- list(exposureId = exposureId,
-                     outcomeId = outcomeId)
+        args <- list(exposureId = exposureId)
         args <- append(args, ccAnalysis$createCaseControlDataArgs)
         ccdObjectsToCreate[[length(ccdObjectsToCreate) + 1]] <- list(args = args,
                                                                      edFilename = edFilename,
@@ -261,7 +259,7 @@ runCcAnalyses <- function(connectionDetails,
   writeLines("*** Creating caseData objects ***")
   createCaseDataObject <- function(params) {
     caseData <- do.call("getDbCaseData", params$args)
-    saveCaseData(createCaseDataObject, params$cdDataFileName)
+    saveCaseData(caseData, params$cdDataFileName)
   }
   if (length(cdObjectsToCreate) != 0) {
     cluster <- OhdsiRTools::makeCluster(getDbCaseDataThreads)
@@ -394,36 +392,41 @@ runCcAnalyses <- function(connectionDetails,
 #'
 #' @export
 summarizeCcAnalyses <- function(outcomeReference) {
-  columns <- c("analysisId", "exposureId", "outcomeId")
+  columns <- c("analysisId", "exposureId", "nestingCohortId", "outcomeId")
   result <- outcomeReference[, columns]
-  result$caseCount <- 0
-  result$eventCount <- 0
-
+  result$rr <- 0
+  result$ci95lb <- 0
+  result$ci95ub <- 0
+  result$p <- 1
+  result$cases <- 0
+  result$controls <- 0
+  result$exposedCases <- 0
+  result$exposedControls <- 0
+  result$logRr <- 0
+  result$seLogRr <- 0
   for (i in 1:nrow(outcomeReference)) {
-    ccEraData <- loadCcEraData(outcomeReference$ccEraDataFolder[i])
-    s <- summary(ccEraData)
-    result$caseCount[i] <- s$outcomeCounts$caseCount
-    result$eventCount[i] <- s$outcomeCounts$eventCount
-    ccModel <- readRDS(outcomeReference$ccModelFile[i])
-
-    estimates <- ccModel$estimates[ccModel$estimates$originalCovariateId == outcomeReference$exposureId[i], ]
-    for (j in 1:nrow(estimates)) {
-      estimatesToInsert <- c(rr = exp(estimates$logRr[j]),
-                             ci95lb = exp(estimates$logLb95[j]),
-                             ci95ub = exp(estimates$logUb95[j]),
-                             logRr = estimates$logRr[j],
-                             seLogRr = estimates$seLogRr[j])
-      names(estimatesToInsert) <- paste0(names(estimatesToInsert),
-                                         "(",
-                                         sub(":.*$", "", estimates$covariateName[j]),
-                                         ")")
-      for (colName in names(estimatesToInsert)) {
-        if (!(colName %in% colnames(result))) {
-          result$newVar <- NA
-          colnames(result)[colnames(result) == "newVar"] <- colName
-        }
+    if (outcomeReference$modelFile[i] != ""){
+      model <- readRDS(outcomeReference$modelFile[i])
+      result$rr[i] <- if (is.null(coef(model)))
+        NA else exp(coef(model))
+      result$ci95lb[i] <- if (is.null(coef(model)))
+        NA else exp(confint(model)[1])
+      result$ci95ub[i] <- if (is.null(coef(model)))
+        NA else exp(confint(model)[2])
+      if (is.null(coef(model))) {
+        result$p[i] <- NA
+      } else {
+        z <- coef(model) / model$outcomeModelTreatmentEstimate$seLogRr
+        result$p[i] <- 2 * pmin(pnorm(z), 1 - pnorm(z))
       }
-      result[i, names(estimatesToInsert)] <- estimatesToInsert
+      result$cases[i] <- model$outcomeCounts$cases
+      result$controls[i] <- model$outcomeCounts$controls
+      result$exposedCases[i] <- model$outcomeCounts$exposedCases
+      result$exposedControls[i] <- model$outcomeCounts$exposedControls
+      result$logRr[i] <- if (is.null(coef(model)))
+        NA else coef(model)
+      result$seLogRr[i] <- if (is.null(coef(model)))
+        NA else model$outcomeModelTreatmentEstimate$seLogRr
     }
   }
   return(result)

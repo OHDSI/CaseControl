@@ -53,6 +53,7 @@ Getting Started
 Getting Involved
 ================
 * Vignette: [Single studies using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/SingleStudies.pdf)
+* Vignette: [Running multiple analyses at once using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/MultipleAnalyses.pdf)
 * Package manual: [CaseControl.pdf](https://raw.githubusercontent.com/OHDSI/CaseControl/master/extras/CaseControl.pdf)
 * Developer questions/comments/feedback: <a href="http://forums.ohdsi.org/c/developers">OHDSI Forum</a>
 * We use the <a href="../../issues">GitHub issue tracker</a> for all bugs/issues/enhancements

@@ -29,9 +29,9 @@ user <- NULL
 server <- "JRDUSAPSCTL01"
 cdmDatabaseSchema <- "cdm_truven_mdcd_v5.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
+cohortTable <- "mschuemi_sccs_vignette"
 oracleTempSchema <- NULL
-outcomeTable <- "mschuemi_sccs_vignette"
-outputFolder <- "s:/temp/ccVignette2"
+outputFolder <- "s:/temp/vignetteCaseControl2"
 port <- 17001
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms,
@@ -84,22 +84,19 @@ negativeControls <- c(705178,
                       19044727,
                       40163731)
 diclofenac <- 1124300
-rheumatoidArthritis <- 2
 giBleed <- 1
+rheumatoidArthritis <- 2
 
-exposureOutcomeNestingCohortList <- list()
+exposureOutcomeNcList <- list()
 for (exposureId in c(diclofenac, negativeControls)) {
   exposureOutcomeNc <- createExposureOutcomeNestingCohort(exposureId = exposureId,
                                                           outcomeId = giBleed,
                                                           nestingCohortId = rheumatoidArthritis)
-  exposureOutcomeNestingCohortList[[length(exposureOutcomeNestingCohortList) + 1]] <- exposureOutcomeNc
+  exposureOutcomeNcList[[length(exposureOutcomeNcList) + 1]] <- exposureOutcomeNc
 }
 
 getDbCaseDataArgs1 <- createGetDbCaseDataArgs(useNestingCohort = FALSE,
                                              getVisits = FALSE)
-
-getDbCaseDataArgs2 <- createGetDbCaseDataArgs(useNestingCohort = TRUE,
-                                              getVisits = TRUE)
 
 selectControlsArgs1 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 washoutPeriod = 180,
@@ -109,16 +106,6 @@ selectControlsArgs1 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 matchOnGender = TRUE,
                                                 matchOnProvider = FALSE,
                                                 matchOnVisitDate = FALSE)
-
-selectControlsArgs2 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
-                                                washoutPeriod = 180,
-                                                controlsPerCase = 2,
-                                                matchOnAge = TRUE,
-                                                ageCaliper = 2,
-                                                matchOnGender = TRUE,
-                                                matchOnProvider = FALSE,
-                                                matchOnVisitDate = TRUE,
-                                                visitDateCaliper = 30)
 
 createCaseControlDataArgs1 <- createCreateCaseControlDataArgs(firstExposureOnly = FALSE,
                                                               riskWindowStart = -30,
@@ -130,11 +117,24 @@ ccAnalysis1 <- createCcAnalysis(analysisId = 1,
                                 selectControlsArgs = selectControlsArgs1,
                                 createCaseControlDataArgs = createCaseControlDataArgs1)
 
+getDbCaseDataArgs2 <- createGetDbCaseDataArgs(useNestingCohort = TRUE,
+                                              getVisits = TRUE)
+
 ccAnalysis2 <- createCcAnalysis(analysisId = 2,
                                 description = "Matching on age and gender, nesting in indication",
                                 getDbCaseDataArgs = getDbCaseDataArgs2,
                                 selectControlsArgs = selectControlsArgs1,
                                 createCaseControlDataArgs = createCaseControlDataArgs1)
+
+selectControlsArgs2 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
+                                                washoutPeriod = 180,
+                                                controlsPerCase = 2,
+                                                matchOnAge = TRUE,
+                                                ageCaliper = 2,
+                                                matchOnGender = TRUE,
+                                                matchOnProvider = FALSE,
+                                                matchOnVisitDate = TRUE,
+                                                visitDateCaliper = 30)
 
 ccAnalysis3 <- createCcAnalysis(analysisId = 3,
                                 description = "Matching on age and gender, nesting in indication, match on visit",
@@ -145,11 +145,11 @@ ccAnalysis3 <- createCcAnalysis(analysisId = 3,
 
 ccAnalysisList <- list(ccAnalysis1, ccAnalysis2, ccAnalysis3)
 
-saveExposureOutcomeNestingCohortList(exposureOutcomeNestingCohortList, "s:/temp/ccVignette2/exposureOutcomeNestingCohortList.txt")
-saveCcAnalysisList(ccAnalysisList, "s:/temp/ccVignette2/ccAnalysisList.txt")
+saveExposureOutcomeNestingCohortList(exposureOutcomeNcList, "s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt")
+saveCcAnalysisList(ccAnalysisList, "s:/temp/vignetteCaseControl2/ccAnalysisList.txt")
 
-# exposureOutcomeNestingCohortList <- loadExposureOutcomeNestingCohortList("s:/temp/ccVignette2/exposureOutcomeNestingCohortList.txt")
-# ccAnalysisList <- loadCcAnalysisList("s:/temp/ccVignette2/ccAnalysisList.txt")
+# exposureOutcomeNcList <- loadExposureOutcomeNestingCohortList("s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt")
+# ccAnalysisList <- loadCcAnalysisList("s:/temp/vignetteCaseControl2/ccAnalysisList.txt")
 
 outcomeDatabaseSchema = cohortDatabaseSchema
 outcomeTable = outcomeTable
@@ -163,22 +163,23 @@ getDbExposureDataThreads = 1
 createCaseControlDataThreads = 1
 fitCaseControlModelThreads = 1
 
-result <- runSccsAnalyses(connectionDetails = connectionDetails,
-                          cdmDatabaseSchema = cdmDatabaseSchema,
-                          oracleTempSchema = cdmDatabaseSchema,
-                          exposureDatabaseSchema = cdmDatabaseSchema,
-                          exposureTable = "drug_era",
-                          outcomeDatabaseSchema = cohortDatabaseSchema,
-                          outcomeTable = outcomeTable,
-                          cdmVersion = cdmVersion,
-                          outputFolder = "s:/temp/sccsVignette2",
-                          combineDataFetchAcrossOutcomes = TRUE,
-                          exposureOutcomeList = exposureOutcomeList,
-                          sccsAnalysisList = sccsAnalysisList,
-                          getDbSccsDataThreads = 1,
-                          createSccsEraDataThreads = 5,
-                          fitSccsModelThreads = 8,
-                          cvThreads = 4)
+result <- runCcAnalyses(connectionDetails = connectionDetails,
+                        cdmDatabaseSchema = cdmDatabaseSchema,
+                        oracleTempSchema = cdmDatabaseSchema,
+                        exposureDatabaseSchema = cdmDatabaseSchema,
+                        exposureTable = "drug_era",
+                        outcomeDatabaseSchema = cohortDatabaseSchema,
+                        outcomeTable = cohortTable,
+                        nestingCohortDatabaseSchema = cohortDatabaseSchema,
+                        nestingCohortTable = cohortTable,
+                        outputFolder = outputFolder,
+                        exposureOutcomeNestingCohortList = exposureOutcomeNcList,
+                        ccAnalysisList = ccAnalysisList,
+                        getDbCaseDataThreads = 1,
+                        selectControlsThreads = 4,
+                        getDbExposureDataThreads = 3,
+                        createCaseControlDataThreads = 3,
+                        fitCaseControlModelThreads = 5)
 
 # result <- readRDS('s:/temp/sccsVignette2/outcomeModelReference.rds')
 

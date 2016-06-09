@@ -51,7 +51,6 @@ createCaseControlData <- function(caseControlsExposure,
   if (riskWindowEnd > 0)
     stop ("Risk window cannot end after index date")
 
-  #exposureId <- 1124300
   exposure <- caseControlsExposure$exposure[caseControlsExposure$exposure$exposureId == exposureId, ]
   if (firstExposureOnly) {
     exposure <- exposure[order(exposure$personId, exposure$daysSinceExposureStart), ]
@@ -60,8 +59,13 @@ createCaseControlData <- function(caseControlsExposure,
   }
   idx <- exposure$daysSinceExposureStart > (-riskWindowEnd) & exposure$daysSinceExposureEnd < (-riskWindowStart)
   exposure <- exposure[idx, c("personId", "indexDate")]
-  exposure$exposed <- 1
-  caseControlData <- merge(caseControlsExposure$caseControls, exposure, all.x = TRUE)
-  caseControlData$exposed[is.na(caseControlData$exposed)] <- 0
+  if (nrow(exposure) == 0) {
+    caseControlData <- caseControlsExposure$caseControls
+    caseControlData$exposed <- 0
+  } else {
+    exposure$exposed <- 1
+    caseControlData <- merge(caseControlsExposure$caseControls, exposure, all.x = TRUE)
+    caseControlData$exposed[is.na(caseControlData$exposed)] <- 0
+  }
   return(caseControlData)
 }

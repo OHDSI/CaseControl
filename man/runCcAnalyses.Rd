@@ -60,7 +60,7 @@ should have the same structure as the cohort table.}
 using the \code{\link{createCcAnalysis}} function.}
 
 \item{exposureOutcomeNestingCohortList}{A list of objects of type \code{exposureOutcomeNestingCohort} as created
-using the \code{\link{createexposureOutcomeNestingCohort}} function.}
+using the \code{\link{createExposureOutcomeNestingCohort}} function.}
 
 \item{getDbCaseDataThreads}{The number of parallel threads to use for building the
 caseData objects.}
