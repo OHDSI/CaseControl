@@ -45,11 +45,15 @@ getDbExposureData <- function(caseControls,
                               oracleTempSchema = NULL,
                               exposureDatabaseSchema,
                               exposureTable = "drug_era",
-                              exposureIds = c()) {
+                              exposureIds = c(),
+                              cdmDatabaseSchema = exposureDatabaseSchema,
+                              covariateSettings = NULL) {
   connection <- DatabaseConnector::connect(connectionDetails)
   writeLines("Uploading cases and controls to database temp table")
   start <- Sys.time()
   data <- caseControls[, c("personId", "indexDate")]
+  colnames(data)[colnames(data) == "personId"] <- "subjectId"
+  colnames(data)[colnames(data) == "indexDate"] <- "cohortStartDate"
   colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
   DatabaseConnector::insertTable(connection = connection,
                                  tableName = "#case_controls",
@@ -75,12 +79,98 @@ getDbExposureData <- function(caseControls,
   delta <- Sys.time() - start
   writeLines(paste("Loading took", signif(delta, 3), attr(delta, "units")))
 
+  if (!is.null(covariateSettings)) {
+    covariates <- FeatureExtraction::getDbCovariateData(connection = connection,
+                                                        oracleTempSchema = oracleTempSchema,
+                                                        cdmDatabaseSchema = cdmDatabaseSchema,
+                                                        cdmVersion = 5,
+                                                        cohortTable = "#case_controls",
+                                                        cohortTableIsTemp = TRUE,
+                                                        covariateSettings = covariateSettings,
+                                                        normalize = TRUE)
+  }
+
   sql <- "TRUNCATE TABLE #case_controls; DROP TABLE #case_controls;"
   sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms, oracleTempSchema = oracleTempSchema)$sql
   DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
   RJDBC::dbDisconnect(connection)
 
   result <- list(caseControls = caseControls, exposure = exposure)
+  if (!is.null(covariateSettings)) {
+    result$covariates <- covariates
+    attr(result$caseControls, "metaData")$hasCovariates <- TRUE
+  } else {
+    attr(result$caseControls, "metaData")$hasCovariates <- FALSE
+  }
   class(result) <- "caseControlsExposure"
   return(result)
+}
+
+#' Save the caseControlsExposure data to folder
+#'
+#' @description
+#' \code{saveCaseControlsExposure} saves an object of type caseControlsExposure to folder.
+#'
+#' @param caseControlsExposure   An object of type \code{caseControlsExposure} as generated using \code{\link{getDbExposureData}}.
+#' @param folder     The name of the folder where the data will be written. The folder should not yet
+#'                   exist.
+#'
+#' @details
+#' The data will be written to a set of files in the specified folder.
+#'
+#' @export
+saveCaseControlsExposure <- function(caseControlsExposure, folder) {
+  if (missing(caseControlsExposure))
+    stop("Must specify caseControlsExposure")
+  if (missing(folder))
+    stop("Must specify folder")
+  if (class(caseControlsExposure) != "caseControlsExposure")
+    stop("Data not of class caseControlsExposure")
+
+  if (is.null(caseControlsExposure$covariates)) {
+    dir.create(folder)
+  } else {
+    ffbase::save.ffdf(caseControlsExposure$covariates, dir = folder)
+
+  }
+  saveRDS(caseControlsExposure$caseControls, file = file.path(folder, "caseControls.rds"))
+  saveRDS(caseControlsExposure$exposure, file = file.path(folder, "exposure.rds"))
+  invisible(TRUE)
+}
+
+#' Load the caseControlsExposure data from a folder
+#'
+#' @description
+#' \code{loadCaseControlsExposureData} loads an object of type caseControlsExposure from a folder in the file system.
+#'
+#' @param folder     The name of the folder containing the data.
+#' @param readOnly   If true, the data is opened read only.
+#'
+#' @details
+#' The data will be written to a set of files in the folder specified by the user.
+#'
+#' @return
+#' An object of class \code{caseControlsExposure}.
+#'
+#' @export
+loadCaseControlsExposureData <- function(folder, readOnly = TRUE) {
+  if (!file.exists(folder))
+    stop(paste("Cannot find folder", folder))
+  if (!file.info(folder)$isdir)
+    stop(paste("Not a folder:", folder))
+
+  caseControls <- readRDS(file.path(folder, "caseControls.rds"))
+  exposure <- readRDS(file.path(folder, "exposure.rds"))
+  result <- list(caseControls = caseControls, exposure = exposure)
+  if (attr(result$caseControls, "metaData")$hasCovariates) {
+    temp <- setwd(folder)
+    absolutePath <- setwd(temp)
+    e <- new.env()
+    ffbase::load.ffdf(absolutePath, e)
+    result$covariates <- get("covariates", envir = e)
+    open(result$covariates, readonly = readOnly)
+    rm(e)
+  }
+  class(result) <- "caseControlsExposure"
+  return(caseData)
 }

@@ -21,11 +21,11 @@ limitations under the License.
 {DEFAULT @exposure_table = 'drug_era'} 
 {DEFAULT @exposure_ids = 1} 
 
-SELECT case_controls.person_id,
-  index_date,
+SELECT case_controls.subject_id AS person_id,
+  cohort_start_date AS index_date,
   exposure_id,
-  DATEDIFF(DAY, exposure_start_date, index_date) AS days_since_exposure_start,
-  DATEDIFF(DAY, exposure_end_date, index_date) AS days_since_exposure_end
+  DATEDIFF(DAY, exposure_start_date, cohort_start_date) AS days_since_exposure_start,
+  DATEDIFF(DAY, exposure_end_date, cohort_start_date) AS days_since_exposure_end
 FROM #case_controls case_controls
 INNER JOIN (
 {@exposure_table == 'drug_era'} ? {
@@ -48,5 +48,5 @@ SELECT subject_id AS person_id,
 }
 }
 	) exposure
-ON case_controls.person_id = exposure.person_id
-AND  exposure.exposure_start_date <= index_date
+ON case_controls.subject_id = exposure.person_id
+AND  exposure.exposure_start_date <= cohort_start_date

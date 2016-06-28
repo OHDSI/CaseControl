@@ -27,15 +27,54 @@
 #' An object of type \code{outcomeModel}.
 #'
 #' @export
-fitCaseControlModel <- function(caseControlData) {
+fitCaseControlModel <- function(caseControlData,
+                                useCovariates = FALSE,
+                                excludeCovariateIds = c(),
+                                includeCovariateIds = c(),
+                                caseControlsExposure = NULL,
+                                prior = createPrior("laplace", useCrossValidation = TRUE),
+                                control = createControl(cvType = "auto",
+                                                        startingVariance = 0.01,
+                                                        tolerance  = 2e-07,
+                                                        cvRepetitions = 10,
+                                                        selectorType = "byPid",
+                                                        noiseLevel = "quiet")) {
+  if (useCovariates && is.null(caseControlsExposure))
+    stop("Must provide caseControlsExposure when using covariates")
   start <- Sys.time()
   treatmentEstimate <- NULL
   fit <- NULL
   status <- "NO MODEL FITTED"
 
-  cyclopsData <- Cyclops::createCyclopsData(isCase ~ exposed + strata(stratumId), data = caseControlData, modelType = "clr")
+  if (useCovariates) {
+    treatmentVarId <- ffbase::max.ff(caseControlsExposure$covariates$covariateId) + 1
+    prior$exclude <- treatmentVarId  # Exclude treatment variable from regularization
+
+    treatmentCovariate <- ff::ffdf(rowId = ff::as.ff(caseControlData$personId),
+                                   covariateId = ff::ff(treatmentVarId, length = nrow(caseControlData), vmode = "double"),
+                                   covariateValue = ff::as.ff(caseControlData$exposed, vmode = "double"))
+    covariates <- ffbase::ffdfappend(treatmentCovariate, caseControlsExposure$covariates)
+    if (length(includeCovariateIds) != 0) {
+      includeCovariateIds <- c(includeCovariateIds, treatmentVarId)
+      idx <- !is.na(ffbase::ffmatch(covariates$covariateId, ff::as.ff(includeCovariateIds)))
+      covariates <- covariates[ffbase::ffwhich(idx, idx == TRUE), ]
+    }
+    if (length(excludeCovariateIds) != 0) {
+      idx <- is.na(ffbase::ffmatch(covariates$covariateId, ff::as.ff(excludeCovariateIds)))
+      covariates <- covariates[ffbase::ffwhich(idx, idx == TRUE), ]
+    }
+    outcomes <- caseControlData
+    colnames(outcomes)[colnames(outcomes) == "personId"] <- "rowId"
+    colnames(outcomes)[colnames(outcomes) == "isCase"] <- "y"
+    covariates <- ffbase::merge.ffdf(covariates, ff::as.ffdf(outcomes[, c("rowId","stratumId")]))
+    cyclopsData <- Cyclops::convertToCyclopsData(outcomes, covariates)
+  } else {
+    prior <- createPrior("none")  # Only one variable, which we're not going to regularize, so effectively no prior
+    treatmentCovariate <- "exposed"
+    cyclopsData <- Cyclops::createCyclopsData(isCase ~ exposed + strata(stratumId), data = caseControlData, modelType = "clr")
+  }
   fit <- tryCatch({
-    Cyclops::fitCyclopsModel(cyclopsData)
+    Cyclops::fitCyclopsModel(cyclopsData, prior = prior, control = control)
   }, error = function(e) {
     e$message
   })
@@ -48,9 +87,9 @@ fitCaseControlModel <- function(caseControlData) {
   } else {
     status <- "OK"
     coefficients <- coef(fit)
-    logRr <- coef(fit)[names(coef(fit)) == "exposed"]
+    logRr <- coef(fit)[names(coef(fit)) == treatmentCovariate]
     ci <- tryCatch({
-      confint(fit, parm = "exposed", includePenalty = TRUE)
+      confint(fit, parm = treatmentCovariate, includePenalty = TRUE)
     }, error = function(e) {
       missing(e)  # suppresses R CMD check note
       c(0, -Inf, Inf)

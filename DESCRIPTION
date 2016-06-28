@@ -20,7 +20,8 @@ Imports:
     ffbase (>= 0.12.1),
     Rcpp (>= 0.11.2),
     OhdsiRTools (>= 1.1.1),
-    plyr
+    plyr,
+    FeatureExtraction
 Suggests:
     testthat,
     knitr,
