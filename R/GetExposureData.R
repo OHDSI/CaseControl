@@ -38,6 +38,13 @@
 #'                                        the cohort_definition_id in the cohort-like table. If no
 #'                                        exposureIds are provided, all drugs or cohorts in the
 #'                                        exposureTable are included as exposures.
+#' @param cdmDatabaseSchema            Needed when constructing covariates: the name of the database schema that contains the OMOP CDM
+#'                                     instance.  Requires read permissions to this database. On SQL
+#'                                     Server, this should specifiy both the database and the schema,
+#'                                     so for example 'cdm_instance.dbo'.
+#' @param covariateSettings            An object of type \code{covariateSettings} as created using the
+#'                                     \code{createCovariateSettings} function in the
+#'                                     \code{FeatureExtraction} package. If NULL then no covariate data is retrieved.
 #'
 #' @export
 getDbExposureData <- function(caseControls,
@@ -51,7 +58,8 @@ getDbExposureData <- function(caseControls,
   connection <- DatabaseConnector::connect(connectionDetails)
   writeLines("Uploading cases and controls to database temp table")
   start <- Sys.time()
-  data <- caseControls[, c("personId", "indexDate")]
+  caseControls$rowId <- 1:nrow(caseControls)
+  data <- caseControls[, c("rowId", "personId", "indexDate")]
   colnames(data)[colnames(data) == "personId"] <- "subjectId"
   colnames(data)[colnames(data) == "indexDate"] <- "cohortStartDate"
   colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
@@ -86,21 +94,26 @@ getDbExposureData <- function(caseControls,
                                                         cdmVersion = 5,
                                                         cohortTable = "#case_controls",
                                                         cohortTableIsTemp = TRUE,
+                                                        rowIdField = "row_id",
                                                         covariateSettings = covariateSettings,
                                                         normalize = TRUE)
   }
-
   sql <- "TRUNCATE TABLE #case_controls; DROP TABLE #case_controls;"
   sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms, oracleTempSchema = oracleTempSchema)$sql
   DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
   RJDBC::dbDisconnect(connection)
 
-  result <- list(caseControls = caseControls, exposure = exposure)
+  result <- list(caseControls = caseControls,
+                 exposure = exposure,
+                 metaData = attr(caseControls, "metaData"))
+  attr(result$caseControls, "metaData") <- NULL
   if (!is.null(covariateSettings)) {
-    result$covariates <- covariates
-    attr(result$caseControls, "metaData")$hasCovariates <- TRUE
+    result$covariates <- covariates$covariates
+    result$covariateRef <- covariates$covariateRef
+    result$metaData$hasCovariates <- TRUE
+    result$metaData$covariateMetaData <- covariates$metaData
   } else {
-    attr(result$caseControls, "metaData")$hasCovariates <- FALSE
+    result$metaData$hasCovariates <- FALSE
   }
   class(result) <- "caseControlsExposure"
   return(result)
@@ -127,21 +140,23 @@ saveCaseControlsExposure <- function(caseControlsExposure, folder) {
   if (class(caseControlsExposure) != "caseControlsExposure")
     stop("Data not of class caseControlsExposure")
 
-  if (is.null(caseControlsExposure$covariates)) {
-    dir.create(folder)
+  if (caseControlsExposure$metaData$hasCovariates) {
+    covariates <- caseControlsExposure$covariates
+    covariateRef <- caseControlsExposure$covariateRef
+    ffbase::save.ffdf(covariates, covariateRef, dir = folder, clone = TRUE)
   } else {
-    ffbase::save.ffdf(caseControlsExposure$covariates, dir = folder)
-
+    dir.create(folder)
   }
   saveRDS(caseControlsExposure$caseControls, file = file.path(folder, "caseControls.rds"))
   saveRDS(caseControlsExposure$exposure, file = file.path(folder, "exposure.rds"))
+  saveRDS(caseControlsExposure$metaData, file = file.path(folder, "metaData.rds"))
   invisible(TRUE)
 }
 
 #' Load the caseControlsExposure data from a folder
 #'
 #' @description
-#' \code{loadCaseControlsExposureData} loads an object of type caseControlsExposure from a folder in the file system.
+#' \code{loadCaseControlsExposure} loads an object of type caseControlsExposure from a folder in the file system.
 #'
 #' @param folder     The name of the folder containing the data.
 #' @param readOnly   If true, the data is opened read only.
@@ -153,7 +168,7 @@ saveCaseControlsExposure <- function(caseControlsExposure, folder) {
 #' An object of class \code{caseControlsExposure}.
 #'
 #' @export
-loadCaseControlsExposureData <- function(folder, readOnly = TRUE) {
+loadCaseControlsExposure <- function(folder, readOnly = TRUE) {
   if (!file.exists(folder))
     stop(paste("Cannot find folder", folder))
   if (!file.info(folder)$isdir)
@@ -161,16 +176,19 @@ loadCaseControlsExposureData <- function(folder, readOnly = TRUE) {
 
   caseControls <- readRDS(file.path(folder, "caseControls.rds"))
   exposure <- readRDS(file.path(folder, "exposure.rds"))
-  result <- list(caseControls = caseControls, exposure = exposure)
-  if (attr(result$caseControls, "metaData")$hasCovariates) {
+  metaData <- readRDS(file.path(folder, "metaData.rds"))
+  result <- list(caseControls = caseControls, exposure = exposure, metaData = metaData)
+  if (result$metaData$hasCovariates) {
     temp <- setwd(folder)
     absolutePath <- setwd(temp)
     e <- new.env()
     ffbase::load.ffdf(absolutePath, e)
     result$covariates <- get("covariates", envir = e)
+    result$covariateRef <- get("covariateRef", envir = e)
     open(result$covariates, readonly = readOnly)
+    open(result$covariateRef, readonly = readOnly)
     rm(e)
   }
   class(result) <- "caseControlsExposure"
-  return(caseData)
+  return(result)
 }

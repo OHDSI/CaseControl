@@ -21,8 +21,7 @@ limitations under the License.
 {DEFAULT @exposure_table = 'drug_era'} 
 {DEFAULT @exposure_ids = 1} 
 
-SELECT case_controls.subject_id AS person_id,
-  cohort_start_date AS index_date,
+SELECT row_id,
   exposure_id,
   DATEDIFF(DAY, exposure_start_date, cohort_start_date) AS days_since_exposure_start,
   DATEDIFF(DAY, exposure_end_date, cohort_start_date) AS days_since_exposure_end

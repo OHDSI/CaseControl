@@ -27,7 +27,7 @@ pw <- NULL
 dbms <- "pdw"
 user <- NULL
 server <- "JRDUSAPSCTL01"
-cdmDatabaseSchema <- "cdm_truven_mdcd_v5.dbo"
+cdmDatabaseSchema <- "CDM_Truven_MDCD_V417.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 cohortTable <- "mschuemi_sccs_vignette"
 oracleTempSchema <- NULL
@@ -42,20 +42,20 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms,
 
 connection <- DatabaseConnector::connect(connectionDetails)
 
-sql <- loadRenderTranslateSql("vignette.sql",
-                              packageName = "CaseControl",
-                              dbms = dbms,
-                              cdmDatabaseSchema = cdmDatabaseSchema,
-                              cohortDatabaseSchema = cohortDatabaseSchema,
-                              outcomeTable = outcomeTable)
+sql <- SqlRender::loadRenderTranslateSql("vignette.sql",
+                                         packageName = "CaseControl",
+                                         dbms = dbms,
+                                         cdmDatabaseSchema = cdmDatabaseSchema,
+                                         cohortDatabaseSchema = cohortDatabaseSchema,
+                                         cohortTable = cohortTable)
 
 DatabaseConnector::executeSql(connection, sql)
 
 # Check number of subjects per cohort:
-sql <- "SELECT cohort_definition_id, COUNT(*) AS count FROM @cohortDatabaseSchema.@outcomeTable GROUP BY cohort_definition_id"
+sql <- "SELECT cohort_definition_id, COUNT(*) AS count FROM @cohortDatabaseSchema.@cohortTable GROUP BY cohort_definition_id"
 sql <- SqlRender::renderSql(sql,
                             cohortDatabaseSchema = cohortDatabaseSchema,
-                            outcomeTable = outcomeTable)$sql
+                            cohortTable = cohortTable)$sql
 sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
 DatabaseConnector::querySql(connection, sql)
 
@@ -144,6 +144,7 @@ ccAnalysis3 <- createCcAnalysis(analysisId = 3,
 
 
 ccAnalysisList <- list(ccAnalysis1, ccAnalysis2, ccAnalysis3)
+ccAnalysisList <- list(ccAnalysis2, ccAnalysis3)
 
 saveExposureOutcomeNestingCohortList(exposureOutcomeNcList, "s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt")
 saveCcAnalysisList(ccAnalysisList, "s:/temp/vignetteCaseControl2/ccAnalysisList.txt")
@@ -183,6 +184,6 @@ result <- runCcAnalyses(connectionDetails = connectionDetails,
 
 # result <- readRDS('s:/temp/sccsVignette2/outcomeModelReference.rds')
 
-analysisSum <- summarizeSccsAnalyses(result)
+analysisSum <- summarizeCcAnalyses(result)
 saveRDS(analysisSum, "s:/temp/sccsVignette2/analysisSummary.rds")
 

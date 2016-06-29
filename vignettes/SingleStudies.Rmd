@@ -256,25 +256,31 @@ if (file.exists("s:/temp/vignetteCaseControl")){
 }
 ```
 
-# Loading exposure data
+# Loading exposure data and covariates
 
-Next, we load information on the exposures of the cases and controls.
+Next, we load information on the exposures of the cases and controls, as well as covariates.
 
 ```{r tidy=FALSE,eval=FALSE}
+covarSettings <- createCovariateSettings(useCovariateRiskScores = TRUE,
+                                         useCovariateRiskScoresCharlson = TRUE,
+                                         useCovariateRiskScoresDCSI = TRUE,
+                                         useCovariateRiskScoresCHADS2 = TRUE)
+
 caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
                                           caseControls = caseControls,
                                           oracleTempSchema = oracleTempSchema,
                                           exposureDatabaseSchema = cdmDatabaseSchema,
                                           exposureTable = "drug_era",
-                                          exposureIds = 1124300)
+                                          exposureIds = 1124300,
+                                          covariateSettings = covarSettings)
 ```
 
-Here we specify that we will use the `drug_era` table to identify exposures, and will only retrieve data on exposure to Diclofenac (concept ID 1124300).
+Here we specify that we will use the `drug_era` table to identify exposures, and will only retrieve data on exposure to Diclofenac (concept ID 1124300). We use the `covariateSettings` function of the FeatureExtraction package to specify which covariates to construct. In this example the only coviariates are the Charlson comorbidity index, Diabetes Complications Severity Index (DCSI), and CHADS2 score.
 
-The `caseControlsExposure` object is a standard R object and can be saved as usual, for example:
+When including covariates, the `caseControlsExposure` object uses `ff` to store large objects and therefore cannot be stored using standard functions. Please use `saveCaseControlsExposure` to save:
 
 ```{r tidy=TRUE,eval=FALSE}
-saveRDS(caseControlsExposure, "caseControlsExposure.rds")
+saveCaseControlsExposure(caseControlsExposure, "caseControlsExposure")
 ```
 
 # Creating case-control data
@@ -299,6 +305,7 @@ data.frame(personId = c(3,123,345,6,234,567),
            indexDate = c("2009-10-10", "2009-10-11", "2009-10-09", "2010-05-04", "2010-05-04", "2010-05-05"), 
            isCase = c(TRUE, FALSE, FALSE, TRUE, FALSE, FALSE), 
            stratumId = c(1,1,1,2,2,2), 
+           rowId = c(1,2,3,4,5,6),
            exposed = c(1,0,0,0,0,0))
 ```
 
@@ -307,7 +314,10 @@ data.frame(personId = c(3,123,345,6,234,567),
 We can now fit the model, which is a logistic regression conditioned on the matched sets:
 
 ```{r tidy=FALSE,eval=FALSE}
-fit <- fitCaseControlModel(caseControlData)
+fit <- fitCaseControlModel(caseControlData,
+                           useCovariates = TRUE,
+                           caseControlsExposure = caseControlsExposure,
+                           prior = createPrior("none"))
 
 fit
 ```

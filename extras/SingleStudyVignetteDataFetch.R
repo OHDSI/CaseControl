@@ -27,7 +27,7 @@ pw <- NULL
 dbms <- "pdw"
 user <- NULL
 server <- "JRDUSAPSCTL01"
-cdmDatabaseSchema <- "cdm_truven_mdcd_v5.dbo"
+cdmDatabaseSchema <- "CDM_Truven_MDCD_V417.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 oracleTempSchema <- NULL
 cohortTable <- "mschuemi_cc_vignette"
@@ -97,16 +97,23 @@ saveRDS(caseControls, "s:/temp/vignetteCaseControl/caseControls.rds")
 
 caseControls <- readRDS("s:/temp/vignetteCaseControl/caseControls.rds")
 
+
+covariateSettings <- createCovariateSettings(useCovariateRiskScores = TRUE,
+                                             useCovariateRiskScoresCharlson = TRUE,
+                                             useCovariateRiskScoresDCSI = TRUE,
+                                             useCovariateRiskScoresCHADS2 = TRUE)
+
 caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
                                           caseControls = caseControls,
                                           oracleTempSchema = oracleTempSchema,
                                           exposureDatabaseSchema = cdmDatabaseSchema,
                                           exposureTable = "drug_era",
-                                          exposureIds = 1124300)
+                                          exposureIds = 1124300,
+                                          covariateSettings = covariateSettings)
 
-saveRDS(caseControlsExposure, "s:/temp/vignetteCaseControl/caseControlsExposure.rds")
+saveCaseControlsExposure(caseControlsExposure, "s:/temp/vignetteCaseControl/caseControlsExposure")
 
-caseControlsExposure <- readRDS("s:/temp/vignetteCaseControl/caseControlsExposure.rds")
+caseControlsExposure <- loadCaseControlsExposure("s:/temp/vignetteCaseControl/caseControlsExposure")
 
 caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExposure,
                                          exposureId = 1124300,
@@ -114,9 +121,14 @@ caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExpo
                                          riskWindowStart = 0,
                                          riskWindowEnd = 0)
 
+
+
 head(caseControlData)
 
-fit <- fitCaseControlModel(caseControlData)
+fit <- fitCaseControlModel(caseControlData,
+                           useCovariates = TRUE,
+                           caseControlsExposure = caseControlsExposure,
+                           prior = createPrior("none"))
 
 saveRDS(fit, "s:/temp/vignetteCaseControl/fit.rds")
 

@@ -1,8 +1,8 @@
 Package: CaseControl
 Type: Package
 Title: Case-Control
-Version: 0.0.2
-Date: 2016-05-18
+Version: 0.0.3
+Date: 2016-06-28
 Author: Martijn Schuemie
 Maintainer: Martijn Schuemie <schuemie@ohdsi.org>
 Description: CaseControl is an R package for performing (nested) matched case-control analyses in an observational database in the OMOP Common Data Model.
@@ -11,7 +11,8 @@ Depends:
     R (>= 3.2.2),
     Cyclops (>= 1.2.0),
     DatabaseConnector (>= 1.3.0),
-    survival
+    survival,
+	FeatureExtraction  (>= 1.0.1)
 Imports:
     RJDBC,
     SqlRender (>= 1.1.1),
@@ -20,8 +21,7 @@ Imports:
     ffbase (>= 0.12.1),
     Rcpp (>= 0.11.2),
     OhdsiRTools (>= 1.1.1),
-    plyr,
-    FeatureExtraction
+    plyr
 Suggests:
     testthat,
     knitr,

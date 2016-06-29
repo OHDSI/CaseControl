@@ -1,38 +1,130 @@
 library(CaseControl)
 setwd("s:/temp")
 options(fftempdir = "s:/fftemp")
-pw <- NULL
-dbms <- "pdw"
-user <- NULL
-server <- "JRDUSAPSCTL01"
-cdmDatabaseSchema <- "cdm_truven_mdcd_v5.dbo"
-cohortDatabaseSchema <- "scratch.dbo"
-oracleTempSchema <- NULL
-cohortTable <- "mschuemi_cc_vignette"
-port <- 17001
 
-connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms,
-                                                                server = server,
-                                                                user = user,
-                                                                password = pw,
-                                                                port = port)
+negativeControls <- c(705178,
+                      705944,
+                      710650,
+                      714785,
+                      719174,
+                      719311,
+                      735340,
+                      742185,
+                      780369,
+                      781182,
+                      924724,
+                      990760,
+                      1110942,
+                      1111706,
+                      1136601,
+                      1317967,
+                      1501309,
+                      1505346,
+                      1551673,
+                      1560278,
+                      1584910,
+                      19010309,
+                      19044727,
+                      40163731)
+diclofenac <- 1124300
+giBleed <- 1
 
 
-oracleTempSchema = cdmDatabaseSchema
-exposureDatabaseSchema = cdmDatabaseSchema
-exposureTable = "drug_era"
-outcomeDatabaseSchema = cdmDatabaseSchema
-outcomeTable = "condition_era"
-nestingCohortDatabaseSchema = cdmDatabaseSchema
-nestingCohortTable = "condition_era"
-outputFolder = "./CcOutput"
-exposureOutcomeNestingCohortList <- loadExposureOutcomeNestingCohortList("s:/temp/ccVignette2/exposureOutcomeNestingCohortList.txt")
-ccAnalysisList <- loadCcAnalysisList("s:/temp/ccVignette2/ccAnalysisList.txt")
-getDbCaseDataThreads = 1
-selectControlsThreads = 1
-getDbExposureDataThreads = 1
-createCaseControlDataThreads = 1
-fitCaseControlModelThreads = 1
+caseControls <- readRDS("s:/temp/vignetteCaseControl/caseControlsNoVisit.rds")
+
+caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
+                                          caseControls = caseControls,
+                                          oracleTempSchema = oracleTempSchema,
+                                          exposureDatabaseSchema = cdmDatabaseSchema,
+                                          exposureTable = "drug_era",
+                                          exposureIds = c(diclofenac, negativeControls))
+
+caseControlsExposure2 <- loadCaseControlsExposure("s:/temp/vignetteCaseControl/caseControlsExposureNoVisit")
+
+caseControlsExposure$covariates <- ff::clone.ffdf(caseControlsExposure2$covariates)
+caseControlsExposure$covariateRef <- ff::clone.ffdf(caseControlsExposure2$covariateRef)
+caseControlsExposure$metaData$hasCovariates <- TRUE
+
+saveCaseControlsExposure(caseControlsExposure, "s:/temp/ccQnD/caseControlsExposureNoVisit")
+
+
+caseControlsExposure <- loadCaseControlsExposure("s:/temp/ccQnD/caseControlsExposureNoVisit")
+control = createControl(cvType = "auto",
+                        startingVariance = 0.01,
+                        tolerance  = 2e-07,
+                        cvRepetitions = 10,
+                        selectorType = "byPid",
+                        noiseLevel = "quiet",
+                        threads = 20)
+for (exposureId in c(diclofenac, negativeControls)) {
+  writeLines(paste("Exposure:",exposureId))
+  fileName <- paste0("s:/temp/ccQnD/NoVisit/model_e", exposureId, ".rds")
+  if (!file.exists(fileName) && exposureId != 735340 && exposureId != 1584910) {
+    caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExposure,
+                                             exposureId = exposureId,
+                                             firstExposureOnly = FALSE,
+                                             riskWindowStart = -30,
+                                             riskWindowEnd = 0)
+    model <- fitCaseControlModel(caseControlData,
+                                 useCovariates = TRUE,
+                                 caseControlsExposure = caseControlsExposure,
+                                 prior = createPrior("none"))
+    saveRDS(model, fileName)
+  }
+}
+
+for (exposureId in c(diclofenac, negativeControls)) {
+  writeLines(paste("Exposure:",exposureId))
+  fileName <- paste0("s:/temp/ccQnD/noCovars/model_e", exposureId, ".rds")
+  if (!file.exists(fileName)) {
+    caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExposure,
+                                             exposureId = exposureId,
+                                             firstExposureOnly = FALSE,
+                                             riskWindowStart = -30,
+                                             riskWindowEnd = 0)
+    model <- fitCaseControlModel(caseControlData,
+                                 useCovariates = FALSE)
+    saveRDS(model, fileName)
+  }
+}
+
+results <- data.frame(exposureId = c(diclofenac, negativeControls), logRr = NA, seLogRr = NA)
+for (i in 1:nrow(results)) {
+  model <- readRDS(paste0("s:/temp/ccQnD/noCovars/model_e", results$exposureId[i], ".rds"))
+  if (!is.null(model$outcomeModelTreatmentEstimat)) {
+    results$logRr[i] <- model$outcomeModelTreatmentEstimate$logRr
+    results$seLogRr[i] <- model$outcomeModelTreatmentEstimate$seLogRr
+  }
+}
+
+
+
+
+results <- data.frame(exposureId = c(diclofenac, negativeControls), logRr = NA, seLogRr = NA)
+for (i in 1:nrow(results)) {
+  if (file.exists(paste0("s:/temp/ccQnD/NoVisit/model_e", results$exposureId[i], ".rds"))){
+    model <- readRDS(paste0("s:/temp/ccQnD/NoVisit/model_e", results$exposureId[i], ".rds"))
+    if (!is.null(model$outcomeModelTreatmentEstimat)) {
+      results$logRr[i] <- model$outcomeModelTreatmentEstimate$logRr
+      results$seLogRr[i] <- model$outcomeModelTreatmentEstimate$seLogRr
+    }
+  }
+}
+
+library(EmpiricalCalibration)
+
+
+negCons <- results[results$exposureId != 1124300, ]
+ei <-  results[results$exposureId == 1124300, ]
+null <- fitNull(negCons$logRr, negCons$seLogRr)
+plotCalibrationEffect(logRrNegatives = negCons$logRr,
+                      seLogRrNegatives = negCons$seLogRr,
+                      logRrPositives = ei$logRr,
+                      seLogRrPositives = ei$seLogRr,
+                      null,
+                      file = "s:/temp/cal5.png")
+
+
 
 
 setwd("s:/temp")

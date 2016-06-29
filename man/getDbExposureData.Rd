@@ -34,6 +34,15 @@ If exposureTable <> drug_era, exposureIds is used to select
 the cohort_definition_id in the cohort-like table. If no
 exposureIds are provided, all drugs or cohorts in the
 exposureTable are included as exposures.}
+
+\item{cdmDatabaseSchema}{Needed when constructing covariates: the name of the database schema that contains the OMOP CDM
+instance.  Requires read permissions to this database. On SQL
+Server, this should specifiy both the database and the schema,
+so for example 'cdm_instance.dbo'.}
+
+\item{covariateSettings}{An object of type \code{covariateSettings} as created using the
+\code{createCovariateSettings} function in the
+\code{FeatureExtraction} package. If NULL then no covariate data is retrieved.}
 }
 \description{
 Get exposure data for cases and controls from a database
