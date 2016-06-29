@@ -182,7 +182,7 @@ The second group of arguments are not specific to a hypothesis of interest, and 
 
 ```{r tidy=FALSE,eval=TRUE}
 getDbCaseDataArgs1 <- createGetDbCaseDataArgs(useNestingCohort = FALSE,
-                                              getVisits = FALSE)
+                                             getVisits = FALSE)
 
 selectControlsArgs1 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 washoutPeriod = 180,
@@ -193,11 +193,12 @@ selectControlsArgs1 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 matchOnProvider = FALSE,
                                                 matchOnVisitDate = FALSE)
 
+getDbExposureDataArgs1 <- createGetDbExposureDataArgs()
+
 createCaseControlDataArgs1 <- createCreateCaseControlDataArgs(firstExposureOnly = FALSE,
-                                                              riskWindowStart = -30,
+                                                              riskWindowStart = 0,
                                                               riskWindowEnd = 0)
-
-
+fitCaseControlModelArgs1 <- createFitCaseControlModelArgs()
 ```
 
 Any argument that is not explicitly specified by the user will assume the default value specified in the function. Note that in this example, even though we specified a nesting cohort for each exposure-outcome-nesting cohort triplet, we have specified `useNestingCohort = FALSE`, meaning we will not nest this analysis but rather use the entire population to draw cases and controls.
@@ -209,7 +210,9 @@ ccAnalysis1 <- createCcAnalysis(analysisId = 1,
                                 description = "Matching on age and gender",
                                 getDbCaseDataArgs = getDbCaseDataArgs1,
                                 selectControlsArgs = selectControlsArgs1,
-                                createCaseControlDataArgs = createCaseControlDataArgs1)
+                                getDbExposureDataArgs = getDbExposureDataArgs1,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs1)
 ```
 
 Note that we have assigned an analysis ID (1) to this set of arguments. We can use this later to link the results back to this specific set of choices. We also include a short description of the analysis.
@@ -224,7 +227,27 @@ ccAnalysis2 <- createCcAnalysis(analysisId = 2,
                                 description = "Matching on age and gender, nesting in indication",
                                 getDbCaseDataArgs = getDbCaseDataArgs2,
                                 selectControlsArgs = selectControlsArgs1,
-                                createCaseControlDataArgs = createCaseControlDataArgs1)
+                                getDbExposureDataArgs = getDbExposureDataArgs1,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs1)
+
+covariateSettings <- createCovariateSettings(useCovariateRiskScores = TRUE,
+                                             useCovariateRiskScoresCharlson = TRUE,
+                                             useCovariateRiskScoresDCSI = TRUE,
+                                             useCovariateRiskScoresCHADS2 = TRUE)
+
+getDbExposureDataArgs2 <- createGetDbExposureDataArgs(covariateSettings = covariateSettings)
+
+fitCaseControlModelArgs2 <- createFitCaseControlModelArgs(useCovariates = TRUE,
+                                                          prior = createPrior("none"))
+
+ccAnalysis3 <- createCcAnalysis(analysisId = 3,
+                                description = "Matching on age and gender, nesting in indication, using covars",
+                                getDbCaseDataArgs = getDbCaseDataArgs2,
+                                selectControlsArgs = selectControlsArgs1,
+                                getDbExposureDataArgs = getDbExposureDataArgs2,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs2)
 
 selectControlsArgs2 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 washoutPeriod = 180,
@@ -236,17 +259,19 @@ selectControlsArgs2 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 matchOnVisitDate = TRUE,
                                                 visitDateCaliper = 30)
 
-ccAnalysis3 <- createCcAnalysis(analysisId = 3,
-                                description = "Matching on age and gender, nesting in indication, match on visit",
+ccAnalysis4 <- createCcAnalysis(analysisId = 4,
+                                description = "Matching on age, gender and visit, nesting in indication, using covars",
                                 getDbCaseDataArgs = getDbCaseDataArgs2,
                                 selectControlsArgs = selectControlsArgs2,
-                                createCaseControlDataArgs = createCaseControlDataArgs1)
+                                getDbExposureDataArgs = getDbExposureDataArgs2,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs2)
 ```
 
 These analyses can be combined in a list:
 
 ```{r tidy=FALSE,eval=TRUE}
-ccAnalysisList <- list(ccAnalysis1, ccAnalysis2, ccAnalysis3)
+ccAnalysisList <- list(ccAnalysis1, ccAnalysis2, ccAnalysis3, ccAnalysis4)
 ```
 
 A convenient way to save `ccAnalysisList` to file is by using the `saveCcAnalysisList` function, and we can load it again using the `loadCcAnalysisList` function.
@@ -274,14 +299,18 @@ ccAnalysis1A <- createCcAnalysis(analysisId = 1,
                                 outcomeType = "narrowDefinition",
                                 getDbCaseDataArgs = getDbCaseDataArgs1,
                                 selectControlsArgs = selectControlsArgs1,
-                                createCaseControlDataArgs = createCaseControlDataArgs1)
+                                getDbExposureDataArgs = getDbExposureDataArgs1,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs1)
 
 ccAnalysis1B <- createCcAnalysis(analysisId = 2,
                                 description = "Matching on age and gender, using broad def.",
                                 outcomeType = "broadDefinition",
                                 getDbCaseDataArgs = getDbCaseDataArgs1,
                                 selectControlsArgs = selectControlsArgs1,
-                                createCaseControlDataArgs = createCaseControlDataArgs1)
+                                getDbExposureDataArgs = getDbExposureDataArgs1,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs1)
 
 ccAnalysisList2 <- list(ccAnalysis1A, ccAnalysis1B)
 ```
@@ -311,7 +340,8 @@ result <- runCcAnalyses(connectionDetails = connectionDetails,
                         selectControlsThreads = 2,
                         getDbExposureDataThreads = 3,
                         createCaseControlDataThreads = 5,
-                        fitCaseControlModelThreads = 5)
+                        fitCaseControlModelThreads = 5,
+                        cvThreads = 3)
 ```
 
 In the code above, we provide the arguments for connecting to the database, which schemas and tables to use, as well as the analyses and hypotheses of interest. The `outputFolder` specifies where the outcome models and intermediate files will be written. We also instruct `CaseControl` to use multiple threads for various stages in the analyses, meaning these will be executed in parallel on multiple CPUs in the computer. Multithreading can significantly reduce execution time, but will require more system resources such as memory and temporary disk space. 
@@ -415,7 +445,7 @@ if (file.exists("s:/temp/vignetteCaseControl2/outcomeModelReference.rds")){
 ```
 
 ```{r tidy=FALSE,eval=FALSE}
-# Analysis 3: Nesting and matching on visit date
+# Analysis 3: Nesting and including covariates
 negCons <- analysisSum[analysisSum$analysisId == 3 & analysisSum$exposureId != 1124300, ]
 ei <-  analysisSum[analysisSum$analysisId == 3 & analysisSum$exposureId == 1124300, ]
 null <- fitNull(negCons$logRr, negCons$seLogRr)
@@ -430,6 +460,31 @@ if (file.exists("s:/temp/vignetteCaseControl2/outcomeModelReference.rds")){
   library(EmpiricalCalibration)
   negCons <- analysisSum[analysisSum$analysisId == 3 & analysisSum$exposureId != 1124300, ]
   ei <-  analysisSum[analysisSum$analysisId == 3 & analysisSum$exposureId == 1124300, ]
+  null <- fitNull(negCons$logRr, negCons$seLogRr)
+  plotCalibrationEffect(logRrNegatives = negCons$logRr, 
+                        seLogRrNegatives = negCons$seLogRr, 
+                        logRrPositives = ei$logRr, 
+                        seLogRrPositives = ei$seLogRr, 
+                        null)
+}
+```
+
+```{r tidy=FALSE,eval=FALSE}
+# Analysis 4: Nesting, including covariates, and matching on visit
+negCons <- analysisSum[analysisSum$analysisId == 4 & analysisSum$exposureId != 1124300, ]
+ei <-  analysisSum[analysisSum$analysisId == 4 & analysisSum$exposureId == 1124300, ]
+null <- fitNull(negCons$logRr, negCons$seLogRr)
+plotCalibrationEffect(logRrNegatives = negCons$logRr, 
+                      seLogRrNegatives = negCons$seLogRr, 
+                      logRrPositives = ei$logRr, 
+                      seLogRrPositives = ei$seLogRr, 
+                      null)
+```
+```{r echo=FALSE,message=FALSE,eval=TRUE}
+if (file.exists("s:/temp/vignetteCaseControl2/outcomeModelReference.rds")){
+  library(EmpiricalCalibration)
+  negCons <- analysisSum[analysisSum$analysisId == 4 & analysisSum$exposureId != 1124300, ]
+  ei <-  analysisSum[analysisSum$analysisId == 4 & analysisSum$exposureId == 1124300, ]
   null <- fitNull(negCons$logRr, negCons$seLogRr)
   plotCalibrationEffect(logRrNegatives = negCons$logRr, 
                         seLogRrNegatives = negCons$seLogRr, 

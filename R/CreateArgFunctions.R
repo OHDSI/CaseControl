@@ -83,6 +83,32 @@ createSelectControlsArgs <- function(firstOutcomeOnly = TRUE,
   return(analysis)
 }
 
+#' Create a parameter object for the function getDbExposureData
+#'
+#' @details
+#' Create an object defining the parameter values.
+#'
+#' @param covariateSettings   An object of type covariateSettings as created using
+#'                            thecreateCovariateSettings function in theFeatureExtraction package. If
+#'                            NULL then no covariate data is retrieved.
+#'
+#' @export
+createGetDbExposureDataArgs <- function(covariateSettings = NULL) {
+  # First: get default values:
+  analysis <- list()
+  for (name in names(formals(createGetDbExposureDataArgs))) {
+    analysis[[name]] <- get(name)
+  }
+  # Second: overwrite defaults with actual values:
+  values <- lapply(as.list(match.call())[-1], function(x) eval(x, envir = sys.frame(-3)))
+  for (name in names(values)) {
+    if (name %in% names(analysis))
+      analysis[[name]] <- values[[name]]
+  }
+  class(analysis) <- "args"
+  return(analysis)
+}
+
 #' Create a parameter object for the function createCaseControlData
 #'
 #' @details
@@ -101,6 +127,45 @@ createCreateCaseControlDataArgs <- function(firstExposureOnly = FALSE,
   # First: get default values:
   analysis <- list()
   for (name in names(formals(createCreateCaseControlDataArgs))) {
+    analysis[[name]] <- get(name)
+  }
+  # Second: overwrite defaults with actual values:
+  values <- lapply(as.list(match.call())[-1], function(x) eval(x, envir = sys.frame(-3)))
+  for (name in names(values)) {
+    if (name %in% names(analysis))
+      analysis[[name]] <- values[[name]]
+  }
+  class(analysis) <- "args"
+  return(analysis)
+}
+
+#' Create a parameter object for the function fitCaseControlModel
+#'
+#' @details
+#' Create an object defining the parameter values.
+#'
+#' @param useCovariates         Whether to use the covariates in the caseControlsExposure.
+#' @param excludeCovariateIds   Exclude these covariates from the model.
+#' @param includeCovariateIds   Include only these covariates in the model.
+#' @param prior                 The prior used to fit the model. SeecreatePrior for details.
+#' @param control               The control object used to control the cross-validation used
+#'                              todetermine the hyperparameters of the prior (if applicable).
+#'                              SeecreateControl for details.
+#'
+#' @export
+createFitCaseControlModelArgs <- function(useCovariates = FALSE,
+                                          excludeCovariateIds = c(),
+                                          includeCovariateIds = c(),
+                                          prior = createPrior("laplace", useCrossValidation = TRUE),
+                                          control = createControl(cvType = "auto",
+                                                                  startingVariance = 0.01,
+                                                                  tolerance = 2e-07,
+                                                                  cvRepetitions = 10,
+                                                                  selectorType = "byPid",
+                                                                  noiseLevel = "quiet")) {
+  # First: get default values:
+  analysis <- list()
+  for (name in names(formals(createFitCaseControlModelArgs))) {
     analysis[[name]] <- get(name)
   }
   # Second: overwrite defaults with actual values:

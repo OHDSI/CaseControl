@@ -6,7 +6,8 @@
 \usage{
 createCcAnalysis(analysisId = 1, description = "", exposureType = NULL,
   outcomeType = NULL, nestingCohortType = NULL, getDbCaseDataArgs,
-  selectControlsArgs, createCaseControlDataArgs)
+  selectControlsArgs, getDbExposureDataArgs, createCaseControlDataArgs,
+  fitCaseControlModelArgs)
 }
 \arguments{
 \item{analysisId}{An integer that will be used later to refer to this specific
@@ -32,8 +33,14 @@ the \code{\link{createGetDbCaseDataArgs}} function.}
 \item{selectControlsArgs}{An object representing the arguments to be used when calling
 the \code{\link{createSelectControlsArgs}} function.}
 
+\item{getDbExposureDataArgs}{An object representing the arguments to be used when calling
+the \code{\link{createGetDbExposureDataArgs}} function.}
+
 \item{createCaseControlDataArgs}{An object representing the arguments to be used when calling
 the \code{\link{createCreateCaseControlDataArgs}} function.}
+
+\item{fitCaseControlModelArgs}{An object representing the arguments to be used when calling
+the \code{\link{createFitCaseControlModelArgs}} function.}
 }
 \description{
 Create a case-control analysis specification

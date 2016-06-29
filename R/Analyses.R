@@ -37,8 +37,12 @@
 #'                                        the \code{\link{createGetDbCaseDataArgs}} function.
 #' @param selectControlsArgs              An object representing the arguments to be used when calling
 #'                                        the \code{\link{createSelectControlsArgs}} function.
+#' @param getDbExposureDataArgs           An object representing the arguments to be used when calling
+#'                                        the \code{\link{createGetDbExposureDataArgs}} function.
 #' @param createCaseControlDataArgs       An object representing the arguments to be used when calling
 #'                                        the \code{\link{createCreateCaseControlDataArgs}} function.
+#' @param fitCaseControlModelArgs         An object representing the arguments to be used when calling
+#'                                        the \code{\link{createFitCaseControlModelArgs}} function.
 #'
 #' @export
 createCcAnalysis <- function(analysisId = 1,
@@ -48,9 +52,13 @@ createCcAnalysis <- function(analysisId = 1,
                              nestingCohortType = NULL,
                              getDbCaseDataArgs,
                              selectControlsArgs,
-                             createCaseControlDataArgs) {
+                             getDbExposureDataArgs,
+                             createCaseControlDataArgs,
+                             fitCaseControlModelArgs) {
   if (selectControlsArgs$matchOnVisitDate && !getDbCaseDataArgs$getVisits)
     stop("Requested matching on visit date, but getVisits argument for getDbCaseData is FALSE")
+  if (fitCaseControlModelArgs$useCovariates && is.null(getDbExposureDataArgs$covariateSettings))
+    stop("Requested using covariates in fitCaseControlModelArgs, but no covariates are loaded in getDbExposureDataArgs")
 
   # First: get the default values:
   analysis <- list()

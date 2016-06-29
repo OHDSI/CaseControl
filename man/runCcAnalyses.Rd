@@ -12,7 +12,8 @@ runCcAnalyses(connectionDetails, cdmDatabaseSchema,
   nestingCohortTable = "condition_era", outputFolder = "./CcOutput",
   ccAnalysisList, exposureOutcomeNestingCohortList, getDbCaseDataThreads = 1,
   selectControlsThreads = 1, getDbExposureDataThreads = 1,
-  createCaseControlDataThreads = 1, fitCaseControlModelThreads = 1)
+  createCaseControlDataThreads = 1, fitCaseControlModelThreads = 1,
+  cvThreads = 1)
 }
 \arguments{
 \item{connectionDetails}{An R object of type \code{ConnectionDetails} created using
@@ -73,6 +74,9 @@ caseData objects.}
 
 \item{fitCaseControlModelThreads}{The number of parallel threads to use for fitting the
 models.}
+
+\item{cvThreads}{The number of parallel threads used for the cross-validation to determine the hyper-parameter when
+fitting the model.}
 }
 \value{
 A data frame with the following columns: \tabular{ll}{ \verb{analysisId} \tab The unique identifier

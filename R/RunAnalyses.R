@@ -70,6 +70,8 @@
 #' @param createCaseControlDataThreads              The number of parallel threads to use for creating case and control data including exposure status indicators
 #' @param fitCaseControlModelThreads              The number of parallel threads to use for fitting the
 #'                                         models.
+#' @param cvThreads                The number of parallel threads used for the cross-validation to determine the hyper-parameter when
+#'                                 fitting the model.
 #'
 #' @return
 #' A data frame with the following columns: \tabular{ll}{ \verb{analysisId} \tab The unique identifier
@@ -95,7 +97,8 @@ runCcAnalyses <- function(connectionDetails,
                           selectControlsThreads = 1,
                           getDbExposureDataThreads = 1,
                           createCaseControlDataThreads = 1,
-                          fitCaseControlModelThreads = 1) {
+                          fitCaseControlModelThreads = 1,
+                          cvThreads = 1) {
   for (exposureOutcomeNestingCohort in exposureOutcomeNestingCohortList)
     stopifnot(class(exposureOutcomeNestingCohort) == "exposureOutcomeNestingCohort")
   for (ccAnalysis in ccAnalysisList) stopifnot(class(ccAnalysis) == "ccAnalysis")
@@ -180,7 +183,7 @@ runCcAnalyses <- function(connectionDetails,
 
   ccObjectsToCreate <- list()
   selectControlsArgsList <- unique(OhdsiRTools::selectFromList(ccAnalysisList,
-                                                                  c("selectControlsArgs")))
+                                                               c("selectControlsArgs")))
   for (i in 1:length(selectControlsArgsList)) {
     selectControlsArgs <- selectControlsArgsList[[i]]
     analyses <- OhdsiRTools::matchInList(ccAnalysisList, selectControlsArgs)
@@ -206,22 +209,55 @@ runCcAnalyses <- function(connectionDetails,
 
   edObjectsToCreate <- list()
   for (ccFilename in unique(outcomeReference$caseControlsFile)) {
-    exposureIds <- unique(outcomeReference$exposureId[outcomeReference$caseControlsFile == ccFilename])
-    edFilename <- .createExposureDataFileName(ccFilename)
-    outcomeReference$exposureDataFile[outcomeReference$caseControlsFile == ccFilename] <- edFilename
-    if (!file.exists(edFilename)) {
-      args <- list(connectionDetails = connectionDetails,
-                   oracleTempSchema = oracleTempSchema,
-                   exposureDatabaseSchema = exposureDatabaseSchema,
-                   exposureTable = exposureTable,
-                   exposureIds = exposureIds)
-      edObjectsToCreate[[length(edObjectsToCreate) + 1]] <- list(args = args,
-                                                                 ccFilename = ccFilename,
-                                                                 edFilename = edFilename)
+    analysisIds <- unique(outcomeReference$analysisId[outcomeReference$caseControlsFile == ccFilename])
+    edArgsList <- unique(sapply(ccAnalysisList, function(x) if (x$analysisId %in% analysisIds) return(x$getDbExposureDataArgs)))
+    edArgsList <- edArgsList[!sapply(edArgsList, is.null)]
+    for (ed in 1:length(edArgsList)) {
+      edArgs <- edArgsList[[ed]]
+      analysisIds <- unlist(unique(OhdsiRTools::selectFromList(OhdsiRTools::matchInList(ccAnalysisList, list(getDbExposureDataArgs = edArgs)), "analysisId")))
+      idx <- outcomeReference$caseControlsFile == ccFilename & outcomeReference$analysisId %in% analysisIds
+      exposureIds <- unique(outcomeReference$exposureId[idx])
+      edFilename <- .createExposureDataFileName(ccFilename, ed)
+      outcomeReference$exposureDataFile[idx] <- edFilename
+      if (!file.exists(edFilename)) {
+        args <- list(connectionDetails = connectionDetails,
+                     oracleTempSchema = oracleTempSchema,
+                     exposureDatabaseSchema = exposureDatabaseSchema,
+                     exposureTable = exposureTable,
+                     exposureIds = exposureIds,
+                     cdmDatabaseSchema = cdmDatabaseSchema)
+        args <- append(args, edArgs)
+        edObjectsToCreate[[length(edObjectsToCreate) + 1]] <- list(args = args,
+                                                                   ccFilename = ccFilename,
+                                                                   edFilename = edFilename)
+      }
     }
   }
 
   ccdObjectsToCreate <- list()
+  for (edFilename in unique(outcomeReference$exposureDataFile)) {
+    analysisIds <- unique(outcomeReference$analysisId[outcomeReference$exposureDataFile == edFilename])
+    ccdArgsList <- unique(sapply(ccAnalysisList, function(x) if (x$analysisId %in% analysisIds) return(x$createCaseControlDataArgs)))
+    ccdArgsList <- ccdArgsList[!sapply(ccdArgsList, is.null)]
+    for (ccd in 1:length(ccdArgsList)) {
+      ccdArgs <- ccdArgsList[[ccd]]
+      analysisIds <- unlist(unique(OhdsiRTools::selectFromList(OhdsiRTools::matchInList(ccAnalysisList, list(createCaseControlDataArgs = ccdArgs)), "analysisId")))
+      idx <- outcomeReference$exposureDataFile == edFilename & outcomeReference$analysisId %in% analysisIds
+      exposureIds <- unique(outcomeReference$exposureId[idx])
+      for (exposureId in exposureIds) {
+        ccdFilename <- .createCaseControlDataFileName(edFilename, exposureId, ccd)
+        outcomeReference$caseControlDataFile[idx & outcomeReference$exposureId == exposureId] <- ccdFilename
+        if (!file.exists(ccdFilename)) {
+          args <- ccdArgs
+          args$exposureId <- exposureId
+          ccdObjectsToCreate[[length(ccdObjectsToCreate) + 1]] <- list(args = args,
+                                                                       ccdFilename = ccdFilename,
+                                                                       edFilename = edFilename)
+        }
+      }
+    }
+  }
+
   modelObjectsToCreate <- list()
   for (ccAnalysis in ccAnalysisList) {
     # ccAnalysis = ccAnalysisList[[1]]
@@ -233,20 +269,15 @@ runCcAnalyses <- function(connectionDetails,
       exposureId <- outcomeReference$exposureId[i]
       outcomeId <- outcomeReference$outcomeId[i]
       edFilename <- outcomeReference$exposureDataFile[i]
-      ccdFilename <- .createCaseControlDataFileName(analysisFolder, exposureId, outcomeId)
-      outcomeReference$caseControlDataFile[i] <- ccdFilename
-      if (!file.exists(ccdFilename)) {
-        args <- list(exposureId = exposureId)
-        args <- append(args, ccAnalysis$createCaseControlDataArgs)
-        ccdObjectsToCreate[[length(ccdObjectsToCreate) + 1]] <- list(args = args,
-                                                                     edFilename = edFilename,
-                                                                     ccdFilename = ccdFilename)
-      }
-
+      ccdFilename <- outcomeReference$caseControlDataFile[i]
       modelFilename <- .createModelFileName(analysisFolder, exposureId, outcomeId)
       outcomeReference$modelFile[i] <- modelFilename
       if (!file.exists(modelFilename)) {
-        modelObjectsToCreate[[length(modelObjectsToCreate) + 1]] <- list(ccdFilename = ccdFilename,
+        args <- ccAnalysis$fitCaseControlModelArgs
+        args$control$threads <- cvThreads
+        modelObjectsToCreate[[length(modelObjectsToCreate) + 1]] <- list(args = args,
+                                                                         ccdFilename = ccdFilename,
+                                                                         edFilename = edFilename,
                                                                          modelFilename = modelFilename)
       }
     }
@@ -287,7 +318,7 @@ runCcAnalyses <- function(connectionDetails,
     caseControls <- readRDS(params$ccFilename)
     params$args$caseControls <- caseControls
     exposureData <- do.call("getDbExposureData", params$args)
-    saveRDS(exposureData, params$edFilename)
+    saveCaseControlsExposure(exposureData, params$edFilename)
   }
   if (length(edObjectsToCreate) != 0) {
     cluster <- OhdsiRTools::makeCluster(getDbExposureDataThreads)
@@ -298,7 +329,7 @@ runCcAnalyses <- function(connectionDetails,
 
   writeLines("*** Creating caseControlData objects ***")
   createCaseControlDataObject <- function(params) {
-    exposureData <- readRDS(params$edFilename)
+    exposureData <- loadCaseControlsExposure(params$edFilename)
     params$args$caseControlsExposure <- exposureData
     caseControlData <- do.call("createCaseControlData", params$args)
     saveRDS(caseControlData, params$ccdFilename)
@@ -313,7 +344,9 @@ runCcAnalyses <- function(connectionDetails,
   writeLines("*** Creating case-control model objects ***")
   createCaseControlModelObject <- function(params) {
     caseControlData <- readRDS(params$ccdFilename)
+    exposureData <- loadCaseControlsExposure(params$edFilename)
     params$args$caseControlData <- caseControlData
+    params$args$caseControlsExposure <- exposureData
     model <- do.call("fitCaseControlModel", params$args)
     saveRDS(model, params$modelFilename)
   }
@@ -323,7 +356,6 @@ runCcAnalyses <- function(connectionDetails,
     dummy <- OhdsiRTools::clusterApply(cluster, modelObjectsToCreate, createCaseControlModelObject)
     OhdsiRTools::stopCluster(cluster)
   }
-
 
   invisible(outcomeReference)
 }
@@ -340,13 +372,17 @@ runCcAnalyses <- function(connectionDetails,
   return(file.path(folder, name))
 }
 
-.createExposureDataFileName <- function(ccFilename) {
-  return(gsub("caseControls_", "exposureData_", ccFilename))
+.createExposureDataFileName <- function(ccFilename, ed) {
+  name <- gsub("caseControls_", "exposureData_", ccFilename)
+  name <- gsub(".rds", "", name)
+  name <- paste0(name, "_ed", ed)
+  return(name)
 }
 
-.createCaseControlDataFileName <- function(folder, exposureId, outcomeId) {
-  name <- paste("ccd_e", exposureId, "_o", outcomeId, ".rds", sep = "")
-  return(file.path(folder, name))
+.createCaseControlDataFileName <- function(edFilename, exposureId, ccd) {
+  name <- gsub("exposureData_", "ccd_", edFilename)
+  name <- paste0(name, "_e", exposureId, "_ccd", ccd, ".rds")
+  return(name)
 }
 
 .createModelFileName <- function(folder, exposureId, outcomeId) {

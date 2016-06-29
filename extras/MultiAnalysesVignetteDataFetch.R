@@ -20,7 +20,6 @@
 library(SqlRender)
 library(DatabaseConnector)
 library(CaseControl)
-setwd("s:/temp")
 options(fftempdir = "s:/fftemp")
 
 pw <- NULL
@@ -107,15 +106,20 @@ selectControlsArgs1 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 matchOnProvider = FALSE,
                                                 matchOnVisitDate = FALSE)
 
+getDbExposureDataArgs1 <- createGetDbExposureDataArgs()
+
 createCaseControlDataArgs1 <- createCreateCaseControlDataArgs(firstExposureOnly = FALSE,
-                                                              riskWindowStart = -30,
+                                                              riskWindowStart = 0,
                                                               riskWindowEnd = 0)
+fitCaseControlModelArgs1 <- createFitCaseControlModelArgs()
 
 ccAnalysis1 <- createCcAnalysis(analysisId = 1,
                                 description = "Matching on age and gender",
                                 getDbCaseDataArgs = getDbCaseDataArgs1,
                                 selectControlsArgs = selectControlsArgs1,
-                                createCaseControlDataArgs = createCaseControlDataArgs1)
+                                getDbExposureDataArgs = getDbExposureDataArgs1,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs1)
 
 getDbCaseDataArgs2 <- createGetDbCaseDataArgs(useNestingCohort = TRUE,
                                               getVisits = TRUE)
@@ -124,7 +128,27 @@ ccAnalysis2 <- createCcAnalysis(analysisId = 2,
                                 description = "Matching on age and gender, nesting in indication",
                                 getDbCaseDataArgs = getDbCaseDataArgs2,
                                 selectControlsArgs = selectControlsArgs1,
-                                createCaseControlDataArgs = createCaseControlDataArgs1)
+                                getDbExposureDataArgs = getDbExposureDataArgs1,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs1)
+
+covariateSettings <- createCovariateSettings(useCovariateRiskScores = TRUE,
+                                             useCovariateRiskScoresCharlson = TRUE,
+                                             useCovariateRiskScoresDCSI = TRUE,
+                                             useCovariateRiskScoresCHADS2 = TRUE)
+
+getDbExposureDataArgs2 <- createGetDbExposureDataArgs(covariateSettings = covariateSettings)
+
+fitCaseControlModelArgs2 <- createFitCaseControlModelArgs(useCovariates = TRUE,
+                                                          prior = createPrior("none"))
+
+ccAnalysis3 <- createCcAnalysis(analysisId = 3,
+                                description = "Matching on age and gender, nesting in indication, using covars",
+                                getDbCaseDataArgs = getDbCaseDataArgs2,
+                                selectControlsArgs = selectControlsArgs1,
+                                getDbExposureDataArgs = getDbExposureDataArgs2,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs2)
 
 selectControlsArgs2 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 washoutPeriod = 180,
@@ -136,15 +160,15 @@ selectControlsArgs2 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 matchOnVisitDate = TRUE,
                                                 visitDateCaliper = 30)
 
-ccAnalysis3 <- createCcAnalysis(analysisId = 3,
-                                description = "Matching on age and gender, nesting in indication, match on visit",
+ccAnalysis4 <- createCcAnalysis(analysisId = 4,
+                                description = "Matching on age, gender and visit, nesting in indication, using covars",
                                 getDbCaseDataArgs = getDbCaseDataArgs2,
                                 selectControlsArgs = selectControlsArgs2,
-                                createCaseControlDataArgs = createCaseControlDataArgs1)
+                                getDbExposureDataArgs = getDbExposureDataArgs2,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs2)
 
-
-ccAnalysisList <- list(ccAnalysis1, ccAnalysis2, ccAnalysis3)
-ccAnalysisList <- list(ccAnalysis2, ccAnalysis3)
+ccAnalysisList <- list(ccAnalysis1, ccAnalysis2, ccAnalysis3, ccAnalysis4)
 
 saveExposureOutcomeNestingCohortList(exposureOutcomeNcList, "s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt")
 saveCcAnalysisList(ccAnalysisList, "s:/temp/vignetteCaseControl2/ccAnalysisList.txt")
@@ -153,9 +177,9 @@ saveCcAnalysisList(ccAnalysisList, "s:/temp/vignetteCaseControl2/ccAnalysisList.
 # ccAnalysisList <- loadCcAnalysisList("s:/temp/vignetteCaseControl2/ccAnalysisList.txt")
 
 outcomeDatabaseSchema = cohortDatabaseSchema
-outcomeTable = outcomeTable
+outcomeTable = cohortTable
 nestingCohortDatabaseSchema = cohortDatabaseSchema
-nestingCohortTable = outcomeTable
+nestingCohortTable = cohortTable
 exposureDatabaseSchema = cdmDatabaseSchema
 exposureTable = "drug_era"
 getDbCaseDataThreads = 1
@@ -163,6 +187,7 @@ selectControlsThreads = 1
 getDbExposureDataThreads = 1
 createCaseControlDataThreads = 1
 fitCaseControlModelThreads = 1
+exposureOutcomeNestingCohortList <- exposureOutcomeNcList
 
 result <- runCcAnalyses(connectionDetails = connectionDetails,
                         cdmDatabaseSchema = cdmDatabaseSchema,
@@ -179,11 +204,15 @@ result <- runCcAnalyses(connectionDetails = connectionDetails,
                         getDbCaseDataThreads = 1,
                         selectControlsThreads = 4,
                         getDbExposureDataThreads = 3,
-                        createCaseControlDataThreads = 3,
-                        fitCaseControlModelThreads = 5)
+                        createCaseControlDataThreads = 4,
+                        fitCaseControlModelThreads = 4,
+                        cvThreads = 10)
 
 # result <- readRDS('s:/temp/sccsVignette2/outcomeModelReference.rds')
 
 analysisSum <- summarizeCcAnalyses(result)
 saveRDS(analysisSum, "s:/temp/sccsVignette2/analysisSummary.rds")
 
+x <- readRDS(result$modelFile[1])
+summary(x)
+max(x$exposed)

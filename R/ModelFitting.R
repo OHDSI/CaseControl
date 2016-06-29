@@ -55,61 +55,64 @@ fitCaseControlModel <- function(caseControlData,
   treatmentEstimate <- NULL
   fit <- NULL
   status <- "NO MODEL FITTED"
-
-  if (useCovariates) {
-    treatmentVarId <- ffbase::max.ff(caseControlsExposure$covariates$covariateId) + 1
-    prior$exclude <- treatmentVarId  # Exclude treatment variable from regularization
-
-    treatmentCovariate <- ff::ffdf(rowId = ff::as.ff(as.numeric(caseControlData$rowId)),
-                                   covariateId = ff::ff(treatmentVarId, length = nrow(caseControlData), vmode = "double"),
-                                   covariateValue = ff::as.ff(caseControlData$exposed, vmode = "double"))
-    covariates <- ffbase::ffdfappend(treatmentCovariate, caseControlsExposure$covariates)
-    if (length(includeCovariateIds) != 0) {
-      includeCovariateIds <- c(includeCovariateIds, treatmentVarId)
-      idx <- !is.na(ffbase::ffmatch(covariates$covariateId, ff::as.ff(includeCovariateIds)))
-      covariates <- covariates[ffbase::ffwhich(idx, idx == TRUE), ]
-    }
-    if (length(excludeCovariateIds) != 0) {
-      idx <- is.na(ffbase::ffmatch(covariates$covariateId, ff::as.ff(excludeCovariateIds)))
-      covariates <- covariates[ffbase::ffwhich(idx, idx == TRUE), ]
-    }
-    outcomes <- caseControlData[, c("rowId", "stratumId", "isCase")]
-    colnames(outcomes)[colnames(outcomes) == "isCase"] <- "y"
-    covariates <- ffbase::merge.ffdf(covariates, ff::as.ffdf(outcomes[, c("rowId","stratumId")]))
-    cyclopsData <- Cyclops::convertToCyclopsData(ff::as.ffdf(outcomes), covariates, modelType = "clr", addIntercept = FALSE)
+  if (max(caseControlData$exposed) == 0) {
+    status <- "NO EXPOSED SUBJECTS"
   } else {
-    prior <- createPrior("none")  # Only one variable, which we're not going to regularize, so effectively no prior
-    treatmentVarId <- "exposed"
-    cyclopsData <- Cyclops::createCyclopsData(isCase ~ exposed + strata(stratumId), data = caseControlData, modelType = "clr")
-  }
-  fit <- tryCatch({
-    Cyclops::fitCyclopsModel(cyclopsData, prior = prior, control = control)
-  }, error = function(e) {
-    e$message
-  })
-  if (is.character(fit)) {
-    status <- fit
-  } else if (fit$return_flag == "ILLCONDITIONED") {
-    status <- "ILL CONDITIONED, CANNOT FIT"
-  } else if (fit$return_flag == "MAX_ITERATIONS") {
-    status <- "REACHED MAXIMUM NUMBER OF ITERATIONS, CANNOT FIT"
-  } else {
-    status <- "OK"
-    coefficients <- coef(fit)
-    logRr <- coefficients[names(coefficients) == treatmentVarId]
-    ci <- tryCatch({
-      confint(fit, parm = treatmentVarId, includePenalty = TRUE)
+    if (useCovariates) {
+      treatmentVarId <- ffbase::max.ff(caseControlsExposure$covariates$covariateId) + 1
+      prior$exclude <- treatmentVarId  # Exclude treatment variable from regularization
+
+      treatmentCovariate <- ff::ffdf(rowId = ff::as.ff(as.numeric(caseControlData$rowId)),
+                                     covariateId = ff::ff(treatmentVarId, length = nrow(caseControlData), vmode = "double"),
+                                     covariateValue = ff::as.ff(caseControlData$exposed, vmode = "double"))
+      covariates <- ffbase::ffdfappend(treatmentCovariate, caseControlsExposure$covariates)
+      if (length(includeCovariateIds) != 0) {
+        includeCovariateIds <- c(includeCovariateIds, treatmentVarId)
+        idx <- !is.na(ffbase::ffmatch(covariates$covariateId, ff::as.ff(includeCovariateIds)))
+        covariates <- covariates[ffbase::ffwhich(idx, idx == TRUE), ]
+      }
+      if (length(excludeCovariateIds) != 0) {
+        idx <- is.na(ffbase::ffmatch(covariates$covariateId, ff::as.ff(excludeCovariateIds)))
+        covariates <- covariates[ffbase::ffwhich(idx, idx == TRUE), ]
+      }
+      outcomes <- caseControlData[, c("rowId", "stratumId", "isCase")]
+      colnames(outcomes)[colnames(outcomes) == "isCase"] <- "y"
+      covariates <- ffbase::merge.ffdf(covariates, ff::as.ffdf(outcomes[, c("rowId","stratumId")]))
+      cyclopsData <- Cyclops::convertToCyclopsData(ff::as.ffdf(outcomes), covariates, modelType = "clr", addIntercept = FALSE)
+    } else {
+      prior <- createPrior("none")  # Only one variable, which we're not going to regularize, so effectively no prior
+      treatmentVarId <- "exposed"
+      cyclopsData <- Cyclops::createCyclopsData(isCase ~ exposed + strata(stratumId), data = caseControlData, modelType = "clr")
+    }
+    fit <- tryCatch({
+      Cyclops::fitCyclopsModel(cyclopsData, prior = prior, control = control)
     }, error = function(e) {
-      missing(e)  # suppresses R CMD check note
-      c(0, -Inf, Inf)
+      e$message
     })
-    if (identical(ci, c(0, -Inf, Inf)))
-      status <- "ERROR COMPUTING CI"
-    seLogRr <- (ci[3] - ci[2])/(2*qnorm(0.975))
-    treatmentEstimate <- data.frame(logRr = logRr,
-                                    logLb95 = ci[2],
-                                    logUb95 = ci[3],
-                                    seLogRr = seLogRr)
+    if (is.character(fit)) {
+      status <- fit
+    } else if (fit$return_flag == "ILLCONDITIONED") {
+      status <- "ILL CONDITIONED, CANNOT FIT"
+    } else if (fit$return_flag == "MAX_ITERATIONS") {
+      status <- "REACHED MAXIMUM NUMBER OF ITERATIONS, CANNOT FIT"
+    } else {
+      status <- "OK"
+      coefficients <- coef(fit)
+      logRr <- coefficients[names(coefficients) == treatmentVarId]
+      ci <- tryCatch({
+        confint(fit, parm = treatmentVarId, includePenalty = TRUE)
+      }, error = function(e) {
+        missing(e)  # suppresses R CMD check note
+        c(0, -Inf, Inf)
+      })
+      if (identical(ci, c(0, -Inf, Inf)))
+        status <- "ERROR COMPUTING CI"
+      seLogRr <- (ci[3] - ci[2])/(2*qnorm(0.975))
+      treatmentEstimate <- data.frame(logRr = logRr,
+                                      logLb95 = ci[2],
+                                      logUb95 = ci[3],
+                                      seLogRr = seLogRr)
+    }
   }
   outcomeModel <- list()
   outcomeModel$outcomeModelTreatmentEstimate <- treatmentEstimate
