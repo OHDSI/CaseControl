@@ -365,7 +365,7 @@ Considerable work has been dedicated to provide the `CaseControl` package.
 citation("CaseControl")
 ```
 
-Furthermore, `CaseControl` makes use of the `Cyclops` package.
+Furthermore, `CaseControl` makes extensive use of the `Cyclops` package.
 
 ```{r tidy=TRUE,eval=TRUE}
 citation("Cyclops")
