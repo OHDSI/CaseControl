@@ -8,31 +8,29 @@ createCaseControlData(caseControlsExposure, exposureId,
   firstExposureOnly = FALSE, riskWindowStart = 0, riskWindowEnd = 0)
 }
 \arguments{
-\item{caseControlsExposure}{An object of type \code{caseControlsExposure} as created using the \code{\link{getDbExposureData}} function.}
+\item{caseControlsExposure}{An object of type \code{caseControlsExposure} as created using the
+\code{\link{getDbExposureData}} function.}
 
 \item{exposureId}{The identifier of the exposure.}
 
 \item{firstExposureOnly}{Should only the first exposure per subject be included?}
 
-\item{riskWindowStart}{The start of the risk window (in days) relative to the index date. This number should be non-positive.}
+\item{riskWindowStart}{The start of the risk window (in days) relative to the index date.
+This number should be non-positive.}
 
-\item{riskWindowEnd}{The end of the risk window (in days) relative to the index date. This number should be non-positive.}
+\item{riskWindowEnd}{The end of the risk window (in days) relative to the index date. This
+number should be non-positive.}
 }
 \value{
-A data frame with these columns:
-\describe{
-  \item{personId}{The person ID}
-  \item{indexDate}{The index date}
-  \item{isCase}{Is the person a case or a control?}
-  \item{stratumId}{The ID linking cases and controls in a matched set}
-  \item{exposed}{Was the subject exposed during the risk window?}
-}
+A data frame with these columns: \describe{ \item{personId}{The person ID} \item{indexDate}{The
+index date} \item{isCase}{Is the person a case or a control?} \item{stratumId}{The ID linking cases
+and controls in a matched set} \item{exposed}{Was the subject exposed during the risk window?} }
 }
 \description{
 Create case-control data
 }
 \details{
-For each case and control, assesses whether exposure takes place within the risk window. The output can be directly used in a
-conditional logistic regression.
+For each case and control, assesses whether exposure takes place within the risk window. The output
+can be directly used in a conditional logistic regression.
 }
 

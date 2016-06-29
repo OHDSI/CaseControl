@@ -7,10 +7,11 @@
 saveCaseControlsExposure(caseControlsExposure, folder)
 }
 \arguments{
-\item{caseControlsExposure}{An object of type \code{caseControlsExposure} as generated using \code{\link{getDbExposureData}}.}
+\item{caseControlsExposure}{An object of type \code{caseControlsExposure} as generated using
+\code{\link{getDbExposureData}}.}
 
-\item{folder}{The name of the folder where the data will be written. The folder should not yet
-exist.}
+\item{folder}{The name of the folder where the data will be written. The folder
+should not yet exist.}
 }
 \description{
 \code{saveCaseControlsExposure} saves an object of type caseControlsExposure to folder.

@@ -34,20 +34,21 @@ exposureDatabaseSchema is not used but assumed to be
 cdmSchema.  Requires read permissions to this database.}
 
 \item{exposureTable}{The tablename that contains the exposure cohorts.  If
-exposureTable <> drug_era, then expectation is exposureTable
-has format of COHORT table: cohort_definition_id, subject_id,
-cohort_start_date, cohort_end_date.}
+exposureTable <> drug_era, then expectation is
+exposureTable has format of COHORT table:
+cohort_definition_id, subject_id, cohort_start_date,
+cohort_end_date.}
 
 \item{outcomeDatabaseSchema}{The name of the database schema that is the location where
-the data used to define the outcome cohorts is available. If
-outcomeTable = CONDITION_ERA, outcomeDatabaseSchema is not
-used.  Requires read permissions to this database.}
+the data used to define the outcome cohorts is available.
+If outcomeTable = CONDITION_ERA, outcomeDatabaseSchema is
+not used.  Requires read permissions to this database.}
 
 \item{outcomeTable}{The tablename that contains the outcome cohorts.  If
 outcomeTable is not CONDITION_OCCURRENCE or CONDITION_ERA,
-then expectation is outcomeTable has format of COHORT table:
-COHORT_DEFINITION_ID, SUBJECT_ID, COHORT_START_DATE,
-COHORT_END_DATE.}
+then expectation is outcomeTable has format of COHORT
+table: COHORT_DEFINITION_ID, SUBJECT_ID,
+COHORT_START_DATE, COHORT_END_DATE.}
 
 \item{nestingCohortDatabaseSchema}{The name of the database schema that is the location where
 the nesting cohort is defined.}
@@ -60,42 +61,47 @@ should have the same structure as the cohort table.}
 \item{ccAnalysisList}{A list of objects of type \code{ccAnalysis} as created
 using the \code{\link{createCcAnalysis}} function.}
 
-\item{exposureOutcomeNestingCohortList}{A list of objects of type \code{exposureOutcomeNestingCohort} as created
-using the \code{\link{createExposureOutcomeNestingCohort}} function.}
+\item{exposureOutcomeNestingCohortList}{A list of objects of type
+\code{exposureOutcomeNestingCohort} as created using the
+\code{\link{createExposureOutcomeNestingCohort}} function.}
 
 \item{getDbCaseDataThreads}{The number of parallel threads to use for building the
 caseData objects.}
 
-\item{selectControlsThreads}{The number of parallel threads to use for selecting controls.}
+\item{selectControlsThreads}{The number of parallel threads to use for selecting
+controls.}
 
-\item{getDbExposureDataThreads}{The number of parallel threads to use for fetchign data on exposures for cases and controls.}
+\item{getDbExposureDataThreads}{The number of parallel threads to use for fetchign data on
+exposures for cases and controls.}
 
-\item{createCaseControlDataThreads}{The number of parallel threads to use for creating case and control data including exposure status indicators}
+\item{createCaseControlDataThreads}{The number of parallel threads to use for creating case
+and control data including exposure status indicators}
 
 \item{fitCaseControlModelThreads}{The number of parallel threads to use for fitting the
 models.}
 
-\item{cvThreads}{The number of parallel threads used for the cross-validation to determine the hyper-parameter when
+\item{cvThreads}{The number of parallel threads used for the
+cross-validation to determine the hyper-parameter when
 fitting the model.}
 }
 \value{
 A data frame with the following columns: \tabular{ll}{ \verb{analysisId} \tab The unique identifier
 for a set of analysis choices.\cr \verb{exposureId} \tab The ID of the target drug.\cr
 \verb{outcomeId} \tab The ID of the outcome.\cr \verb{ccDataFolder} \tab The folder where the
-ccData object is stored.\cr \verb{ccEraDataFolder} \tab The folder where the ccEraData object
-is stored.\cr \verb{ccModelFile} \tab The file where the fitted SCCS model is stored.\cr }
+ccData object is stored.\cr \verb{ccEraDataFolder} \tab The folder where the ccEraData object is
+stored.\cr \verb{ccModelFile} \tab The file where the fitted SCCS model is stored.\cr }
 }
 \description{
 Run a list of analyses
 }
 \details{
-Run a list of analyses for the exposure-outcome-nesting cohorts of interest. This function will run all
-specified analyses against all hypotheses of interest, meaning that the total number of outcome
-models is `length(ccAnalysisList) * length(exposureOutcomeNestingCohortList)` (if all analyses specify an
-outcome model should be fitted). When you provide several analyses it will determine whether any of
-the analyses have anything in common, and will take advantage of this fact. For example, if we
-specify several analyses that only differ in the way the outcome model is fitted, then this
-function will extract the data and fit the propensity model only once, and re-use this in all the
-analysis.
+Run a list of analyses for the exposure-outcome-nesting cohorts of interest. This function will run
+all specified analyses against all hypotheses of interest, meaning that the total number of outcome
+models is `length(ccAnalysisList) * length(exposureOutcomeNestingCohortList)` (if all analyses
+specify an outcome model should be fitted). When you provide several analyses it will determine
+whether any of the analyses have anything in common, and will take advantage of this fact. For
+example, if we specify several analyses that only differ in the way the outcome model is fitted,
+then this function will extract the data and fit the propensity model only once, and re-use this in
+all the analysis.
 }
 

@@ -27,6 +27,7 @@
 #' @import bit
 #' @import Cyclops
 #' @import DatabaseConnector
+#' @import FeatureExtraction
 #' @useDynLib CaseControl
 NULL
 

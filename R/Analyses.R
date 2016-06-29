@@ -21,28 +21,28 @@
 #' @details
 #' Create a set of analysis choices, to be used with the \code{\link{runCcAnalyses}} function.
 #'
-#' @param analysisId                      An integer that will be used later to refer to this specific
-#'                                        set of analysis choices.
-#' @param description                     A short description of the analysis.
-#' @param exposureType            If more than one exposure is provided for each exposureOutcomeNestingCohort, this
-#'                                field should be used to select the specific exposure to use in this
-#'                                analysis.
-#' @param outcomeType             If more than one outcome is provided for each exposureOutcomeNestingCohort, this
-#'                                field should be used to select the specific outcome to use in this
-#'                                analysis.
-#' @param nestingCohortType       If more than one nesting cohort is provided for each exposureOutcomeNestingCohort, this
-#'                                field should be used to select the specific nesting cohort to use in this
-#'                                analysis.
-#' @param getDbCaseDataArgs       An object representing the arguments to be used when calling
-#'                                        the \code{\link{createGetDbCaseDataArgs}} function.
-#' @param selectControlsArgs              An object representing the arguments to be used when calling
-#'                                        the \code{\link{createSelectControlsArgs}} function.
-#' @param getDbExposureDataArgs           An object representing the arguments to be used when calling
-#'                                        the \code{\link{createGetDbExposureDataArgs}} function.
-#' @param createCaseControlDataArgs       An object representing the arguments to be used when calling
-#'                                        the \code{\link{createCreateCaseControlDataArgs}} function.
-#' @param fitCaseControlModelArgs         An object representing the arguments to be used when calling
-#'                                        the \code{\link{createFitCaseControlModelArgs}} function.
+#' @param analysisId                  An integer that will be used later to refer to this specific set
+#'                                    of analysis choices.
+#' @param description                 A short description of the analysis.
+#' @param exposureType                If more than one exposure is provided for each
+#'                                    exposureOutcomeNestingCohort, this field should be used to select
+#'                                    the specific exposure to use in this analysis.
+#' @param outcomeType                 If more than one outcome is provided for each
+#'                                    exposureOutcomeNestingCohort, this field should be used to select
+#'                                    the specific outcome to use in this analysis.
+#' @param nestingCohortType           If more than one nesting cohort is provided for each
+#'                                    exposureOutcomeNestingCohort, this field should be used to select
+#'                                    the specific nesting cohort to use in this analysis.
+#' @param getDbCaseDataArgs           An object representing the arguments to be used when calling the
+#'                                    \code{\link{createGetDbCaseDataArgs}} function.
+#' @param selectControlsArgs          An object representing the arguments to be used when calling the
+#'                                    \code{\link{createSelectControlsArgs}} function.
+#' @param getDbExposureDataArgs       An object representing the arguments to be used when calling the
+#'                                    \code{\link{createGetDbExposureDataArgs}} function.
+#' @param createCaseControlDataArgs   An object representing the arguments to be used when calling the
+#'                                    \code{\link{createCreateCaseControlDataArgs}} function.
+#' @param fitCaseControlModelArgs     An object representing the arguments to be used when calling the
+#'                                    \code{\link{createFitCaseControlModelArgs}} function.
 #'
 #' @export
 createCcAnalysis <- function(analysisId = 1,
@@ -116,27 +116,27 @@ loadCcAnalysisList <- function(file) {
 #' @details
 #' Create a set of hypotheses of interest, to be used with the \code{\link{runCcAnalyses}} function.
 #'
-#' @param exposureId   A concept ID indentifying the target drug in the exposure table. If multiple
-#'                     strategies for picking the exposure will be tested in the analysis, a named list
-#'                     of numbers can be provided instead. In the analysis, the name of the number to
-#'                     be used can be specified using the #' \code{exposureType} parameter in the
-#'                     \code{\link{createCcAnalysis}} function.
-#' @param outcomeId    A concept ID indentifying the outcome in the outcome table. If multiple
-#'                     strategies for picking the outcome will be tested in the analysis, a named list
-#'                     of numbers can be provided instead. In the analysis, the name of the number to
-#'                     be used can be specified using the \code{outcomeType} parameter in the
-#'                     \code{\link{createCcAnalysis}} function.
-#' @param nestingCohortId    A concept ID indentifying the nesting cohort in the nesting cohort table. If multiple
-#'                     strategies for picking the nesting cohort will be tested in the analysis, a named list
-#'                     of numbers can be provided instead. In the analysis, the name of the number to
-#'                     be used can be specified using the \code{nestingCohortType} parameter in the
-#'                     \code{\link{createCcAnalysis}} function.
+#' @param exposureId        A concept ID indentifying the target drug in the exposure table. If
+#'                          multiple strategies for picking the exposure will be tested in the
+#'                          analysis, a named list of numbers can be provided instead. In the analysis,
+#'                          the name of the number to be used can be specified using the #'
+#'                          \code{exposureType} parameter in the \code{\link{createCcAnalysis}}
+#'                          function.
+#' @param outcomeId         A concept ID indentifying the outcome in the outcome table. If multiple
+#'                          strategies for picking the outcome will be tested in the analysis, a named
+#'                          list of numbers can be provided instead. In the analysis, the name of the
+#'                          number to be used can be specified using the \code{outcomeType} parameter
+#'                          in the \code{\link{createCcAnalysis}} function.
+#' @param nestingCohortId   A concept ID indentifying the nesting cohort in the nesting cohort table.
+#'                          If multiple strategies for picking the nesting cohort will be tested in the
+#'                          analysis, a named list of numbers can be provided instead. In the analysis,
+#'                          the name of the number to be used can be specified using the
+#'                          \code{nestingCohortType} parameter in the \code{\link{createCcAnalysis}}
+#'                          function.
 #'
 #'
 #' @export
-createExposureOutcomeNestingCohort <- function(exposureId,
-                                               outcomeId,
-                                               nestingCohortId = NULL) {
+createExposureOutcomeNestingCohort <- function(exposureId, outcomeId, nestingCohortId = NULL) {
   # First: get the default values:
   exposureOutcomeNestingCohort <- list()
   for (name in names(formals(createExposureOutcomeNestingCohort))) {
@@ -157,10 +157,12 @@ createExposureOutcomeNestingCohort <- function(exposureId,
 #' Save a list of drugComparatorOutcome to file
 #'
 #' @description
-#' Write a list of objects of type \code{exposureOutcomeNestingCohort} to file. The file is in JSON format.
+#' Write a list of objects of type \code{exposureOutcomeNestingCohort} to file. The file is in JSON
+#' format.
 #'
-#' @param exposureOutcomeNestingCohortList   The exposureOutcomeNestingCohort list to be written to file
-#' @param file                         The name of the file where the results will be written
+#' @param exposureOutcomeNestingCohortList   The exposureOutcomeNestingCohort list to be written to
+#'                                           file
+#' @param file                               The name of the file where the results will be written
 #'
 #' @export
 saveExposureOutcomeNestingCohortList <- function(exposureOutcomeNestingCohortList, file) {
@@ -175,7 +177,8 @@ saveExposureOutcomeNestingCohortList <- function(exposureOutcomeNestingCohortLis
 #' Load a list of exposureOutcomeNestingCohort from file
 #'
 #' @description
-#' Load a list of objects of type \code{exposureOutcomeNestingCohort} from file. The file is in JSON format.
+#' Load a list of objects of type \code{exposureOutcomeNestingCohort} from file. The file is in JSON
+#' format.
 #'
 #' @param file   The name of the file
 #'

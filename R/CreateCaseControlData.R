@@ -19,24 +19,22 @@
 #' Create case-control data
 #'
 #' @details
-#' For each case and control, assesses whether exposure takes place within the risk window. The output can be directly used in a
-#' conditional logistic regression.
+#' For each case and control, assesses whether exposure takes place within the risk window. The output
+#' can be directly used in a conditional logistic regression.
 #'
-#' @param caseControlsExposure   An object of type \code{caseControlsExposure} as created using the \code{\link{getDbExposureData}} function.
+#' @param caseControlsExposure   An object of type \code{caseControlsExposure} as created using the
+#'                               \code{\link{getDbExposureData}} function.
 #' @param exposureId             The identifier of the exposure.
 #' @param firstExposureOnly      Should only the first exposure per subject be included?
-#' @param riskWindowStart        The start of the risk window (in days) relative to the index date. This number should be non-positive.
-#' @param riskWindowEnd          The end of the risk window (in days) relative to the index date. This number should be non-positive.
+#' @param riskWindowStart        The start of the risk window (in days) relative to the index date.
+#'                               This number should be non-positive.
+#' @param riskWindowEnd          The end of the risk window (in days) relative to the index date. This
+#'                               number should be non-positive.
 #'
 #' @return
-#' A data frame with these columns:
-#' \describe{
-#'   \item{personId}{The person ID}
-#'   \item{indexDate}{The index date}
-#'   \item{isCase}{Is the person a case or a control?}
-#'   \item{stratumId}{The ID linking cases and controls in a matched set}
-#'   \item{exposed}{Was the subject exposed during the risk window?}
-#' }
+#' A data frame with these columns: \describe{ \item{personId}{The person ID} \item{indexDate}{The
+#' index date} \item{isCase}{Is the person a case or a control?} \item{stratumId}{The ID linking cases
+#' and controls in a matched set} \item{exposed}{Was the subject exposed during the risk window?} }
 #'
 #' @export
 createCaseControlData <- function(caseControlsExposure,
@@ -47,9 +45,9 @@ createCaseControlData <- function(caseControlsExposure,
   if (riskWindowStart > riskWindowEnd)
     stop("riskWindowStart cannot be after riskWindowEnd")
   if (riskWindowStart > 0)
-    stop ("Risk window cannot start after index date")
+    stop("Risk window cannot start after index date")
   if (riskWindowEnd > 0)
-    stop ("Risk window cannot end after index date")
+    stop("Risk window cannot end after index date")
 
   exposure <- caseControlsExposure$exposure[caseControlsExposure$exposure$exposureId == exposureId, ]
   if (firstExposureOnly) {

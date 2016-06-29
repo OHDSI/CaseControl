@@ -15,7 +15,8 @@ loadCaseControlsExposure(folder, readOnly = TRUE)
 An object of class \code{caseControlsExposure}.
 }
 \description{
-\code{loadCaseControlsExposure} loads an object of type caseControlsExposure from a folder in the file system.
+\code{loadCaseControlsExposure} loads an object of type caseControlsExposure from a folder in the
+file system.
 }
 \details{
 The data will be written to a set of files in the folder specified by the user.

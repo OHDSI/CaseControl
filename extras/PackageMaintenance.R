@@ -69,12 +69,10 @@ rCode <- OhdsiRTools::createArgFunction("getDbExposureData",
                                                         "cdmDatabaseSchema"),
                                         rCode = rCode)
 rCode <- OhdsiRTools::createArgFunction("createCaseControlData",
-                                        excludeArgs = c("caseControlsExposure",
-                                                        "exposureId"),
+                                        excludeArgs = c("caseControlsExposure", "exposureId"),
                                         rCode = rCode)
 rCode <- OhdsiRTools::createArgFunction("fitCaseControlModel",
-                                        excludeArgs = c("caseControlData",
-                                                        "caseControlsExposure"),
+                                        excludeArgs = c("caseControlData", "caseControlsExposure"),
                                         rCode = rCode)
 writeLines(rCode, "r/CreateArgFunctions.R")
 OhdsiRTools::formatRFile("r/CreateArgFunctions.R")

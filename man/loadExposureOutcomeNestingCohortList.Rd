@@ -13,6 +13,7 @@ loadExposureOutcomeNestingCohortList(file)
 A list of objects of type \code{drugComparatorOutcome}.
 }
 \description{
-Load a list of objects of type \code{exposureOutcomeNestingCohort} from file. The file is in JSON format.
+Load a list of objects of type \code{exposureOutcomeNestingCohort} from file. The file is in JSON
+format.
 }
 

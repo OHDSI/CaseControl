@@ -49,15 +49,15 @@ saveCaseControlsExposure(caseControlsExposure, "s:/temp/ccQnD/caseControlsExposu
 
 
 caseControlsExposure <- loadCaseControlsExposure("s:/temp/ccQnD/caseControlsExposureNoVisit")
-control = createControl(cvType = "auto",
-                        startingVariance = 0.01,
-                        tolerance  = 2e-07,
-                        cvRepetitions = 10,
-                        selectorType = "byPid",
-                        noiseLevel = "quiet",
-                        threads = 20)
+control <- createControl(cvType = "auto",
+                         startingVariance = 0.01,
+                         tolerance = 2e-07,
+                         cvRepetitions = 10,
+                         selectorType = "byPid",
+                         noiseLevel = "quiet",
+                         threads = 20)
 for (exposureId in c(diclofenac, negativeControls)) {
-  writeLines(paste("Exposure:",exposureId))
+  writeLines(paste("Exposure:", exposureId))
   fileName <- paste0("s:/temp/ccQnD/NoVisit/model_e", exposureId, ".rds")
   if (!file.exists(fileName) && exposureId != 735340 && exposureId != 1584910) {
     caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExposure,
@@ -74,7 +74,7 @@ for (exposureId in c(diclofenac, negativeControls)) {
 }
 
 for (exposureId in c(diclofenac, negativeControls)) {
-  writeLines(paste("Exposure:",exposureId))
+  writeLines(paste("Exposure:", exposureId))
   fileName <- paste0("s:/temp/ccQnD/noCovars/model_e", exposureId, ".rds")
   if (!file.exists(fileName)) {
     caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExposure,
@@ -82,8 +82,7 @@ for (exposureId in c(diclofenac, negativeControls)) {
                                              firstExposureOnly = FALSE,
                                              riskWindowStart = -30,
                                              riskWindowEnd = 0)
-    model <- fitCaseControlModel(caseControlData,
-                                 useCovariates = FALSE)
+    model <- fitCaseControlModel(caseControlData, useCovariates = FALSE)
     saveRDS(model, fileName)
   }
 }
@@ -102,7 +101,7 @@ for (i in 1:nrow(results)) {
 
 results <- data.frame(exposureId = c(diclofenac, negativeControls), logRr = NA, seLogRr = NA)
 for (i in 1:nrow(results)) {
-  if (file.exists(paste0("s:/temp/ccQnD/NoVisit/model_e", results$exposureId[i], ".rds"))){
+  if (file.exists(paste0("s:/temp/ccQnD/NoVisit/model_e", results$exposureId[i], ".rds"))) {
     model <- readRDS(paste0("s:/temp/ccQnD/NoVisit/model_e", results$exposureId[i], ".rds"))
     if (!is.null(model$outcomeModelTreatmentEstimat)) {
       results$logRr[i] <- model$outcomeModelTreatmentEstimate$logRr
@@ -115,7 +114,7 @@ library(EmpiricalCalibration)
 
 
 negCons <- results[results$exposureId != 1124300, ]
-ei <-  results[results$exposureId == 1124300, ]
+ei <- results[results$exposureId == 1124300, ]
 null <- fitNull(negCons$logRr, negCons$seLogRr)
 plotCalibrationEffect(logRrNegatives = negCons$logRr,
                       seLogRrNegatives = negCons$seLogRr,
@@ -129,17 +128,17 @@ plotCalibrationEffect(logRrNegatives = negCons$logRr,
 
 setwd("s:/temp")
 options(fftempdir = "s:/fftemp")
-outcomeId = 1
-firstOutcomeOnly = TRUE
-washoutPeriod = 180
-controlsPerCase = 2
-matchOnAge = TRUE
-ageCaliper = 2
-matchOnGender = TRUE
-matchOnProvider = FALSE
-matchOnVisitDate = TRUE
-visitDateCaliper = 30
-removedUnmatchedCases = TRUE
+outcomeId <- 1
+firstOutcomeOnly <- TRUE
+washoutPeriod <- 180
+controlsPerCase <- 2
+matchOnAge <- TRUE
+ageCaliper <- 2
+matchOnGender <- TRUE
+matchOnProvider <- FALSE
+matchOnVisitDate <- TRUE
+visitDateCaliper <- 30
+removedUnmatchedCases <- TRUE
 caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
 
 library(CaseControl)
@@ -191,7 +190,7 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
                           useNestingCohort = F,
                           nestingCohortDatabaseSchema = cohortDatabaseSchema,
                           nestingCohortTable = cohortTable,
-                          #nestingCohortId = 2,
+                          nestingCohortId = 2,
                           useObservationEndAsNestingEndDate = TRUE,
                           getVisits = TRUE)
 

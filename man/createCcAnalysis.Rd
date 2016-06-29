@@ -10,37 +10,37 @@ createCcAnalysis(analysisId = 1, description = "", exposureType = NULL,
   fitCaseControlModelArgs)
 }
 \arguments{
-\item{analysisId}{An integer that will be used later to refer to this specific
-set of analysis choices.}
+\item{analysisId}{An integer that will be used later to refer to this specific set
+of analysis choices.}
 
 \item{description}{A short description of the analysis.}
 
-\item{exposureType}{If more than one exposure is provided for each exposureOutcomeNestingCohort, this
-field should be used to select the specific exposure to use in this
-analysis.}
+\item{exposureType}{If more than one exposure is provided for each
+exposureOutcomeNestingCohort, this field should be used to select
+the specific exposure to use in this analysis.}
 
-\item{outcomeType}{If more than one outcome is provided for each exposureOutcomeNestingCohort, this
-field should be used to select the specific outcome to use in this
-analysis.}
+\item{outcomeType}{If more than one outcome is provided for each
+exposureOutcomeNestingCohort, this field should be used to select
+the specific outcome to use in this analysis.}
 
-\item{nestingCohortType}{If more than one nesting cohort is provided for each exposureOutcomeNestingCohort, this
-field should be used to select the specific nesting cohort to use in this
-analysis.}
+\item{nestingCohortType}{If more than one nesting cohort is provided for each
+exposureOutcomeNestingCohort, this field should be used to select
+the specific nesting cohort to use in this analysis.}
 
-\item{getDbCaseDataArgs}{An object representing the arguments to be used when calling
-the \code{\link{createGetDbCaseDataArgs}} function.}
+\item{getDbCaseDataArgs}{An object representing the arguments to be used when calling the
+\code{\link{createGetDbCaseDataArgs}} function.}
 
-\item{selectControlsArgs}{An object representing the arguments to be used when calling
-the \code{\link{createSelectControlsArgs}} function.}
+\item{selectControlsArgs}{An object representing the arguments to be used when calling the
+\code{\link{createSelectControlsArgs}} function.}
 
-\item{getDbExposureDataArgs}{An object representing the arguments to be used when calling
-the \code{\link{createGetDbExposureDataArgs}} function.}
+\item{getDbExposureDataArgs}{An object representing the arguments to be used when calling the
+\code{\link{createGetDbExposureDataArgs}} function.}
 
-\item{createCaseControlDataArgs}{An object representing the arguments to be used when calling
-the \code{\link{createCreateCaseControlDataArgs}} function.}
+\item{createCaseControlDataArgs}{An object representing the arguments to be used when calling the
+\code{\link{createCreateCaseControlDataArgs}} function.}
 
-\item{fitCaseControlModelArgs}{An object representing the arguments to be used when calling
-the \code{\link{createFitCaseControlModelArgs}} function.}
+\item{fitCaseControlModelArgs}{An object representing the arguments to be used when calling the
+\code{\link{createFitCaseControlModelArgs}} function.}
 }
 \description{
 Create a case-control analysis specification

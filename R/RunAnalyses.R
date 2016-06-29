@@ -19,66 +19,72 @@
 #' Run a list of analyses
 #'
 #' @details
-#' Run a list of analyses for the exposure-outcome-nesting cohorts of interest. This function will run all
-#' specified analyses against all hypotheses of interest, meaning that the total number of outcome
-#' models is `length(ccAnalysisList) * length(exposureOutcomeNestingCohortList)` (if all analyses specify an
-#' outcome model should be fitted). When you provide several analyses it will determine whether any of
-#' the analyses have anything in common, and will take advantage of this fact. For example, if we
-#' specify several analyses that only differ in the way the outcome model is fitted, then this
-#' function will extract the data and fit the propensity model only once, and re-use this in all the
-#' analysis.
+#' Run a list of analyses for the exposure-outcome-nesting cohorts of interest. This function will run
+#' all specified analyses against all hypotheses of interest, meaning that the total number of outcome
+#' models is `length(ccAnalysisList) * length(exposureOutcomeNestingCohortList)` (if all analyses
+#' specify an outcome model should be fitted). When you provide several analyses it will determine
+#' whether any of the analyses have anything in common, and will take advantage of this fact. For
+#' example, if we specify several analyses that only differ in the way the outcome model is fitted,
+#' then this function will extract the data and fit the propensity model only once, and re-use this in
+#' all the analysis.
 #'
-#' @param connectionDetails                An R object of type \code{ConnectionDetails} created using
-#'                                         the function \code{createConnectionDetails} in the
-#'                                         \code{DatabaseConnector} package.
-#' @param cdmDatabaseSchema                The name of the database schema that contains the OMOP CDM
-#'                                         instance.  Requires read permissions to this database. On
-#'                                         SQL Server, this should specifiy both the database and the
-#'                                         schema, so for example 'cdm_instance.dbo'.
-#' @param oracleTempSchema                 A schema where temp tables can be created in Oracle.
-#' @param outcomeDatabaseSchema           The name of the database schema that is the location where
-#'                                        the data used to define the outcome cohorts is available. If
-#'                                        outcomeTable = CONDITION_ERA, outcomeDatabaseSchema is not
-#'                                        used.  Requires read permissions to this database.
-#' @param outcomeTable                    The tablename that contains the outcome cohorts.  If
-#'                                        outcomeTable is not CONDITION_OCCURRENCE or CONDITION_ERA,
-#'                                        then expectation is outcomeTable has format of COHORT table:
-#'                                        COHORT_DEFINITION_ID, SUBJECT_ID, COHORT_START_DATE,
-#'                                        COHORT_END_DATE.
-#' @param exposureDatabaseSchema          The name of the database schema that is the location where
-#'                                        the exposure data used to define the exposure cohorts is
-#'                                        available. If exposureTable = DRUG_ERA,
-#'                                        exposureDatabaseSchema is not used but assumed to be
-#'                                        cdmSchema.  Requires read permissions to this database.
-#' @param exposureTable                   The tablename that contains the exposure cohorts.  If
-#'                                        exposureTable <> drug_era, then expectation is exposureTable
-#'                                        has format of COHORT table: cohort_definition_id, subject_id,
-#'                                        cohort_start_date, cohort_end_date.
-#' @param nestingCohortDatabaseSchema     The name of the database schema that is the location where
-#'                                        the nesting cohort is defined.
-#' @param nestingCohortTable              Name of the table holding the nesting cohort. This table
-#'                                        should have the same structure as the cohort table.
-#' @param ccAnalysisList                 A list of objects of type \code{ccAnalysis} as created
-#'                                         using the \code{\link{createCcAnalysis}} function.
-#' @param exposureOutcomeNestingCohortList              A list of objects of type \code{exposureOutcomeNestingCohort} as created
-#'                                         using the \code{\link{createExposureOutcomeNestingCohort}} function.
-#' @param outputFolder                     Name of the folder where all the outputs will written to.
-#' @param getDbCaseDataThreads             The number of parallel threads to use for building the
-#'                                         caseData objects.
-#' @param selectControlsThreads         The number of parallel threads to use for selecting controls.
-#' @param getDbExposureDataThreads              The number of parallel threads to use for fetchign data on exposures for cases and controls.
-#' @param createCaseControlDataThreads              The number of parallel threads to use for creating case and control data including exposure status indicators
-#' @param fitCaseControlModelThreads              The number of parallel threads to use for fitting the
-#'                                         models.
-#' @param cvThreads                The number of parallel threads used for the cross-validation to determine the hyper-parameter when
-#'                                 fitting the model.
+#' @param connectionDetails                  An R object of type \code{ConnectionDetails} created using
+#'                                           the function \code{createConnectionDetails} in the
+#'                                           \code{DatabaseConnector} package.
+#' @param cdmDatabaseSchema                  The name of the database schema that contains the OMOP CDM
+#'                                           instance.  Requires read permissions to this database. On
+#'                                           SQL Server, this should specifiy both the database and the
+#'                                           schema, so for example 'cdm_instance.dbo'.
+#' @param oracleTempSchema                   A schema where temp tables can be created in Oracle.
+#' @param outcomeDatabaseSchema              The name of the database schema that is the location where
+#'                                           the data used to define the outcome cohorts is available.
+#'                                           If outcomeTable = CONDITION_ERA, outcomeDatabaseSchema is
+#'                                           not used.  Requires read permissions to this database.
+#' @param outcomeTable                       The tablename that contains the outcome cohorts.  If
+#'                                           outcomeTable is not CONDITION_OCCURRENCE or CONDITION_ERA,
+#'                                           then expectation is outcomeTable has format of COHORT
+#'                                           table: COHORT_DEFINITION_ID, SUBJECT_ID,
+#'                                           COHORT_START_DATE, COHORT_END_DATE.
+#' @param exposureDatabaseSchema             The name of the database schema that is the location where
+#'                                           the exposure data used to define the exposure cohorts is
+#'                                           available. If exposureTable = DRUG_ERA,
+#'                                           exposureDatabaseSchema is not used but assumed to be
+#'                                           cdmSchema.  Requires read permissions to this database.
+#' @param exposureTable                      The tablename that contains the exposure cohorts.  If
+#'                                           exposureTable <> drug_era, then expectation is
+#'                                           exposureTable has format of COHORT table:
+#'                                           cohort_definition_id, subject_id, cohort_start_date,
+#'                                           cohort_end_date.
+#' @param nestingCohortDatabaseSchema        The name of the database schema that is the location where
+#'                                           the nesting cohort is defined.
+#' @param nestingCohortTable                 Name of the table holding the nesting cohort. This table
+#'                                           should have the same structure as the cohort table.
+#' @param ccAnalysisList                     A list of objects of type \code{ccAnalysis} as created
+#'                                           using the \code{\link{createCcAnalysis}} function.
+#' @param exposureOutcomeNestingCohortList   A list of objects of type
+#'                                           \code{exposureOutcomeNestingCohort} as created using the
+#'                                           \code{\link{createExposureOutcomeNestingCohort}} function.
+#' @param outputFolder                       Name of the folder where all the outputs will written to.
+#' @param getDbCaseDataThreads               The number of parallel threads to use for building the
+#'                                           caseData objects.
+#' @param selectControlsThreads              The number of parallel threads to use for selecting
+#'                                           controls.
+#' @param getDbExposureDataThreads           The number of parallel threads to use for fetchign data on
+#'                                           exposures for cases and controls.
+#' @param createCaseControlDataThreads       The number of parallel threads to use for creating case
+#'                                           and control data including exposure status indicators
+#' @param fitCaseControlModelThreads         The number of parallel threads to use for fitting the
+#'                                           models.
+#' @param cvThreads                          The number of parallel threads used for the
+#'                                           cross-validation to determine the hyper-parameter when
+#'                                           fitting the model.
 #'
 #' @return
 #' A data frame with the following columns: \tabular{ll}{ \verb{analysisId} \tab The unique identifier
 #' for a set of analysis choices.\cr \verb{exposureId} \tab The ID of the target drug.\cr
 #' \verb{outcomeId} \tab The ID of the outcome.\cr \verb{ccDataFolder} \tab The folder where the
-#' ccData object is stored.\cr \verb{ccEraDataFolder} \tab The folder where the ccEraData object
-#' is stored.\cr \verb{ccModelFile} \tab The file where the fitted SCCS model is stored.\cr }
+#' ccData object is stored.\cr \verb{ccEraDataFolder} \tab The folder where the ccEraData object is
+#' stored.\cr \verb{ccModelFile} \tab The file where the fitted SCCS model is stored.\cr }
 #'
 #' @export
 runCcAnalyses <- function(connectionDetails,
@@ -99,11 +105,13 @@ runCcAnalyses <- function(connectionDetails,
                           createCaseControlDataThreads = 1,
                           fitCaseControlModelThreads = 1,
                           cvThreads = 1) {
-  for (exposureOutcomeNestingCohort in exposureOutcomeNestingCohortList)
-    stopifnot(class(exposureOutcomeNestingCohort) == "exposureOutcomeNestingCohort")
+  for (exposureOutcomeNestingCohort in exposureOutcomeNestingCohortList) stopifnot(class(exposureOutcomeNestingCohort) ==
+                                                                                     "exposureOutcomeNestingCohort")
   for (ccAnalysis in ccAnalysisList) stopifnot(class(ccAnalysis) == "ccAnalysis")
   uniqueExposureOutcomeNcList <- unique(OhdsiRTools::selectFromList(exposureOutcomeNestingCohortList,
-                                                                    c("exposureId", "outcomeId", "nestingCohortId")))
+                                                                    c("exposureId",
+                                                                      "outcomeId",
+                                                                      "nestingCohortId")))
   if (length(uniqueExposureOutcomeNcList) != length(exposureOutcomeNestingCohortList))
     stop("Duplicate exposure-outcome-nesting cohort combinations are not allowed")
   uniqueAnalysisIds <- unlist(unique(OhdsiRTools::selectFromList(ccAnalysisList, "analysisId")))
@@ -124,8 +132,13 @@ runCcAnalyses <- function(connectionDetails,
     for (exposureOutcomeNc in exposureOutcomeNestingCohortList) {
       exposureId <- .selectByType(ccAnalysis$exposureType, exposureOutcomeNc$exposureId, "exposure")
       outcomeId <- .selectByType(ccAnalysis$outcomeType, exposureOutcomeNc$outcomeId, "outcome")
-      nestingCohortId <- .selectByType(ccAnalysis$nestingCohortType, exposureOutcomeNc$nestingCohortId, "nestingCohort")
-      row <- data.frame(exposureId = exposureId, outcomeId = outcomeId, nestingCohortId = nestingCohortId, analysisId = analysisId)
+      nestingCohortId <- .selectByType(ccAnalysis$nestingCohortType,
+                                       exposureOutcomeNc$nestingCohortId,
+                                       "nestingCohort")
+      row <- data.frame(exposureId = exposureId,
+                        outcomeId = outcomeId,
+                        nestingCohortId = nestingCohortId,
+                        analysisId = analysisId)
       outcomeReference <- rbind(outcomeReference, row)
     }
   }
@@ -138,9 +151,11 @@ runCcAnalyses <- function(connectionDetails,
     analyses <- OhdsiRTools::matchInList(ccAnalysisList, getDbCaseDataArgs)
     analysesIds <- unlist(OhdsiRTools::selectFromList(analyses, "analysisId"))
     if (getDbCaseDataArgs$getDbCaseDataArgs$useNestingCohort) {
-      nestingCohortIds <- unique(outcomeReference$nestingCohortId[outcomeReference$analysisId %in% analysesIds])
+      nestingCohortIds <- unique(outcomeReference$nestingCohortId[outcomeReference$analysisId %in%
+                                                                    analysesIds])
       for (nestingCohortId in nestingCohortIds) {
-        idx <- outcomeReference$analysisId %in% analysesIds & outcomeReference$nestingCohortId == nestingCohortId
+        idx <- outcomeReference$analysisId %in% analysesIds & outcomeReference$nestingCohortId ==
+          nestingCohortId
         outcomeIds <- unique(outcomeReference$outcomeId[idx])
         cdDataFileName <- .createCaseDataFileName(outputFolder, d, nestingCohortId)
         outcomeReference$caseDataFolder[idx] <- cdDataFileName
@@ -191,7 +206,8 @@ runCcAnalyses <- function(connectionDetails,
     cdDataFileNames <- unique(outcomeReference$caseDataFolder[outcomeReference$analysisId %in% analysesIds])
     for (cdDataFileName in cdDataFileNames) {
       cdId <- gsub("^.*caseData_", "", cdDataFileName)
-      idx <- outcomeReference$analysisId %in% analysesIds & outcomeReference$caseDataFolder == cdDataFileName
+      idx <- outcomeReference$analysisId %in% analysesIds & outcomeReference$caseDataFolder ==
+        cdDataFileName
       outcomeIds <- unique(outcomeReference$outcomeId[idx])
       for (outcomeId in outcomeIds) {
         ccFilename <- .createCaseControlsFileName(outputFolder, cdId, i, outcomeId)
@@ -210,12 +226,16 @@ runCcAnalyses <- function(connectionDetails,
   edObjectsToCreate <- list()
   for (ccFilename in unique(outcomeReference$caseControlsFile)) {
     analysisIds <- unique(outcomeReference$analysisId[outcomeReference$caseControlsFile == ccFilename])
-    edArgsList <- unique(sapply(ccAnalysisList, function(x) if (x$analysisId %in% analysisIds) return(x$getDbExposureDataArgs)))
+    edArgsList <- unique(sapply(ccAnalysisList, function(x) if (x$analysisId %in% analysisIds)
+      return(x$getDbExposureDataArgs)))
     edArgsList <- edArgsList[!sapply(edArgsList, is.null)]
     for (ed in 1:length(edArgsList)) {
       edArgs <- edArgsList[[ed]]
-      analysisIds <- unlist(unique(OhdsiRTools::selectFromList(OhdsiRTools::matchInList(ccAnalysisList, list(getDbExposureDataArgs = edArgs)), "analysisId")))
-      idx <- outcomeReference$caseControlsFile == ccFilename & outcomeReference$analysisId %in% analysisIds
+      analysisIds <- unlist(unique(OhdsiRTools::selectFromList(OhdsiRTools::matchInList(ccAnalysisList,
+                                                                                        list(getDbExposureDataArgs = edArgs)),
+                                                               "analysisId")))
+      idx <- outcomeReference$caseControlsFile == ccFilename & outcomeReference$analysisId %in%
+        analysisIds
       exposureIds <- unique(outcomeReference$exposureId[idx])
       edFilename <- .createExposureDataFileName(ccFilename, ed)
       outcomeReference$exposureDataFile[idx] <- edFilename
@@ -237,12 +257,16 @@ runCcAnalyses <- function(connectionDetails,
   ccdObjectsToCreate <- list()
   for (edFilename in unique(outcomeReference$exposureDataFile)) {
     analysisIds <- unique(outcomeReference$analysisId[outcomeReference$exposureDataFile == edFilename])
-    ccdArgsList <- unique(sapply(ccAnalysisList, function(x) if (x$analysisId %in% analysisIds) return(x$createCaseControlDataArgs)))
+    ccdArgsList <- unique(sapply(ccAnalysisList, function(x) if (x$analysisId %in% analysisIds)
+      return(x$createCaseControlDataArgs)))
     ccdArgsList <- ccdArgsList[!sapply(ccdArgsList, is.null)]
     for (ccd in 1:length(ccdArgsList)) {
       ccdArgs <- ccdArgsList[[ccd]]
-      analysisIds <- unlist(unique(OhdsiRTools::selectFromList(OhdsiRTools::matchInList(ccAnalysisList, list(createCaseControlDataArgs = ccdArgs)), "analysisId")))
-      idx <- outcomeReference$exposureDataFile == edFilename & outcomeReference$analysisId %in% analysisIds
+      analysisIds <- unlist(unique(OhdsiRTools::selectFromList(OhdsiRTools::matchInList(ccAnalysisList,
+                                                                                        list(createCaseControlDataArgs = ccdArgs)),
+                                                               "analysisId")))
+      idx <- outcomeReference$exposureDataFile == edFilename & outcomeReference$analysisId %in%
+        analysisIds
       exposureIds <- unique(outcomeReference$exposureId[idx])
       for (exposureId in exposureIds) {
         ccdFilename <- .createCaseControlDataFileName(edFilename, exposureId, ccd)
@@ -441,7 +465,7 @@ summarizeCcAnalyses <- function(outcomeReference) {
   result$logRr <- 0
   result$seLogRr <- 0
   for (i in 1:nrow(outcomeReference)) {
-    if (outcomeReference$modelFile[i] != ""){
+    if (outcomeReference$modelFile[i] != "") {
       model <- readRDS(outcomeReference$modelFile[i])
       result$rr[i] <- if (is.null(coef(model)))
         NA else exp(coef(model))
@@ -452,7 +476,7 @@ summarizeCcAnalyses <- function(outcomeReference) {
       if (is.null(coef(model))) {
         result$p[i] <- NA
       } else {
-        z <- coef(model) / model$outcomeModelTreatmentEstimate$seLogRr
+        z <- coef(model)/model$outcomeModelTreatmentEstimate$seLogRr
         result$p[i] <- 2 * pmin(pnorm(z), 1 - pnorm(z))
       }
       result$cases[i] <- model$outcomeCounts$cases

@@ -11,13 +11,15 @@ selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
   removedUnmatchedCases = TRUE)
 }
 \arguments{
-\item{caseData}{An object of type \code{caseData} as generated using the \code{\link{getDbCaseData}} function.}
+\item{caseData}{An object of type \code{caseData} as generated using the
+\code{\link{getDbCaseData}} function.}
 
 \item{outcomeId}{The outcome ID of the cases for which we need to pick controls.}
 
 \item{firstOutcomeOnly}{Use the first outcome per person?}
 
-\item{washoutPeriod}{Minimum required numbers of days of observation for inclusion as either case or control.}
+\item{washoutPeriod}{Minimum required numbers of days of observation for inclusion as
+either case or control.}
 
 \item{controlsPerCase}{Maximum number of controls to select per case.}
 
@@ -29,26 +31,24 @@ selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
 
 \item{matchOnProvider}{Match on provider (as specified in the person table)?}
 
-\item{matchOnVisitDate}{Should the index date of the control be changed to the nearest visit date?}
+\item{matchOnVisitDate}{Should the index date of the control be changed to the nearest visit
+date?}
 
-\item{visitDateCaliper}{Maximum difference (in days) between the index date and the visit date when matching on visit date.}
+\item{visitDateCaliper}{Maximum difference (in days) between the index date and the visit
+date when matching on visit date.}
 
 \item{removedUnmatchedCases}{Should cases with no matched controls be removed?}
 }
 \value{
-A data frame with these columns:
-\describe{
-  \item{personId}{The person ID}
-  \item{indexDate}{The index date}
-  \item{isCase}{Is the person a case or a control?}
-  \item{stratumId}{The ID linking cases and controls in a matched set}
-}
+A data frame with these columns: \describe{ \item{personId}{The person ID} \item{indexDate}{The
+index date} \item{isCase}{Is the person a case or a control?} \item{stratumId}{The ID linking cases
+and controls in a matched set} }
 }
 \description{
 Select matched controls per case
 }
 \details{
-Select controls per case. Controls are matched on calendar time and the criteria defined in the arguments. Controls
-are randomly sampled to the required number.
+Select controls per case. Controls are matched on calendar time and the criteria defined in the
+arguments. Controls are randomly sampled to the required number.
 }
 

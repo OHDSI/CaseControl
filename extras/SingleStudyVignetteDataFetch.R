@@ -20,8 +20,8 @@
 library(SqlRender)
 library(DatabaseConnector)
 library(CaseControl)
-setwd('s:/temp')
-options('fftempdir' = 's:/fftemp')
+setwd("s:/temp")
+options(fftempdir = "s:/fftemp")
 
 pw <- NULL
 dbms <- "pdw"

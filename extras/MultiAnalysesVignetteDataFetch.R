@@ -94,8 +94,7 @@ for (exposureId in c(diclofenac, negativeControls)) {
   exposureOutcomeNcList[[length(exposureOutcomeNcList) + 1]] <- exposureOutcomeNc
 }
 
-getDbCaseDataArgs1 <- createGetDbCaseDataArgs(useNestingCohort = FALSE,
-                                             getVisits = FALSE)
+getDbCaseDataArgs1 <- createGetDbCaseDataArgs(useNestingCohort = FALSE, getVisits = FALSE)
 
 selectControlsArgs1 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 washoutPeriod = 180,
@@ -121,8 +120,7 @@ ccAnalysis1 <- createCcAnalysis(analysisId = 1,
                                 createCaseControlDataArgs = createCaseControlDataArgs1,
                                 fitCaseControlModelArgs = fitCaseControlModelArgs1)
 
-getDbCaseDataArgs2 <- createGetDbCaseDataArgs(useNestingCohort = TRUE,
-                                              getVisits = TRUE)
+getDbCaseDataArgs2 <- createGetDbCaseDataArgs(useNestingCohort = TRUE, getVisits = TRUE)
 
 ccAnalysis2 <- createCcAnalysis(analysisId = 2,
                                 description = "Matching on age and gender, nesting in indication",
@@ -170,23 +168,25 @@ ccAnalysis4 <- createCcAnalysis(analysisId = 4,
 
 ccAnalysisList <- list(ccAnalysis1, ccAnalysis2, ccAnalysis3, ccAnalysis4)
 
-saveExposureOutcomeNestingCohortList(exposureOutcomeNcList, "s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt")
+saveExposureOutcomeNestingCohortList(exposureOutcomeNcList,
+                                     "s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt")
 saveCcAnalysisList(ccAnalysisList, "s:/temp/vignetteCaseControl2/ccAnalysisList.txt")
 
-# exposureOutcomeNcList <- loadExposureOutcomeNestingCohortList("s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt")
-# ccAnalysisList <- loadCcAnalysisList("s:/temp/vignetteCaseControl2/ccAnalysisList.txt")
+# exposureOutcomeNcList <-
+# loadExposureOutcomeNestingCohortList('s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt')
+# ccAnalysisList <- loadCcAnalysisList('s:/temp/vignetteCaseControl2/ccAnalysisList.txt')
 
-outcomeDatabaseSchema = cohortDatabaseSchema
-outcomeTable = cohortTable
-nestingCohortDatabaseSchema = cohortDatabaseSchema
-nestingCohortTable = cohortTable
-exposureDatabaseSchema = cdmDatabaseSchema
-exposureTable = "drug_era"
-getDbCaseDataThreads = 1
-selectControlsThreads = 1
-getDbExposureDataThreads = 1
-createCaseControlDataThreads = 1
-fitCaseControlModelThreads = 1
+outcomeDatabaseSchema <- cohortDatabaseSchema
+outcomeTable <- cohortTable
+nestingCohortDatabaseSchema <- cohortDatabaseSchema
+nestingCohortTable <- cohortTable
+exposureDatabaseSchema <- cdmDatabaseSchema
+exposureTable <- "drug_era"
+getDbCaseDataThreads <- 1
+selectControlsThreads <- 1
+getDbExposureDataThreads <- 1
+createCaseControlDataThreads <- 1
+fitCaseControlModelThreads <- 1
 exposureOutcomeNestingCohortList <- exposureOutcomeNcList
 
 result <- runCcAnalyses(connectionDetails = connectionDetails,

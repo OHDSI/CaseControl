@@ -14,53 +14,55 @@ getDbCaseData(connectionDetails, cdmDatabaseSchema,
   studyStartDate = "", studyEndDate = "")
 }
 \arguments{
-\item{connectionDetails}{An R object of type \code{ConnectionDetails} created using
-the function \code{createConnectionDetails} in the
+\item{connectionDetails}{An R object of type \code{ConnectionDetails} created
+using the function \code{createConnectionDetails} in the
 \code{DatabaseConnector} package.}
 
-\item{cdmDatabaseSchema}{The name of the database schema that contains the OMOP CDM
-instance.  Requires read permissions to this database. On SQL
-Server, this should specifiy both the database and the
-schema, so for example 'cdm_instance.dbo'.}
+\item{cdmDatabaseSchema}{The name of the database schema that contains the OMOP
+CDM instance.  Requires read permissions to this
+database. On SQL Server, this should specifiy both the
+database and the schema, so for example
+'cdm_instance.dbo'.}
 
 \item{oracleTempSchema}{A schema where temp tables can be created in Oracle.}
 
-\item{outcomeDatabaseSchema}{The name of the database schema that is the location where
-the data used to define the outcome cohorts is available. If
-outcomeTable = CONDITION_ERA, outcomeDatabaseSchema is not
-used.  Requires read permissions to this database.}
+\item{outcomeDatabaseSchema}{The name of the database schema that is the location
+where the data used to define the outcome cohorts is
+available. If outcomeTable = CONDITION_ERA,
+outcomeDatabaseSchema is not used.  Requires read
+permissions to this database.}
 
 \item{outcomeTable}{The tablename that contains the outcome cohorts.  If
-outcomeTable is not CONDITION_OCCURRENCE or CONDITION_ERA,
-then expectation is outcomeTable has format of COHORT table:
-COHORT_DEFINITION_ID, SUBJECT_ID, COHORT_START_DATE,
-COHORT_END_DATE.}
+outcomeTable is not CONDITION_OCCURRENCE or
+CONDITION_ERA, then expectation is outcomeTable has
+format of COHORT table: COHORT_DEFINITION_ID, SUBJECT_ID,
+COHORT_START_DATE, COHORT_END_DATE.}
 
 \item{outcomeIds}{A list of ids used to define outcomes.  If outcomeTable =
 CONDITION_OCCURRENCE, the list is a set of ancestor
-CONCEPT_IDs, and all occurrences of all descendant concepts
-will be selected.  If outcomeTable <> CONDITION_OCCURRENCE,
-the list contains records found in COHORT_DEFINITION_ID
-field.}
+CONCEPT_IDs, and all occurrences of all descendant
+concepts will be selected.  If outcomeTable <>
+CONDITION_OCCURRENCE, the list contains records found in
+COHORT_DEFINITION_ID field.}
 
 \item{useNestingCohort}{Should the study be nested in a cohort (e.g. people with
-a specific indication)? If not, the study will be nested in
-the general population.}
+a specific indication)? If not, the study will be nested
+in the general population.}
 
-\item{nestingCohortDatabaseSchema}{The name of the database schema that is the location where
-the nesting cohort is defined.}
+\item{nestingCohortDatabaseSchema}{The name of the database schema that is the location
+where the nesting cohort is defined.}
 
 \item{nestingCohortTable}{Name of the table holding the nesting cohort. This table
 should have the same structure as the cohort table.}
 
-\item{nestingCohortId}{A cohort definition ID identifying the records in
-the nestingCohortTable to use as nesting cohort}
+\item{nestingCohortId}{A cohort definition ID identifying the records in the
+nestingCohortTable to use as nesting cohort}
 
-\item{useObservationEndAsNestingEndDate}{When using a nesting cohort, should the observation period end
-date be used instead of the cohort end date?}
+\item{useObservationEndAsNestingEndDate}{When using a nesting cohort, should the observation
+period end date be used instead of the cohort end date?}
 
-\item{getVisits}{Get data on visits? This is needed when matching on visit date is
-requested later on.}
+\item{getVisits}{Get data on visits? This is needed when matching on visit
+date is requested later on.}
 
 \item{studyStartDate}{A calendar date specifying the minimum date where data is
 used. Date format is 'yyyymmdd'.}
@@ -70,8 +72,8 @@ used. Date format is 'yyyymmdd'.}
 }
 \value{
 Returns an object of type \code{caseData}, containing information on the cases, the nesting cohort,
-and optionally visits. Information about multiple outcomes can be captured at
-once for efficiency reasons. The generic \code{summary()} function has been implemented for this object.
+and optionally visits. Information about multiple outcomes can be captured at once for efficiency
+reasons. The generic \code{summary()} function has been implemented for this object.
 }
 \description{
 Load all data about the cases and nesting cohort from the database.

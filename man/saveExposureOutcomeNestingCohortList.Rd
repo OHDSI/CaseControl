@@ -7,11 +7,13 @@
 saveExposureOutcomeNestingCohortList(exposureOutcomeNestingCohortList, file)
 }
 \arguments{
-\item{exposureOutcomeNestingCohortList}{The exposureOutcomeNestingCohort list to be written to file}
+\item{exposureOutcomeNestingCohortList}{The exposureOutcomeNestingCohort list to be written to
+file}
 
 \item{file}{The name of the file where the results will be written}
 }
 \description{
-Write a list of objects of type \code{exposureOutcomeNestingCohort} to file. The file is in JSON format.
+Write a list of objects of type \code{exposureOutcomeNestingCohort} to file. The file is in JSON
+format.
 }
 
