@@ -42,11 +42,12 @@ struct IndexDate {
 
 struct CaseData {
   CaseData() = default;
-  CaseData(const int& _genderConceptId, const int& _dateOfBirth, const int64_t& _providerId) : genderConceptId(_genderConceptId),
-  dateOfBirth(_dateOfBirth), providerId(_providerId), indexDates() {}
+  CaseData(const int& _genderConceptId, const int& _dateOfBirth, const int64_t& _providerId, const int& _startDate) : genderConceptId(_genderConceptId),
+  dateOfBirth(_dateOfBirth), providerId(_providerId), startDate(_startDate), indexDates() {}
   int genderConceptId;
   int dateOfBirth;
   int64_t providerId;
+  int startDate;
   std::vector<IndexDate> indexDates;
 };
 
@@ -71,7 +72,7 @@ class ControlSelector {
 public:
   ControlSelector(const List& _nestingCohorts, const List& _cases, const List& _visits, const bool _firstOutcomeOnly, const int _washoutPeriod,
                   const int _controlsPerCase, const bool _matchOnAge, const double _ageCaliper, const bool _matchOnGender, const bool _matchOnProvider,
-                  const bool _matchOnVisitDate, const int _visitDateCaliper);
+                  const bool _matchOnVisitDate, const int _visitDateCaliper, const bool _matchOnTimeInCohort, const int _daysInCohortCaliper);
   DataFrame selectControls();
 
 private:
@@ -91,6 +92,8 @@ private:
   bool matchOnProvider;
   bool matchOnVisitDate;
   int visitDateCaliper;
+  bool matchOnTimeInCohort;
+  int daysInCohortCaliper;
   std::mt19937 generator;
   std::uniform_int_distribution<int> *distribution;
   Result result;

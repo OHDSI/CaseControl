@@ -29,13 +29,13 @@ using namespace Rcpp;
 // [[Rcpp::export(".selectControls")]]
 DataFrame selectControls(const List& nestingCohorts, const List& cases, const List& visits, const bool firstOutcomeOnly, const int washoutPeriod,
                     const int controlsPerCase, const bool matchOnAge, const double ageCaliper, const bool matchOnGender, const bool matchOnProvider,
-                    const bool matchOnVisitDate, const int visitDateCaliper) {
+                    const bool matchOnVisitDate, const int visitDateCaliper, const bool matchOnTimeInCohort, const int daysInCohortCaliper) {
 
 	using namespace ohdsi::caseControl;
 
 	try {
 	  ControlSelector controlSelector(nestingCohorts, cases, visits, firstOutcomeOnly, washoutPeriod, controlsPerCase, matchOnAge, ageCaliper,
-                                   matchOnGender, matchOnProvider,matchOnVisitDate, visitDateCaliper);
+                                   matchOnGender, matchOnProvider,matchOnVisitDate, visitDateCaliper, matchOnTimeInCohort, daysInCohortCaliper);
 		return (controlSelector.selectControls());
 	} catch (std::exception &e) {
 		forward_exception_to_r(e);

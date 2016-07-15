@@ -46,7 +46,7 @@ test_that("Washout period for controls", {
   expect_equal(cc$personId, c(1, 2))
 
   # Both controls afterwashout period:
-  cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 0)
+  cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 0, matchOnTimeInCohort = FALSE)
   expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
 })
 
@@ -174,7 +174,7 @@ test_that("Match on visit", {
                        matchOnVisitDate = FALSE)
   expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
 
-  # One control with simlar provider:
+  # One control with matching visit date:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
@@ -182,4 +182,38 @@ test_that("Match on visit", {
                        visitDateCaliper = 30)
   expect_equal(cc$personId, c(1, 2))
   expect_equal(cc$indexDate, as.Date(c("2001-01-01", "2001-01-02")))
+})
+
+test_that("Match on time in cohort", {
+  caseData <- list(cases = data.frame(nestingCohortId = c(1),
+                                      outcomeId = c(1),
+                                      indexDate = as.Date(c("2001-01-01"))),
+                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+                                                           personId = c(1, 2, 3),
+                                                           observationPeriodStartDate = as.Date(c("1999-01-01", "1999-01-01", "2000-01-01")),
+                                                           startDate = as.Date(c("2000-01-01", "1999-01-01", "2000-01-01")),
+                                                           endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
+                                                           dateOfBirth = as.Date(c("2000-01-01", "1999-01-01", "2000-01-01")),
+                                                           genderConceptId = c(8532, 8532, 8532),
+                                                           providerId = c(1, 2, 1))),
+                   metaData = list(hasVisits = FALSE))
+
+  # Two control without matching on time in cohort:
+  cc <- selectControls(caseData = caseData,
+                       outcomeId = 1,
+                       washoutPeriod = 180,
+                       matchOnGender = FALSE,
+                       matchOnAge = FALSE,
+                       matchOnTimeInCohort = FALSE)
+  expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
+
+  # One control with simlar time in cohort:
+  cc <- selectControls(caseData = caseData,
+                       outcomeId = 1,
+                       washoutPeriod = 180,
+                       matchOnGender = FALSE,
+                       matchOnAge = FALSE,
+                       matchOnTimeInCohort = TRUE,
+                       daysInCohortCaliper = 30)
+  expect_equal(cc$personId, c(1, 3))
 })

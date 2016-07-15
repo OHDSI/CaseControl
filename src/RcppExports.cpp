@@ -6,8 +6,8 @@
 using namespace Rcpp;
 
 // selectControls
-DataFrame selectControls(const List& nestingCohorts, const List& cases, const List& visits, const bool firstOutcomeOnly, const int washoutPeriod, const int controlsPerCase, const bool matchOnAge, const double ageCaliper, const bool matchOnGender, const bool matchOnProvider, const bool matchOnVisitDate, const int visitDateCaliper);
-RcppExport SEXP CaseControl_selectControls(SEXP nestingCohortsSEXP, SEXP casesSEXP, SEXP visitsSEXP, SEXP firstOutcomeOnlySEXP, SEXP washoutPeriodSEXP, SEXP controlsPerCaseSEXP, SEXP matchOnAgeSEXP, SEXP ageCaliperSEXP, SEXP matchOnGenderSEXP, SEXP matchOnProviderSEXP, SEXP matchOnVisitDateSEXP, SEXP visitDateCaliperSEXP) {
+DataFrame selectControls(const List& nestingCohorts, const List& cases, const List& visits, const bool firstOutcomeOnly, const int washoutPeriod, const int controlsPerCase, const bool matchOnAge, const double ageCaliper, const bool matchOnGender, const bool matchOnProvider, const bool matchOnVisitDate, const int visitDateCaliper, const bool matchOnTimeInCohort, const int daysInCohortCaliper);
+RcppExport SEXP CaseControl_selectControls(SEXP nestingCohortsSEXP, SEXP casesSEXP, SEXP visitsSEXP, SEXP firstOutcomeOnlySEXP, SEXP washoutPeriodSEXP, SEXP controlsPerCaseSEXP, SEXP matchOnAgeSEXP, SEXP ageCaliperSEXP, SEXP matchOnGenderSEXP, SEXP matchOnProviderSEXP, SEXP matchOnVisitDateSEXP, SEXP visitDateCaliperSEXP, SEXP matchOnTimeInCohortSEXP, SEXP daysInCohortCaliperSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -23,7 +23,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const bool >::type matchOnProvider(matchOnProviderSEXP);
     Rcpp::traits::input_parameter< const bool >::type matchOnVisitDate(matchOnVisitDateSEXP);
     Rcpp::traits::input_parameter< const int >::type visitDateCaliper(visitDateCaliperSEXP);
-    __result = Rcpp::wrap(selectControls(nestingCohorts, cases, visits, firstOutcomeOnly, washoutPeriod, controlsPerCase, matchOnAge, ageCaliper, matchOnGender, matchOnProvider, matchOnVisitDate, visitDateCaliper));
+    Rcpp::traits::input_parameter< const bool >::type matchOnTimeInCohort(matchOnTimeInCohortSEXP);
+    Rcpp::traits::input_parameter< const int >::type daysInCohortCaliper(daysInCohortCaliperSEXP);
+    __result = Rcpp::wrap(selectControls(nestingCohorts, cases, visits, firstOutcomeOnly, washoutPeriod, controlsPerCase, matchOnAge, ageCaliper, matchOnGender, matchOnProvider, matchOnVisitDate, visitDateCaliper, matchOnTimeInCohort, daysInCohortCaliper));
     return __result;
 END_RCPP
 }

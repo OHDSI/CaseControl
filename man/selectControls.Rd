@@ -8,6 +8,7 @@ selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
   washoutPeriod = 180, controlsPerCase = 2, matchOnAge = TRUE,
   ageCaliper = 2, matchOnGender = TRUE, matchOnProvider = FALSE,
   matchOnVisitDate = FALSE, visitDateCaliper = 30,
+  matchOnTimeInCohort = FALSE, daysInCohortCaliper = 30,
   removedUnmatchedCases = TRUE)
 }
 \arguments{
@@ -36,6 +37,11 @@ date?}
 
 \item{visitDateCaliper}{Maximum difference (in days) between the index date and the visit
 date when matching on visit date.}
+
+\item{matchOnTimeInCohort}{Match on time in nesting cohort? When not using nesting, this is
+interpreted as time observed prior to index.}
+
+\item{daysInCohortCaliper}{Maximum difference (in days) in time in cohort.}
 
 \item{removedUnmatchedCases}{Should cases with no matched controls be removed?}
 }

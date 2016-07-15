@@ -9,7 +9,7 @@ Features
 ========
 - Extracts the necessary data from a database in OMOP Common Data Model format
 - Nesting in a cohort of interest (e.g. people with a particular prior condition)
-- Matching on age, gender, provider, and/or visit
+- Matching on age, gender, provider, time in cohort, and/or visit
 - Sampling of controls per case
 - Fitting outcome models using conditional logisitc regression
 
@@ -71,4 +71,4 @@ CaseControl is being developed in R Studio.
 [![Build Status](https://travis-ci.org/OHDSI/CaseControl.svg?branch=master)](https://travis-ci.org/OHDSI/CaseControl)
 [![codecov.io](https://codecov.io/github/OHDSI/CaseControl/coverage.svg?branch=master)](https://codecov.io/github/OHDSI/CaseControl?branch=master)
 
-Beta
+Under development

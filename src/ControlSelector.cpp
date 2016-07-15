@@ -34,10 +34,11 @@ namespace caseControl {
 
 ControlSelector::ControlSelector(const List& _nestingCohorts, const List& _cases, const List& _visits, const bool _firstOutcomeOnly, const int _washoutPeriod,
                                  const int _controlsPerCase, const bool _matchOnAge, const double _ageCaliper, const bool _matchOnGender, const bool _matchOnProvider,
-                                 const bool _matchOnVisitDate, const int _visitDateCaliper) : firstOutcomeOnly(_firstOutcomeOnly), washoutPeriod(_washoutPeriod),
-                                 controlsPerCase(_controlsPerCase), matchOnAge(_matchOnAge), ageCaliper(_ageCaliper), matchOnGender(_matchOnGender), matchOnProvider(_matchOnProvider),
-                                 matchOnVisitDate(_matchOnVisitDate), visitDateCaliper(_visitDateCaliper), nestingCohortDatas(), personId2CaseData(),
-                                 generator(), stratumId(0) {
+                                 const bool _matchOnVisitDate, const int _visitDateCaliper, const bool _matchOnTimeInCohort, const int _daysInCohortCaliper) :
+                                 firstOutcomeOnly(_firstOutcomeOnly), washoutPeriod(_washoutPeriod), controlsPerCase(_controlsPerCase), matchOnAge(_matchOnAge),
+                                 ageCaliper(_ageCaliper), matchOnGender(_matchOnGender), matchOnProvider(_matchOnProvider), matchOnVisitDate(_matchOnVisitDate),
+                                 visitDateCaliper(_visitDateCaliper), matchOnTimeInCohort(_matchOnTimeInCohort), daysInCohortCaliper(_daysInCohortCaliper),
+                                 nestingCohortDatas(), personId2CaseData(), generator(), stratumId(0) {
                                    //Load all data in memory structures:
                                    if (_matchOnVisitDate) {
                                      Environment base = Environment::namespace_env("base");
@@ -50,7 +51,7 @@ ControlSelector::ControlSelector(const List& _nestingCohorts, const List& _cases
                                      if (!matchOnProvider || nestingCohortData.providerId != NA_INTEGER) {
                                        nestingCohortDatas.push_back(nestingCohortData);
                                        if (personId2CaseData.find(nestingCohortData.personId) == personId2CaseData.end()) {
-                                         CaseData caseData(nestingCohortData.genderConceptId, nestingCohortData.dateOfBirth, nestingCohortData.providerId);
+                                         CaseData caseData(nestingCohortData.genderConceptId, nestingCohortData.dateOfBirth, nestingCohortData.providerId, nestingCohortData.startDate);
                                          personId2CaseData.insert(std::pair<int64_t,CaseData>(nestingCohortData.personId, caseData));
                                        }
                                        for (int date : nestingCohortData.indexDates) {
@@ -74,6 +75,11 @@ int ControlSelector::isMatch(const NestingCohortData& controlData, const CaseDat
   }
   if (matchOnProvider) {
     if (caseData.providerId != controlData.providerId)
+      return NO_MATCH;
+  }
+  if (matchOnTimeInCohort) {
+    int timeDelta = abs(controlData.startDate - caseData.startDate);
+    if (timeDelta > daysInCohortCaliper)
       return NO_MATCH;
   }
   //   if (matchOnAge) {
@@ -222,7 +228,7 @@ DataFrame ControlSelector::selectControls() {
 
   writeLines("Finding controls per case");
 
-  List progressBar = txtProgressBar(0,personId2CaseData.size(),0,"=", NA_REAL, "" ,"", 3, "");
+  List progressBar = txtProgressBar(0, personId2CaseData.size(), 0, "=", NA_REAL, "" , "", 3, "");
 
   int i = 0;
   for(std::map<int64_t, CaseData>::iterator iterator = personId2CaseData.begin(); iterator != personId2CaseData.end(); iterator++) {

@@ -37,6 +37,9 @@
 #'                                date?
 #' @param visitDateCaliper        Maximum difference (in days) between the index date and the visit
 #'                                date when matching on visit date.
+#' @param matchOnTimeInCohort     Match on time in nesting cohort? When not using nesting, this is
+#'                                interpreted as time observed prior to index.
+#' @param daysInCohortCaliper     Maximum difference (in days) in time in cohort.
 #' @param removedUnmatchedCases   Should cases with no matched controls be removed?
 #'
 #' @return
@@ -56,6 +59,8 @@ selectControls <- function(caseData,
                            matchOnProvider = FALSE,
                            matchOnVisitDate = FALSE,
                            visitDateCaliper = 30,
+                           matchOnTimeInCohort = FALSE,
+                           daysInCohortCaliper = 30,
                            removedUnmatchedCases = TRUE) {
   if (matchOnVisitDate && !caseData$metaData$hasVisits)
     stop("Cannot match on visits because no visit data was loaded. Please rerun getDbCaseData with getVisits = TRUE")
@@ -96,7 +101,9 @@ selectControls <- function(caseData,
                                   matchOnGender,
                                   matchOnProvider,
                                   matchOnVisitDate,
-                                  visitDateCaliper)
+                                  visitDateCaliper,
+                                  matchOnTimeInCohort,
+                                  daysInCohortCaliper)
   caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
   delta <- Sys.time() - start
   writeLines(paste("Selection took", signif(delta, 3), attr(delta, "units")))
