@@ -227,7 +227,7 @@ runCcAnalyses <- function(connectionDetails,
   for (ccFilename in unique(outcomeReference$caseControlsFile)) {
     analysisIds <- unique(outcomeReference$analysisId[outcomeReference$caseControlsFile == ccFilename])
     edArgsList <- unique(sapply(ccAnalysisList, function(x) if (x$analysisId %in% analysisIds)
-      return(x$getDbExposureDataArgs)))
+      return(x$getDbExposureDataArgs), simplify = FALSE))
     edArgsList <- edArgsList[!sapply(edArgsList, is.null)]
     for (ed in 1:length(edArgsList)) {
       edArgs <- edArgsList[[ed]]
@@ -258,7 +258,7 @@ runCcAnalyses <- function(connectionDetails,
   for (edFilename in unique(outcomeReference$exposureDataFile)) {
     analysisIds <- unique(outcomeReference$analysisId[outcomeReference$exposureDataFile == edFilename])
     ccdArgsList <- unique(sapply(ccAnalysisList, function(x) if (x$analysisId %in% analysisIds)
-      return(x$createCaseControlDataArgs)))
+      return(x$createCaseControlDataArgs), simplify = FALSE))
     ccdArgsList <- ccdArgsList[!sapply(ccdArgsList, is.null)]
     for (ccd in 1:length(ccdArgsList)) {
       ccdArgs <- ccdArgsList[[ccd]]
