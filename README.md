@@ -44,9 +44,7 @@ Getting Started
   install.packages("devtools")
   library(devtools)
   install_github("ohdsi/OhdsiRTools") 
-  install_github("ohdsi/SqlRender")
   install_github("ohdsi/DatabaseConnector")
-  install_github("ohdsi/Cyclops")
   install_github("ohdsi/FeatureExtraction")
   install_github("ohdsi/CaseControl")
   ```
@@ -71,4 +69,4 @@ CaseControl is being developed in R Studio.
 [![Build Status](https://travis-ci.org/OHDSI/CaseControl.svg?branch=master)](https://travis-ci.org/OHDSI/CaseControl)
 [![codecov.io](https://codecov.io/github/OHDSI/CaseControl/coverage.svg?branch=master)](https://codecov.io/github/OHDSI/CaseControl?branch=master)
 
-Under development
+Beta
