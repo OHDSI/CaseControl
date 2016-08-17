@@ -41,12 +41,9 @@ Getting Started
 3. In R, use the following commands to download and install CaseControl:
 
   ```r
-  install.packages("devtools")
-  library(devtools)
-  install_github("ohdsi/OhdsiRTools") 
-  install_github("ohdsi/DatabaseConnector")
-  install_github("ohdsi/FeatureExtraction")
-  install_github("ohdsi/CaseControl")
+  install.packages("drat")
+  drat::addRepo("OHDSI")
+  install.packages("CaseControl")
   ```
 
 Getting Involved
