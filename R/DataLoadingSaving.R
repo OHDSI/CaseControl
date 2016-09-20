@@ -98,12 +98,11 @@ getDbCaseData <- function(connectionDetails,
   }
 
   conn <- connect(connectionDetails)
-  cdmDatabase <- strsplit(cdmDatabaseSchema, "\\.")[[1]][1]
   renderedSql <- SqlRender::loadRenderTranslateSql("createCases.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
                                                    oracleTempSchema = oracleTempSchema,
-                                                   cdm_database = cdmDatabase,
+                                                   cdm_database_schema = cdmDatabaseSchema,
                                                    outcome_database_schema = outcomeDatabaseSchema,
                                                    outcome_table = outcomeTable,
                                                    outcome_ids = outcomeIds,
@@ -141,7 +140,8 @@ getDbCaseData <- function(connectionDetails,
     renderedSql <- SqlRender::loadRenderTranslateSql("queryVisits.sql",
                                                      packageName = "CaseControl",
                                                      dbms = connectionDetails$dbms,
-                                                     oracleTempSchema = oracleTempSchema)
+                                                     oracleTempSchema = oracleTempSchema,
+                                                     cdm_database_schema = cdmDatabaseSchema)
     visits <- querySql.ffdf(conn, renderedSql)
     colnames(visits) <- SqlRender::snakeCaseToCamelCase(colnames(visits))
 
@@ -161,7 +161,6 @@ getDbCaseData <- function(connectionDetails,
     DatabaseConnector::executeSql(conn, renderedSql, progressBar = FALSE, reportOverallTime = FALSE)
   }
   dbDisconnect(conn)
-
 
   metaData <- list(outcomeIds = outcomeIds,
                    call = match.call(),

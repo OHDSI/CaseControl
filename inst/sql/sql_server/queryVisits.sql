@@ -20,7 +20,7 @@ limitations under the License.
 
 SELECT DISTINCT nesting_cohort_id,
 	visit_start_date
-FROM visit_occurrence
+FROM @cdm_database_schema.visit_occurrence
 INNER JOIN #nesting_cohort nesting_cohort
 ON visit_occurrence.person_id = nesting_cohort.person_id
 AND visit_start_date >= nesting_cohort.start_date

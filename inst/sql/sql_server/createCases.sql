@@ -18,7 +18,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ***********************************************************************/
 
-{DEFAULT @cdm_database = 'cdm4_sim.dbo'}
+{DEFAULT @cdm_database_schema = 'cdm4_sim.dbo'}
 {DEFAULT @outcome_database_schema = 'cdm4_sim'} 
 {DEFAULT @outcome_table = 'condition_occurrence'} 
 {DEFAULT @outcome_ids = ''}
@@ -29,8 +29,6 @@ limitations under the License.
 {DEFAULT @use_observation_end_as_nesting_end_date = TRUE} 
 {DEFAULT @study_start_date = '' }
 {DEFAULT @study_end_date = '' }
-
-USE @cdm_database;
 
 IF OBJECT_ID('tempdb..#nesting_cohort', 'U') IS NOT NULL
 	DROP TABLE #nesting_cohort;
@@ -84,7 +82,7 @@ FROM (
 			cohort_table.cohort_end_date AS end_date
 }
 		FROM @nesting_cohort_database_schema.@nesting_cohort_table cohort_table
-		INNER JOIN observation_period
+		INNER JOIN @cdm_database_schema.observation_period
 		ON cohort_table.subject_id = observation_period.person_id
 		WHERE cohort_table.cohort_definition_id = @nesting_cohort_id
 			AND cohort_table.cohort_start_date >= observation_period_start_date
@@ -95,7 +93,7 @@ FROM (
 			observation_period_start_date,
 			observation_period_start_date AS start_date,
 			observation_period_end_date AS end_date
-		FROM observation_period
+		FROM @cdm_database_schema.observation_period
 }
 ) temp_nesting_cohort
 {@study_start_date != '' | @study_end_date != ''} ? {	WHERE}
@@ -103,7 +101,7 @@ FROM (
 {@study_start_date != '' | @study_end_date != ''} ? {		AND}
 {@study_end_date != '' } ? {		start_date < CAST('@study_end_date' AS DATE) }
 ) nesting_cohort
-INNER JOIN person
+INNER JOIN @cdm_database_schema.person
 ON nesting_cohort.person_id = person.person_id;
 	
 /**********************************************************************
