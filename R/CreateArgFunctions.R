@@ -6,12 +6,12 @@
 #' Create an object defining the parameter values.
 #'
 #' @param useNestingCohort                    Should the study be nested in a cohort (e.g. people witha
-#'                                            specific indication)? If not, the study will be nested
-#'                                            inthe general population.
-#' @param useObservationEndAsNestingEndDate   When using a nesting cohort, should the observation
-#'                                            period enddate be used instead of the cohort end date?
-#' @param getVisits                           Get data on visits? This is needed when matching on visit
-#'                                            date isrequested later on.
+#'                                            specific indication)? If not, the study will be nestedin
+#'                                            the general population.
+#' @param useObservationEndAsNestingEndDate   When using a nesting cohort, should the observationperiod
+#'                                            end date be used instead of the cohort end date?
+#' @param getVisits                           Get data on visits? This is needed when matching on
+#'                                            visitdate is requested later on.
 #' @param studyStartDate                      A calendar date specifying the minimum date where data
 #'                                            isused. Date format is 'yyyymmdd'.
 #' @param studyEndDate                        A calendar date specifying the maximum date where data
@@ -44,17 +44,21 @@ createGetDbCaseDataArgs <- function(useNestingCohort = FALSE,
 #' Create an object defining the parameter values.
 #'
 #' @param firstOutcomeOnly        Use the first outcome per person?
-#' @param washoutPeriod           Minimum required numbers of days of observation for inclusion as
-#'                                either case or control.
+#' @param washoutPeriod           Minimum required numbers of days of observation for inclusion
+#'                                aseither case or control.
 #' @param controlsPerCase         Maximum number of controls to select per case.
 #' @param matchOnAge              Match on age?
 #' @param ageCaliper              Maximum difference (in years) in age when matching on age.
 #' @param matchOnGender           Match on gender?
 #' @param matchOnProvider         Match on provider (as specified in the person table)?
-#' @param matchOnVisitDate        Should the index date of the control be changed to the nearest visit
-#'                                date?
-#' @param visitDateCaliper        Maximum difference (in days) between the index date and the visit
-#'                                date when matching on visit date.
+#' @param matchOnCareSite         Match on care site (as specified in the person table)?
+#' @param matchOnVisitDate        Should the index date of the control be changed to the nearest
+#'                                visitdate?
+#' @param visitDateCaliper        Maximum difference (in days) between the index date and the visitdate
+#'                                when matching on visit date.
+#' @param matchOnTimeInCohort     Match on time in nesting cohort? When not using nesting, this
+#'                                isinterpreted as time observed prior to index.
+#' @param daysInCohortCaliper     Maximum difference (in days) in time in cohort.
 #' @param removedUnmatchedCases   Should cases with no matched controls be removed?
 #'
 #' @export
@@ -65,8 +69,11 @@ createSelectControlsArgs <- function(firstOutcomeOnly = TRUE,
                                      ageCaliper = 2,
                                      matchOnGender = TRUE,
                                      matchOnProvider = FALSE,
+                                     matchOnCareSite = FALSE,
                                      matchOnVisitDate = FALSE,
                                      visitDateCaliper = 30,
+                                     matchOnTimeInCohort = FALSE,
+                                     daysInCohortCaliper = 30,
                                      removedUnmatchedCases = TRUE) {
   # First: get default values:
   analysis <- list()
@@ -90,7 +97,7 @@ createSelectControlsArgs <- function(firstOutcomeOnly = TRUE,
 #'
 #' @param covariateSettings   An object of type covariateSettings as created using
 #'                            thecreateCovariateSettings function in theFeatureExtraction package. If
-#'                            NULL then no covariate data is retrieved.
+#'                            NULL then no covariate data isretrieved.
 #'
 #' @export
 createGetDbExposureDataArgs <- function(covariateSettings = NULL) {
@@ -115,10 +122,10 @@ createGetDbExposureDataArgs <- function(covariateSettings = NULL) {
 #' Create an object defining the parameter values.
 #'
 #' @param firstExposureOnly   Should only the first exposure per subject be included?
-#' @param riskWindowStart     The start of the risk window (in days) relative to the index date. This
+#' @param riskWindowStart     The start of the risk window (in days) relative to the index date.This
 #'                            number should be non-positive.
-#' @param riskWindowEnd       The end of the risk window (in days) relative to the index date. This
-#'                            number should be non-positive.
+#' @param riskWindowEnd       The end of the risk window (in days) relative to the index date.
+#'                            Thisnumber should be non-positive.
 #'
 #' @export
 createCreateCaseControlDataArgs <- function(firstExposureOnly = FALSE,

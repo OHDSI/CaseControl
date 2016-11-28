@@ -117,11 +117,6 @@ runCcAnalyses <- function(connectionDetails,
   uniqueAnalysisIds <- unlist(unique(OhdsiRTools::selectFromList(ccAnalysisList, "analysisId")))
   if (length(uniqueAnalysisIds) != length(ccAnalysisList))
     stop("Duplicate analysis IDs are not allowed")
-  for (i in 1:length(ccAnalysisList)) {
-    if (!ccAnalysisList[[i]]$getDbCaseDataArgs$useNestingCohort) {
-      ccAnalysisList[[i]]$getDbCaseDataArgs$useObservationEndAsNestingEndDate <- FALSE
-    }
-  }
 
   if (!file.exists(outputFolder))
     dir.create(outputFolder)
@@ -135,6 +130,9 @@ runCcAnalyses <- function(connectionDetails,
       nestingCohortId <- .selectByType(ccAnalysis$nestingCohortType,
                                        exposureOutcomeNc$nestingCohortId,
                                        "nestingCohort")
+      if (is.null(nestingCohortId)) {
+        nestingCohortId <- NA
+      }
       row <- data.frame(exposureId = exposureId,
                         outcomeId = outcomeId,
                         nestingCohortId = nestingCohortId,
@@ -154,8 +152,12 @@ runCcAnalyses <- function(connectionDetails,
       nestingCohortIds <- unique(outcomeReference$nestingCohortId[outcomeReference$analysisId %in%
                                                                     analysesIds])
       for (nestingCohortId in nestingCohortIds) {
-        idx <- outcomeReference$analysisId %in% analysesIds & outcomeReference$nestingCohortId ==
-          nestingCohortId
+        if (is.na(nestingCohortId)) {
+          idx <- outcomeReference$analysisId %in% analysesIds & is.na(outcomeReference$nestingCohortId)
+        } else {
+          idx <- outcomeReference$analysisId %in% analysesIds & outcomeReference$nestingCohortId ==
+            nestingCohortId
+        }
         outcomeIds <- unique(outcomeReference$outcomeId[idx])
         cdDataFileName <- .createCaseDataFileName(outputFolder, d, nestingCohortId)
         outcomeReference$caseDataFolder[idx] <- cdDataFileName
@@ -170,15 +172,17 @@ runCcAnalyses <- function(connectionDetails,
                        outcomeIds = outcomeIds,
                        nestingCohortId = nestingCohortId)
           args <- append(args, getDbCaseDataArgs$getDbCaseDataArgs)
+          if (is.na(nestingCohortId)) {
+            args$nestingCohortId <- NULL
+            args$useObservationEndAsNestingEndDate <- FALSE
+          }
           cdObjectsToCreate[[length(cdObjectsToCreate) + 1]] <- list(args = args,
                                                                      cdDataFileName = cdDataFileName)
         }
       }
     } else {
-      idx <- outcomeReference$analysisId %in% analysesIds
-      outcomeIds <- unique(outcomeReference$outcomeId[idx])
-
       cdDataFileName <- .createCaseDataFileName(outputFolder, d)
+      idx <- outcomeReference$analysisId %in% analysesIds & is.na(outcomeReference$nestingCohortId)
       outcomeReference$caseDataFolder[idx] <- cdDataFileName
       if (!file.exists(cdDataFileName)) {
         args <- list(connectionDetails = connectionDetails,
@@ -188,10 +192,12 @@ runCcAnalyses <- function(connectionDetails,
                      outcomeTable = outcomeTable,
                      nestingCohortDatabaseSchema = nestingCohortDatabaseSchema,
                      nestingCohortTable = nestingCohortTable,
-                     outcomeIds = outcomeIds)
+                     outcomeIds = outcomeIds,
+                     nestingCohortId = nestingCohortId)
         args <- append(args, getDbCaseDataArgs$getDbCaseDataArgs)
         cdObjectsToCreate[[length(cdObjectsToCreate) + 1]] <- list(args = args,
                                                                    cdDataFileName = cdDataFileName)
+
       }
     }
   }
@@ -386,7 +392,7 @@ runCcAnalyses <- function(connectionDetails,
 
 .createCaseDataFileName <- function(folder, loadId, nestingCohortId = NULL) {
   name <- paste0("caseData_cd", loadId)
-  if (!is.null(nestingCohortId))
+  if (!is.null(nestingCohortId) && !is.na(nestingCohortId))
     name <- paste0(name, "_n", nestingCohortId)
   return(file.path(folder, name))
 }

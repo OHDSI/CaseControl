@@ -48,6 +48,7 @@ void NestingCohortDataIterator::loadNextNestingCohorts() {
   nestingCohortsDateOfBirth = nestingCohorts["dateOfBirth"];
   nestingCohortsGenderConceptId = nestingCohorts["genderConceptId"];
   nestingCohortsProviderId = nestingCohorts["providerId"];
+  nestingCohortsCareSiteId = nestingCohorts["careSiteId"];
 }
 
 void NestingCohortDataIterator::loadNextCases() {
@@ -70,7 +71,8 @@ NestingCohortData NestingCohortDataIterator::next() {
   int64_t nestingCohortId = nestingCohortsNestingCohortId[nestingCohortsCursor];
   NestingCohortData nextNestingCohortData(nestingCohortsNestingCohortId[nestingCohortsCursor], nestingCohortsPersonId[nestingCohortsCursor],
                                           nestingCohortsObservationPeriodStartDate[nestingCohortsCursor], nestingCohortsStartDate[nestingCohortsCursor], nestingCohortsEndDate[nestingCohortsCursor],
-                                          nestingCohortsDateOfBirth[nestingCohortsCursor], nestingCohortsGenderConceptId[nestingCohortsCursor], nestingCohortsProviderId[nestingCohortsCursor]);
+                                          nestingCohortsDateOfBirth[nestingCohortsCursor], nestingCohortsGenderConceptId[nestingCohortsCursor], nestingCohortsProviderId[nestingCohortsCursor],
+                                          nestingCohortsCareSiteId[nestingCohortsCursor]);
   nestingCohortsCursor++;
   if (nestingCohortsCursor == nestingCohortsNestingCohortId.length() && nestingCohortsIterator.hasNext()){
     loadNextNestingCohorts();

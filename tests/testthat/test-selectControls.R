@@ -11,6 +11,7 @@ test_that("Washout period for cases", {
                                                            endDate = as.Date(c("2010-01-01")),
                                                            dateOfBirth = as.Date(c("2000-01-01")),
                                                            genderConceptId = c(8532),
+                                                           careSiteId = c(1),
                                                            providerId = c(1))))
 
   # Case after washout period:
@@ -39,6 +40,7 @@ test_that("Washout period for controls", {
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
+                                                           careSiteId = c(1, 1, 1),
                                                            providerId = c(1, 1, 1))))
 
   # One control after washout period:
@@ -61,6 +63,7 @@ test_that("Match on index date", {
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
+                                                           careSiteId = c(1, 1, 1),
                                                            providerId = c(1, 1, 1))))
 
   # One control with overlapping cohort time:
@@ -80,6 +83,7 @@ test_that("Match on gender", {
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8507),
+                                                           careSiteId = c(1, 1, 1),
                                                            providerId = c(1, 1, 1))))
 
   # Two control without matching on gender:
@@ -108,6 +112,7 @@ test_that("Match on age", {
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "1990-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
+                                                           careSiteId = c(1, 1, 1),
                                                            providerId = c(1, 1, 1))))
 
   # Two control without matching on age:
@@ -134,6 +139,7 @@ test_that("Match on provider", {
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
+                                                           careSiteId = c(1, 1, 1),
                                                            providerId = c(1, 2, 1))))
 
   # Two control without matching on provider:
@@ -151,6 +157,35 @@ test_that("Match on provider", {
   expect_equal(cc$personId, c(1, 3))
 })
 
+test_that("Match on care site", {
+  caseData <- list(cases = data.frame(nestingCohortId = c(1),
+                                      outcomeId = c(1),
+                                      indexDate = as.Date(c("2001-01-01"))),
+                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+                                                           personId = c(1, 2, 3),
+                                                           observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
+                                                           startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
+                                                           endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
+                                                           dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
+                                                           genderConceptId = c(8532, 8532, 8532),
+                                                           careSiteId = c(1, 2, 1),
+                                                           providerId = c(1, 1, 1))))
+
+  # Two control without matching on provider:
+  cc <- selectControls(caseData = caseData,
+                       outcomeId = 1,
+                       washoutPeriod = 180,
+                       matchOnCareSite = FALSE)
+  expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
+
+  # One control with simlar provider:
+  cc <- selectControls(caseData = caseData,
+                       outcomeId = 1,
+                       washoutPeriod = 180,
+                       matchOnCareSite = TRUE)
+  expect_equal(cc$personId, c(1, 3))
+})
+
 test_that("Match on visit", {
   caseData <- list(cases = data.frame(nestingCohortId = c(1),
                                       outcomeId = c(1),
@@ -162,6 +197,7 @@ test_that("Match on visit", {
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
+                                                           careSiteId = c(1, 1, 1),
                                                            providerId = c(1, 2, 1))),
                    visits = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
                                                    visitStartDate = as.Date(c("2001-01-01", "2001-01-02", "2001-03-01")))),
@@ -195,6 +231,7 @@ test_that("Match on time in cohort", {
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
                                                            dateOfBirth = as.Date(c("2000-01-01", "1999-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
+                                                           careSiteId = c(1, 1, 1),
                                                            providerId = c(1, 2, 1))),
                    metaData = list(hasVisits = FALSE))
 

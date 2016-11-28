@@ -46,7 +46,8 @@ SELECT nesting_cohort_id,
 	end_date,
 	DATEFROMPARTS(year_of_birth, ISNULL(month_of_birth, 1), ISNULL(day_of_birth, 1)) AS date_of_birth,
 	gender_concept_id,
-	person.provider_id
+	person.provider_id,
+	person.care_site_id
 INTO #nesting_cohort
 FROM (
 	SELECT person_id,

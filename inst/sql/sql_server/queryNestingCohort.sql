@@ -25,5 +25,6 @@ SELECT nesting_cohort_id,
 	end_date,
 	date_of_birth,
 	gender_concept_id,
-	provider_id
+	provider_id,
+	care_site_id
 FROM #nesting_cohort;

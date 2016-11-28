@@ -6,14 +6,16 @@
 \usage{
 createSelectControlsArgs(firstOutcomeOnly = TRUE, washoutPeriod = 180,
   controlsPerCase = 2, matchOnAge = TRUE, ageCaliper = 2,
-  matchOnGender = TRUE, matchOnProvider = FALSE, matchOnVisitDate = FALSE,
-  visitDateCaliper = 30, removedUnmatchedCases = TRUE)
+  matchOnGender = TRUE, matchOnProvider = FALSE, matchOnCareSite = FALSE,
+  matchOnVisitDate = FALSE, visitDateCaliper = 30,
+  matchOnTimeInCohort = FALSE, daysInCohortCaliper = 30,
+  removedUnmatchedCases = TRUE)
 }
 \arguments{
 \item{firstOutcomeOnly}{Use the first outcome per person?}
 
-\item{washoutPeriod}{Minimum required numbers of days of observation for inclusion as
-either case or control.}
+\item{washoutPeriod}{Minimum required numbers of days of observation for inclusion
+aseither case or control.}
 
 \item{controlsPerCase}{Maximum number of controls to select per case.}
 
@@ -25,11 +27,18 @@ either case or control.}
 
 \item{matchOnProvider}{Match on provider (as specified in the person table)?}
 
-\item{matchOnVisitDate}{Should the index date of the control be changed to the nearest visit
-date?}
+\item{matchOnCareSite}{Match on care site (as specified in the person table)?}
 
-\item{visitDateCaliper}{Maximum difference (in days) between the index date and the visit
-date when matching on visit date.}
+\item{matchOnVisitDate}{Should the index date of the control be changed to the nearest
+visitdate?}
+
+\item{visitDateCaliper}{Maximum difference (in days) between the index date and the visitdate
+when matching on visit date.}
+
+\item{matchOnTimeInCohort}{Match on time in nesting cohort? When not using nesting, this
+isinterpreted as time observed prior to index.}
+
+\item{daysInCohortCaliper}{Maximum difference (in days) in time in cohort.}
 
 \item{removedUnmatchedCases}{Should cases with no matched controls be removed?}
 }

@@ -7,9 +7,9 @@
 selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
   washoutPeriod = 180, controlsPerCase = 2, matchOnAge = TRUE,
   ageCaliper = 2, matchOnGender = TRUE, matchOnProvider = FALSE,
-  matchOnVisitDate = FALSE, visitDateCaliper = 30,
-  matchOnTimeInCohort = FALSE, daysInCohortCaliper = 30,
-  removedUnmatchedCases = TRUE)
+  matchOnCareSite = FALSE, matchOnVisitDate = FALSE,
+  visitDateCaliper = 30, matchOnTimeInCohort = FALSE,
+  daysInCohortCaliper = 30, removedUnmatchedCases = TRUE)
 }
 \arguments{
 \item{caseData}{An object of type \code{caseData} as generated using the
@@ -31,6 +31,8 @@ either case or control.}
 \item{matchOnGender}{Match on gender?}
 
 \item{matchOnProvider}{Match on provider (as specified in the person table)?}
+
+\item{matchOnCareSite}{Match on care site (as specified in the person table)?}
 
 \item{matchOnVisitDate}{Should the index date of the control be changed to the nearest visit
 date?}

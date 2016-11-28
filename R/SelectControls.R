@@ -33,6 +33,7 @@
 #' @param ageCaliper              Maximum difference (in years) in age when matching on age.
 #' @param matchOnGender           Match on gender?
 #' @param matchOnProvider         Match on provider (as specified in the person table)?
+#' @param matchOnCareSite         Match on care site (as specified in the person table)?
 #' @param matchOnVisitDate        Should the index date of the control be changed to the nearest visit
 #'                                date?
 #' @param visitDateCaliper        Maximum difference (in days) between the index date and the visit
@@ -57,6 +58,7 @@ selectControls <- function(caseData,
                            ageCaliper = 2,
                            matchOnGender = TRUE,
                            matchOnProvider = FALSE,
+                           matchOnCareSite = FALSE,
                            matchOnVisitDate = FALSE,
                            visitDateCaliper = 30,
                            matchOnTimeInCohort = FALSE,
@@ -64,8 +66,12 @@ selectControls <- function(caseData,
                            removedUnmatchedCases = TRUE) {
   if (matchOnVisitDate && !caseData$metaData$hasVisits)
     stop("Cannot match on visits because no visit data was loaded. Please rerun getDbCaseData with getVisits = TRUE")
-  if (matchOnProvider && ffbase::all.ff(ffbase::is.na.ff(caseData$nestingCohorts$providerId)))
-    stop("Cannot match on provider because no providers specified (in the person table)")
+  if (matchOnProvider && matchOnCareSite)
+    stop("Cannot match on both provider and care site")
+    if (matchOnProvider && ffbase::all.ff(ffbase::is.na.ff(caseData$nestingCohorts$providerId)))
+    stop("Cannot match on provider because no providers specified in the person table")
+  if (matchOnCareSite && ffbase::all.ff(ffbase::is.na.ff(caseData$nestingCohorts$careSiteId)))
+    stop("Cannot match on care site because no care sites specified in the person table")
 
   start <- Sys.time()
   writeLines(paste("Selecting up to", controlsPerCase, "controls per case"))
@@ -100,6 +106,7 @@ selectControls <- function(caseData,
                                   ageCaliper,
                                   matchOnGender,
                                   matchOnProvider,
+                                  matchOnCareSite,
                                   matchOnVisitDate,
                                   visitDateCaliper,
                                   matchOnTimeInCohort,
@@ -157,6 +164,7 @@ selectControls <- function(caseData,
                    ageCaliper = ageCaliper,
                    matchOnGender = matchOnGender,
                    matchOnProvider = matchOnProvider,
+                   matchOnCareSite = matchOnCareSite,
                    matchOnVisitDate = matchOnVisitDate,
                    visitDateCaliper = visitDateCaliper,
                    counts = counts)

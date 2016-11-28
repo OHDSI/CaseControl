@@ -30,9 +30,9 @@ namespace ohdsi {
 namespace caseControl {
 
 struct NestingCohortData {
-  NestingCohortData(int64_t _nestingCohortId, int64_t _personId, int _observationPeriodStartDate, int _startDate, int _endDate, int _dateOfBirth, int _genderConceptId, int _providerId) :
+  NestingCohortData(int64_t _nestingCohortId, int64_t _personId, int _observationPeriodStartDate, int _startDate, int _endDate, int _dateOfBirth, int _genderConceptId, int64_t _providerId, int64_t _careSiteId) :
   nestingCohortId(_nestingCohortId), personId(_personId), observationPeriodStartDate(_observationPeriodStartDate), startDate(_startDate), endDate(_endDate), dateOfBirth(_dateOfBirth), genderConceptId(_genderConceptId),
-  providerId(_providerId), indexDates(), visitDates() {
+  providerId(_providerId), careSiteId(_careSiteId), indexDates(), visitDates() {
   }
 
   bool operator < (const NestingCohortData& other) const {
@@ -49,6 +49,7 @@ struct NestingCohortData {
   int dateOfBirth;
   int genderConceptId;
   int64_t providerId;
+  int64_t careSiteId;
 };
 
 class NestingCohortDataIterator {
@@ -69,6 +70,7 @@ private:
   NumericVector nestingCohortsDateOfBirth;
   NumericVector nestingCohortsGenderConceptId;
   NumericVector nestingCohortsProviderId;
+  NumericVector nestingCohortsCareSiteId;
   NumericVector casesNestingCohortId;
   NumericVector casesIndexDate;
   NumericVector visitsNestingCohortId;

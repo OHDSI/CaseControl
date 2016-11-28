@@ -34,9 +34,9 @@ namespace caseControl {
 
 ControlSelector::ControlSelector(const List& _nestingCohorts, const List& _cases, const List& _visits, const bool _firstOutcomeOnly, const int _washoutPeriod,
                                  const int _controlsPerCase, const bool _matchOnAge, const double _ageCaliper, const bool _matchOnGender, const bool _matchOnProvider,
-                                 const bool _matchOnVisitDate, const int _visitDateCaliper, const bool _matchOnTimeInCohort, const int _daysInCohortCaliper) :
+                                 const bool _matchOnCareSite, const bool _matchOnVisitDate, const int _visitDateCaliper, const bool _matchOnTimeInCohort, const int _daysInCohortCaliper) :
                                  firstOutcomeOnly(_firstOutcomeOnly), washoutPeriod(_washoutPeriod), controlsPerCase(_controlsPerCase), matchOnAge(_matchOnAge),
-                                 ageCaliper(_ageCaliper), matchOnGender(_matchOnGender), matchOnProvider(_matchOnProvider), matchOnVisitDate(_matchOnVisitDate),
+                                 ageCaliper(_ageCaliper), matchOnGender(_matchOnGender), matchOnProvider(_matchOnProvider), matchOnCareSite(_matchOnCareSite), matchOnVisitDate(_matchOnVisitDate),
                                  visitDateCaliper(_visitDateCaliper), matchOnTimeInCohort(_matchOnTimeInCohort), daysInCohortCaliper(_daysInCohortCaliper),
                                  nestingCohortDatas(), personId2CaseData(), generator(), stratumId(0) {
                                    //Load all data in memory structures:
@@ -48,10 +48,11 @@ ControlSelector::ControlSelector(const List& _nestingCohorts, const List& _cases
                                    NestingCohortDataIterator nestingCohortDataIterator(_nestingCohorts, _cases, _visits, _matchOnVisitDate);
                                    while (nestingCohortDataIterator.hasNext()){
                                      NestingCohortData nestingCohortData = nestingCohortDataIterator.next();
-                                     if (!matchOnProvider || nestingCohortData.providerId != NA_INTEGER) {
+                                     if ((!matchOnProvider || nestingCohortData.providerId != NA_INTEGER)
+                                           && (!matchOnCareSite || nestingCohortData.careSiteId != NA_INTEGER)) {
                                        nestingCohortDatas.push_back(nestingCohortData);
                                        if (personId2CaseData.find(nestingCohortData.personId) == personId2CaseData.end()) {
-                                         CaseData caseData(nestingCohortData.genderConceptId, nestingCohortData.dateOfBirth, nestingCohortData.providerId, nestingCohortData.startDate);
+                                         CaseData caseData(nestingCohortData.genderConceptId, nestingCohortData.dateOfBirth, nestingCohortData.providerId, nestingCohortData.careSiteId, nestingCohortData.startDate);
                                          personId2CaseData.insert(std::pair<int64_t,CaseData>(nestingCohortData.personId, caseData));
                                        }
                                        for (int date : nestingCohortData.indexDates) {
@@ -77,18 +78,15 @@ int ControlSelector::isMatch(const NestingCohortData& controlData, const CaseDat
     if (caseData.providerId != controlData.providerId)
       return NO_MATCH;
   }
+  if (matchOnCareSite) {
+    if (caseData.careSiteId != controlData.careSiteId)
+      return NO_MATCH;
+  }
   if (matchOnTimeInCohort) {
     int timeDelta = abs(controlData.startDate - caseData.startDate);
     if (timeDelta > daysInCohortCaliper)
       return NO_MATCH;
   }
-  //   if (matchOnAge) {
-  //     double ageDelta = abs(caseData.dateOfBirth - controlData.dateOfBirth) / 365.25;
-  //     if (ageDelta > ageCaliper) {
-  //       std::cout << "case Dob: " << caseData.dateOfBirth << ", control dob: " << controlData.dateOfBirth << ", delta: " << (caseData.dateOfBirth - controlData.dateOfBirth) << "\n";
-  //       return NO_MATCH;
-  //     }
-  //   }
   if (firstOutcomeOnly) {
     for (int controlIndexDate : controlData.indexDates)
       if (controlIndexDate <= indexDate)

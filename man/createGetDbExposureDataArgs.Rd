@@ -9,7 +9,7 @@ createGetDbExposureDataArgs(covariateSettings = NULL)
 \arguments{
 \item{covariateSettings}{An object of type covariateSettings as created using
 thecreateCovariateSettings function in theFeatureExtraction package. If
-NULL then no covariate data is retrieved.}
+NULL then no covariate data isretrieved.}
 }
 \description{
 Create a parameter object for the function getDbExposureData

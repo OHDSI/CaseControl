@@ -9,7 +9,7 @@ getDbCaseData(connectionDetails, cdmDatabaseSchema,
   outcomeDatabaseSchema = cdmDatabaseSchema, outcomeTable = "condition_era",
   outcomeIds = c(), useNestingCohort = FALSE,
   nestingCohortDatabaseSchema = cdmDatabaseSchema,
-  nestingCohortTable = "cohort", nestingCohortId,
+  nestingCohortTable = "cohort", nestingCohortId = NULL,
   useObservationEndAsNestingEndDate = TRUE, getVisits = TRUE,
   studyStartDate = "", studyEndDate = "")
 }
@@ -56,7 +56,7 @@ where the nesting cohort is defined.}
 should have the same structure as the cohort table.}
 
 \item{nestingCohortId}{A cohort definition ID identifying the records in the
-nestingCohortTable to use as nesting cohort}
+nestingCohortTable to use as nesting cohort.}
 
 \item{useObservationEndAsNestingEndDate}{When using a nesting cohort, should the observation
 period end date be used instead of the cohort end date?}

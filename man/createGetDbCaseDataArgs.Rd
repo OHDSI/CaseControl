@@ -10,14 +10,14 @@ createGetDbCaseDataArgs(useNestingCohort = FALSE,
 }
 \arguments{
 \item{useNestingCohort}{Should the study be nested in a cohort (e.g. people witha
-specific indication)? If not, the study will be nested
-inthe general population.}
+specific indication)? If not, the study will be nestedin
+the general population.}
 
-\item{useObservationEndAsNestingEndDate}{When using a nesting cohort, should the observation
-period enddate be used instead of the cohort end date?}
+\item{useObservationEndAsNestingEndDate}{When using a nesting cohort, should the observationperiod
+end date be used instead of the cohort end date?}
 
-\item{getVisits}{Get data on visits? This is needed when matching on visit
-date isrequested later on.}
+\item{getVisits}{Get data on visits? This is needed when matching on
+visitdate is requested later on.}
 
 \item{studyStartDate}{A calendar date specifying the minimum date where data
 isused. Date format is 'yyyymmdd'.}

@@ -51,7 +51,7 @@
 #'                                            concepts will be selected.  If outcomeTable <>
 #'                                            CONDITION_OCCURRENCE, the list contains records found in
 #'                                            COHORT_DEFINITION_ID field.
-#' @param useNestingCohort                    Should the study be nested in a cohort (e.g. people with
+#' @param useNestingCohort                   Should the study be nested in a cohort (e.g. people with
 #'                                            a specific indication)? If not, the study will be nested
 #'                                            in the general population.
 #' @param nestingCohortDatabaseSchema         The name of the database schema that is the location
@@ -59,7 +59,7 @@
 #' @param nestingCohortTable                  Name of the table holding the nesting cohort. This table
 #'                                            should have the same structure as the cohort table.
 #' @param nestingCohortId                     A cohort definition ID identifying the records in the
-#'                                            nestingCohortTable to use as nesting cohort
+#'                                            nestingCohortTable to use as nesting cohort.
 #' @param useObservationEndAsNestingEndDate   When using a nesting cohort, should the observation
 #'                                            period end date be used instead of the cohort end date?
 #' @param getVisits                           Get data on visits? This is needed when matching on visit
@@ -79,7 +79,7 @@ getDbCaseData <- function(connectionDetails,
                           useNestingCohort = FALSE,
                           nestingCohortDatabaseSchema = cdmDatabaseSchema,
                           nestingCohortTable = "cohort",
-                          nestingCohortId,
+                          nestingCohortId = NULL,
                           useObservationEndAsNestingEndDate = TRUE,
                           getVisits = TRUE,
                           studyStartDate = "",
@@ -93,8 +93,9 @@ getDbCaseData <- function(connectionDetails,
   if (studyEndDate != "" && regexpr("^[12][0-9]{3}[01][0-9][0-3][0-9]$", studyEndDate) == -1) {
     stop("Study end date must have format YYYYMMDD")
   }
-  if (missing(nestingCohortId)) {
+  if (is.null(nestingCohortId) || !useNestingCohort) {
     nestingCohortId <- -1
+    useObservationEndAsNestingEndDate <- FALSE
   }
 
   conn <- connect(connectionDetails)
@@ -106,7 +107,7 @@ getDbCaseData <- function(connectionDetails,
                                                    outcome_database_schema = outcomeDatabaseSchema,
                                                    outcome_table = outcomeTable,
                                                    outcome_ids = outcomeIds,
-                                                   use_nesting_cohort = useNestingCohort,
+                                                   use_nesting_cohort = (nestingCohortId != -1),
                                                    nesting_cohort_database_schema = nestingCohortDatabaseSchema,
                                                    nesting_cohort_table = nestingCohortTable,
                                                    nesting_cohort_id = nestingCohortId,
