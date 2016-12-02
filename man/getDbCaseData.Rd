@@ -11,7 +11,9 @@ getDbCaseData(connectionDetails, cdmDatabaseSchema,
   nestingCohortDatabaseSchema = cdmDatabaseSchema,
   nestingCohortTable = "cohort", nestingCohortId = NULL,
   useObservationEndAsNestingEndDate = TRUE, getVisits = TRUE,
-  studyStartDate = "", studyEndDate = "")
+  getExposures = FALSE, exposureDatabaseSchema = cdmDatabaseSchema,
+  exposureTable = "drug_era", exposureIds = c(), studyStartDate = "",
+  studyEndDate = "")
 }
 \arguments{
 \item{connectionDetails}{An R object of type \code{ConnectionDetails} created
@@ -63,6 +65,29 @@ period end date be used instead of the cohort end date?}
 
 \item{getVisits}{Get data on visits? This is needed when matching on visit
 date is requested later on.}
+
+\item{getExposures}{Should data on exposures be fetched? All exposure information
+for the nesting cohort will be retrieved, which may be time-consuming.
+Usually it is more efficient to fetch exposure data only for the cases
+and controls, as can be done using the \code{\link{getDbExposureData}} function.}
+
+\item{exposureDatabaseSchema}{The name of the database schema that is the location where
+the exposure data used to define the exposure cohorts is
+available. If exposureTable = DRUG_ERA,
+exposureDatabaseSchema is not used but assumed to be
+cdmSchema.  Requires read permissions to this database.}
+
+\item{exposureTable}{The tablename that contains the exposure cohorts.  If
+exposureTable <> DRUG_ERA, then expectation is exposureTable
+has format of COHORT table: cohort_concept_id, SUBJECT_ID,
+COHORT_START_DATE, COHORT_END_DATE.}
+
+\item{exposureIds}{A list of identifiers to define the exposures of interest. If
+exposureTable = DRUG_ERA, exposureIds should be CONCEPT_ID.
+If exposureTable <> DRUG_ERA, exposureIds is used to select
+the cohort_concept_id in the cohort-like table. If no
+exposureIds are provided, all drugs or cohorts in the
+exposureTable are included as exposures.}
 
 \item{studyStartDate}{A calendar date specifying the minimum date where data is
 used. Date format is 'yyyymmdd'.}

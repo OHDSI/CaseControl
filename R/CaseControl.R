@@ -24,6 +24,7 @@
 #' @importFrom SqlRender loadRenderTranslateSql translateSql
 #' @importFrom RJDBC dbDisconnect
 #' @importFrom survival strata
+#' @importFrom stats coef confint pnorm printCoefmat qnorm
 #' @import bit
 #' @import Cyclops
 #' @import DatabaseConnector

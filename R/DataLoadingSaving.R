@@ -51,7 +51,7 @@
 #'                                            concepts will be selected.  If outcomeTable <>
 #'                                            CONDITION_OCCURRENCE, the list contains records found in
 #'                                            COHORT_DEFINITION_ID field.
-#' @param useNestingCohort                   Should the study be nested in a cohort (e.g. people with
+#' @param useNestingCohort                    Should the study be nested in a cohort (e.g. people with
 #'                                            a specific indication)? If not, the study will be nested
 #'                                            in the general population.
 #' @param nestingCohortDatabaseSchema         The name of the database schema that is the location
@@ -64,6 +64,25 @@
 #'                                            period end date be used instead of the cohort end date?
 #' @param getVisits                           Get data on visits? This is needed when matching on visit
 #'                                            date is requested later on.
+#' @param getExposures                        Should data on exposures be fetched? All exposure information
+#'                                            for the nesting cohort will be retrieved, which may be time-consuming.
+#'                                            Usually it is more efficient to fetch exposure data only for the cases
+#'                                            and controls, as can be done using the \code{\link{getDbExposureData}} function.
+#' @param exposureDatabaseSchema          The name of the database schema that is the location where
+#'                                        the exposure data used to define the exposure cohorts is
+#'                                        available. If exposureTable = DRUG_ERA,
+#'                                        exposureDatabaseSchema is not used but assumed to be
+#'                                        cdmSchema.  Requires read permissions to this database.
+#' @param exposureTable                   The tablename that contains the exposure cohorts.  If
+#'                                        exposureTable <> DRUG_ERA, then expectation is exposureTable
+#'                                        has format of COHORT table: cohort_concept_id, SUBJECT_ID,
+#'                                        COHORT_START_DATE, COHORT_END_DATE.
+#' @param exposureIds                     A list of identifiers to define the exposures of interest. If
+#'                                        exposureTable = DRUG_ERA, exposureIds should be CONCEPT_ID.
+#'                                        If exposureTable <> DRUG_ERA, exposureIds is used to select
+#'                                        the cohort_concept_id in the cohort-like table. If no
+#'                                        exposureIds are provided, all drugs or cohorts in the
+#'                                        exposureTable are included as exposures.
 #' @param studyStartDate                      A calendar date specifying the minimum date where data is
 #'                                            used. Date format is 'yyyymmdd'.
 #' @param studyEndDate                        A calendar date specifying the maximum date where data is
@@ -82,6 +101,10 @@ getDbCaseData <- function(connectionDetails,
                           nestingCohortId = NULL,
                           useObservationEndAsNestingEndDate = TRUE,
                           getVisits = TRUE,
+                          getExposures = FALSE,
+                          exposureDatabaseSchema = cdmDatabaseSchema,
+                          exposureTable = "drug_era",
+                          exposureIds = c(),
                           studyStartDate = "",
                           studyEndDate = "") {
   if (useNestingCohort == TRUE && missing(nestingCohortId)) {
@@ -92,6 +115,9 @@ getDbCaseData <- function(connectionDetails,
   }
   if (studyEndDate != "" && regexpr("^[12][0-9]{3}[01][0-9][0-3][0-9]$", studyEndDate) == -1) {
     stop("Study end date must have format YYYYMMDD")
+  }
+  if (getExposures && length(exposureIds) == 0) {
+    stop("Must provide exposure IDs when getExposures = TRUE")
   }
   if (is.null(nestingCohortId) || !useNestingCohort) {
     nestingCohortId <- -1
@@ -151,6 +177,19 @@ getDbCaseData <- function(connectionDetails,
     visits <- visits[ff::ffdforder(visits[c("nestingCohortId", "visitStartDate")]), ]
   }
 
+  if (getExposures) {
+    writeLines("- Fetching exposures")
+    renderedSql <- SqlRender::loadRenderTranslateSql("queryAllExposures.sql",
+                                                     packageName = "CaseControl",
+                                                     dbms = connectionDetails$dbms,
+                                                     oracleTempSchema = oracleTempSchema,
+                                                     exposure_database_schema = exposureDatabaseSchema,
+                                                     exposure_table = exposureTable,
+                                                     exposure_ids = exposureIds)
+    exposures <- querySql.ffdf(conn, renderedSql)
+    colnames(exposures) <- SqlRender::snakeCaseToCamelCase(colnames(exposures))
+  }
+
   delta <- Sys.time() - start
   writeLines(paste("Loading took", signif(delta, 3), attr(delta, "units")))
 
@@ -166,12 +205,17 @@ getDbCaseData <- function(connectionDetails,
   metaData <- list(outcomeIds = outcomeIds,
                    call = match.call(),
                    hasVisits = getVisits,
+                   hasExposures = getExposures,
                    nestingCohortId = nestingCohortId)
   result <- list(nestingCohorts = nestingCohorts, cases = cases, metaData = metaData)
   open(result$nestingCohorts)
   if (getVisits) {
     result$visits <- visits
     open(result$visits)
+  }
+  if (getExposures) {
+    result$exposures <- exposures
+    open(result$exposures)
   }
   class(result) <- "caseData"
   return(result)
@@ -201,13 +245,24 @@ saveCaseData <- function(caseData, folder) {
   nestingCohorts <- caseData$nestingCohorts
   if (caseData$metaData$hasVisits) {
     visits <- caseData$visits
-    ffbase::save.ffdf(nestingCohorts, visits, dir = folder)
+    if (caseData$metaData$hasExposures) {
+      exposures <- caseData$exposures
+      ffbase::save.ffdf(nestingCohorts, visits, exposures, dir = folder)
+      open(caseData$exposures)
+    } else {
+      ffbase::save.ffdf(nestingCohorts, visits, dir = folder)
+    }
     open(caseData$visits)
-    open(caseData$nestingCohorts)
   } else {
-    ffbase::save.ffdf(nestingCohorts, dir = folder)
-    open(caseData$nestingCohorts)
+    if (caseData$metaData$hasExposures) {
+      exposures <- caseData$exposures
+      ffbase::save.ffdf(nestingCohorts, exposures, dir = folder)
+      open(caseData$exposures)
+    } else {
+      ffbase::save.ffdf(nestingCohorts, dir = folder)
+    }
   }
+  open(caseData$nestingCohorts)
   saveRDS(caseData$cases, file = file.path(folder, "cases.rds"))
   saveRDS(caseData$metaData, file = file.path(folder, "metaData.rds"))
   invisible(TRUE)
@@ -247,6 +302,10 @@ loadCaseData <- function(folder, readOnly = TRUE) {
   if (caseData$metaData$hasVisits) {
     caseData$visits <- get("visits", envir = e)
     open(caseData$visits, readonly = readOnly)
+  }
+  if (caseData$metaData$hasExposures) {
+    caseData$exposures <- get("exposures", envir = e)
+    open(caseData$exposures, readonly = readOnly)
   }
   rm(e)
   class(caseData) <- "caseData"

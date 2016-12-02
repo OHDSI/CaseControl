@@ -47,6 +47,12 @@
 #'                                 \code{createCovariateSettings} function in the
 #'                                 \code{FeatureExtraction} package. If NULL then no covariate data is
 #'                                 retrieved.
+#' @param caseData                An object of type \code{caseData} as generated using the
+#'                                \code{\link{getDbCaseData}} function. If caseData is provided and contains
+#'                                the exposure data (see getExposures in the  \code{\link{getDbCaseData}} function,
+#'                                and if no covariates need to constructed (covariateSettings = NULL), then the
+#'                                no connection to the database is used to create the exposure data. This may be
+#'                                much more efficient in some situations.
 #'
 #' @export
 getDbExposureData <- function(caseControls,
@@ -56,70 +62,106 @@ getDbExposureData <- function(caseControls,
                               exposureTable = "drug_era",
                               exposureIds = c(),
                               cdmDatabaseSchema = exposureDatabaseSchema,
-                              covariateSettings = NULL) {
-  connection <- DatabaseConnector::connect(connectionDetails)
-  writeLines("Uploading cases and controls to database temp table")
-  start <- Sys.time()
-  caseControls$rowId <- 1:nrow(caseControls)
-  data <- caseControls[, c("rowId", "personId", "indexDate")]
-  colnames(data)[colnames(data) == "personId"] <- "subjectId"
-  colnames(data)[colnames(data) == "indexDate"] <- "cohortStartDate"
-  colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-  DatabaseConnector::insertTable(connection = connection,
-                                 tableName = "#case_controls",
-                                 data = data,
-                                 dropTableIfExists = TRUE,
-                                 createTable = TRUE,
-                                 tempTable = TRUE,
-                                 oracleTempSchema = oracleTempSchema)
-  delta <- Sys.time() - start
-  writeLines(paste("Uploading took", signif(delta, 3), attr(delta, "units")))
-
-  writeLines("Loading exposure data from server")
-  start <- Sys.time()
-  renderedSql <- SqlRender::loadRenderTranslateSql("queryExposure.sql",
-                                                   packageName = "CaseControl",
-                                                   dbms = connectionDetails$dbms,
-                                                   oracleTempSchema = oracleTempSchema,
-                                                   exposure_database_schema = exposureDatabaseSchema,
-                                                   exposure_table = exposureTable,
-                                                   exposure_ids = exposureIds)
-  exposure <- DatabaseConnector::querySql(connection, renderedSql)
-  colnames(exposure) <- SqlRender::snakeCaseToCamelCase(colnames(exposure))
-  delta <- Sys.time() - start
-  writeLines(paste("Loading took", signif(delta, 3), attr(delta, "units")))
-
-  if (!is.null(covariateSettings)) {
-    covariates <- FeatureExtraction::getDbCovariateData(connection = connection,
-                                                        oracleTempSchema = oracleTempSchema,
-                                                        cdmDatabaseSchema = cdmDatabaseSchema,
-                                                        cdmVersion = 5,
-                                                        cohortTable = "#case_controls",
-                                                        cohortTableIsTemp = TRUE,
-                                                        rowIdField = "row_id",
-                                                        covariateSettings = covariateSettings,
-                                                        normalize = TRUE)
-  }
-  sql <- "TRUNCATE TABLE #case_controls; DROP TABLE #case_controls;"
-  sql <- SqlRender::translateSql(sql,
-                                 targetDialect = connectionDetails$dbms,
-                                 oracleTempSchema = oracleTempSchema)$sql
-  DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
-  RJDBC::dbDisconnect(connection)
-
-  result <- list(caseControls = caseControls, exposure = exposure, metaData = attr(caseControls,
-                                                                                   "metaData"))
-  attr(result$caseControls, "metaData") <- NULL
-  if (!is.null(covariateSettings)) {
-    result$covariates <- covariates$covariates
-    result$covariateRef <- covariates$covariateRef
-    result$metaData$hasCovariates <- TRUE
-    result$metaData$covariateMetaData <- covariates$metaData
-  } else {
+                              covariateSettings = NULL,
+                              caseData = NULL) {
+  #caseControls <- readRDS("S:/Temp/CiCalibration_Mdcd/ccOutput/caseControls_cd1_cc1_o14.rds")
+  #caseData <- loadCaseData("S:/Temp/CiCalibration_Mdcd/ccOutput/caseData_cd1")
+  #exposureIds = 11
+  if (nrow(caseControls) == 0) {
+    exposures = data.frame(rowId = c(),
+                           exposureId = c(),
+                           daysSinceExposureStart = c(),
+                           daysSinceExposureEnd = c())
+    result <- list(caseControls = caseControls,
+                   exposure = data.frame(),
+                   metaData = attr(caseControls, "metaData"))
+    attr(result$caseControls, "metaData") <- NULL
     result$metaData$hasCovariates <- FALSE
+    class(result) <- "caseControlsExposure"
+    return(result)
   }
-  class(result) <- "caseControlsExposure"
-  return(result)
+  if (is.null(covariateSettings) && !is.null(caseData) && caseData$metaData$hasExposures) {
+    writeLines("Using pre-fetched exposures in caseData object")
+    caseControls$rowId <- 1:nrow(caseControls)
+    exposures <- caseData$exposures[ffbase::`%in%`(caseData$exposures$exposureId, exposureIds), ]
+    exposures <- exposures[ffbase::`%in%`(exposures$personId, caseControls$personId), ]
+    exposure <- merge(ff::as.ram(exposures), caseControls[, c("personId", "indexDate", "rowId")])
+    exposure$daysSinceExposureStart <- exposure$indexDate - exposure$exposureStartDate
+    exposure$daysSinceExposureEnd <- exposure$indexDate - exposure$exposureEndDate
+    exposure <- exposure[exposure$daysSinceExposureStart >= 0, ]
+    exposure <-exposure[, c("rowId", "exposureId", "daysSinceExposureStart", "daysSinceExposureEnd")]
+    result <- list(caseControls = caseControls,
+                   exposure = exposure,
+                   metaData = attr(caseControls, "metaData"))
+    attr(result$caseControls, "metaData") <- NULL
+    result$metaData$hasCovariates <- FALSE
+    class(result) <- "caseControlsExposure"
+    return(result)
+  } else {
+    connection <- DatabaseConnector::connect(connectionDetails)
+    writeLines("Uploading cases and controls to database temp table")
+    start <- Sys.time()
+    caseControls$rowId <- 1:nrow(caseControls)
+    data <- caseControls[, c("rowId", "personId", "indexDate")]
+    colnames(data)[colnames(data) == "personId"] <- "subjectId"
+    colnames(data)[colnames(data) == "indexDate"] <- "cohortStartDate"
+    colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+    DatabaseConnector::insertTable(connection = connection,
+                                   tableName = "#case_controls",
+                                   data = data,
+                                   dropTableIfExists = TRUE,
+                                   createTable = TRUE,
+                                   tempTable = TRUE,
+                                   oracleTempSchema = oracleTempSchema)
+    delta <- Sys.time() - start
+    writeLines(paste("Uploading took", signif(delta, 3), attr(delta, "units")))
+
+    writeLines("Loading exposure data from server")
+    start <- Sys.time()
+    renderedSql <- SqlRender::loadRenderTranslateSql("queryExposure.sql",
+                                                     packageName = "CaseControl",
+                                                     dbms = connectionDetails$dbms,
+                                                     oracleTempSchema = oracleTempSchema,
+                                                     exposure_database_schema = exposureDatabaseSchema,
+                                                     exposure_table = exposureTable,
+                                                     exposure_ids = exposureIds)
+    exposure <- DatabaseConnector::querySql(connection, renderedSql)
+    colnames(exposure) <- SqlRender::snakeCaseToCamelCase(colnames(exposure))
+    delta <- Sys.time() - start
+    writeLines(paste("Loading took", signif(delta, 3), attr(delta, "units")))
+
+    if (!is.null(covariateSettings)) {
+      covariates <- FeatureExtraction::getDbCovariateData(connection = connection,
+                                                          oracleTempSchema = oracleTempSchema,
+                                                          cdmDatabaseSchema = cdmDatabaseSchema,
+                                                          cdmVersion = 5,
+                                                          cohortTable = "#case_controls",
+                                                          cohortTableIsTemp = TRUE,
+                                                          rowIdField = "row_id",
+                                                          covariateSettings = covariateSettings,
+                                                          normalize = TRUE)
+    }
+    sql <- "TRUNCATE TABLE #case_controls; DROP TABLE #case_controls;"
+    sql <- SqlRender::translateSql(sql,
+                                   targetDialect = connectionDetails$dbms,
+                                   oracleTempSchema = oracleTempSchema)$sql
+    DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
+    RJDBC::dbDisconnect(connection)
+
+    result <- list(caseControls = caseControls, exposure = exposure, metaData = attr(caseControls,
+                                                                                     "metaData"))
+    attr(result$caseControls, "metaData") <- NULL
+    if (!is.null(covariateSettings)) {
+      result$covariates <- covariates$covariates
+      result$covariateRef <- covariates$covariateRef
+      result$metaData$hasCovariates <- TRUE
+      result$metaData$covariateMetaData <- covariates$metaData
+    } else {
+      result$metaData$hasCovariates <- FALSE
+    }
+    class(result) <- "caseControlsExposure"
+    return(result)
+  }
 }
 
 #' Save the caseControlsExposure data to folder

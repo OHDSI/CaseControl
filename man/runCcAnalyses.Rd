@@ -10,7 +10,8 @@ runCcAnalyses(connectionDetails, cdmDatabaseSchema,
   outcomeDatabaseSchema = cdmDatabaseSchema, outcomeTable = "condition_era",
   nestingCohortDatabaseSchema = cdmDatabaseSchema,
   nestingCohortTable = "condition_era", outputFolder = "./CcOutput",
-  ccAnalysisList, exposureOutcomeNestingCohortList, getDbCaseDataThreads = 1,
+  ccAnalysisList, exposureOutcomeNestingCohortList,
+  prefetchExposureData = FALSE, getDbCaseDataThreads = 1,
   selectControlsThreads = 1, getDbExposureDataThreads = 1,
   createCaseControlDataThreads = 1, fitCaseControlModelThreads = 1,
   cvThreads = 1)
@@ -64,6 +65,13 @@ using the \code{\link{createCcAnalysis}} function.}
 \item{exposureOutcomeNestingCohortList}{A list of objects of type
 \code{exposureOutcomeNestingCohort} as created using the
 \code{\link{createExposureOutcomeNestingCohort}} function.}
+
+\item{prefetchExposureData}{Should exposure data for the entire nesting cohort be fetched at
+the beginning, or should exposure data be fetch later specifically
+for a set of cases and controls. Prefetching can be faster
+when there are many outcomes but only few exposures. Prefetching
+does not speed up performance when covariates also need to be
+constructed.}
 
 \item{getDbCaseDataThreads}{The number of parallel threads to use for building the
 caseData objects.}

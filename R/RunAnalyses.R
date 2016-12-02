@@ -65,6 +65,12 @@
 #'                                           \code{exposureOutcomeNestingCohort} as created using the
 #'                                           \code{\link{createExposureOutcomeNestingCohort}} function.
 #' @param outputFolder                       Name of the folder where all the outputs will written to.
+#' @param prefetchExposureData               Should exposure data for the entire nesting cohort be fetched at
+#'                                           the beginning, or should exposure data be fetch later specifically
+#'                                           for a set of cases and controls. Prefetching can be faster
+#'                                           when there are many outcomes but only few exposures. Prefetching
+#'                                           does not speed up performance when covariates also need to be
+#'                                           constructed.
 #' @param getDbCaseDataThreads               The number of parallel threads to use for building the
 #'                                           caseData objects.
 #' @param selectControlsThreads              The number of parallel threads to use for selecting
@@ -99,6 +105,7 @@ runCcAnalyses <- function(connectionDetails,
                           outputFolder = "./CcOutput",
                           ccAnalysisList,
                           exposureOutcomeNestingCohortList,
+                          prefetchExposureData = FALSE,
                           getDbCaseDataThreads = 1,
                           selectControlsThreads = 1,
                           getDbExposureDataThreads = 1,
@@ -159,6 +166,7 @@ runCcAnalyses <- function(connectionDetails,
             nestingCohortId
         }
         outcomeIds <- unique(outcomeReference$outcomeId[idx])
+
         cdDataFileName <- .createCaseDataFileName(outputFolder, d, nestingCohortId)
         outcomeReference$caseDataFolder[idx] <- cdDataFileName
         if (!file.exists(cdDataFileName)) {
@@ -170,7 +178,13 @@ runCcAnalyses <- function(connectionDetails,
                        nestingCohortDatabaseSchema = nestingCohortDatabaseSchema,
                        nestingCohortTable = nestingCohortTable,
                        outcomeIds = outcomeIds,
-                       nestingCohortId = nestingCohortId)
+                       nestingCohortId = nestingCohortId,
+                       getExposures = prefetchExposureData)
+          if (prefetchExposureData) {
+            args$exposureDatabaseSchema <- exposureDatabaseSchema
+            args$exposureTable <- exposureTable
+            args$exposureIds <- unique(outcomeReference$exposureId[idx])
+          }
           args <- append(args, getDbCaseDataArgs$getDbCaseDataArgs)
           if (is.na(nestingCohortId)) {
             args$nestingCohortId <- NULL
@@ -181,6 +195,8 @@ runCcAnalyses <- function(connectionDetails,
         }
       }
     } else {
+      idx <- outcomeReference$analysisId %in% analysesIds
+      outcomeIds <- unique(outcomeReference$outcomeId[idx])
       cdDataFileName <- .createCaseDataFileName(outputFolder, d)
       idx <- outcomeReference$analysisId %in% analysesIds & is.na(outcomeReference$nestingCohortId)
       outcomeReference$caseDataFolder[idx] <- cdDataFileName
@@ -193,11 +209,16 @@ runCcAnalyses <- function(connectionDetails,
                      nestingCohortDatabaseSchema = nestingCohortDatabaseSchema,
                      nestingCohortTable = nestingCohortTable,
                      outcomeIds = outcomeIds,
-                     nestingCohortId = nestingCohortId)
+                     nestingCohortId = nestingCohortId,
+                     getExposures = prefetchExposureData)
+        if (prefetchExposureData) {
+          args$exposureDatabaseSchema <- exposureDatabaseSchema
+          args$exposureTable <- exposureTable
+          args$exposureIds <- unique(outcomeReference$exposureId[idx])
+        }
         args <- append(args, getDbCaseDataArgs$getDbCaseDataArgs)
         cdObjectsToCreate[[length(cdObjectsToCreate) + 1]] <- list(args = args,
                                                                    cdDataFileName = cdDataFileName)
-
       }
     }
   }
@@ -252,9 +273,15 @@ runCcAnalyses <- function(connectionDetails,
                      exposureTable = exposureTable,
                      exposureIds = exposureIds,
                      cdmDatabaseSchema = cdmDatabaseSchema)
+        if (prefetchExposureData) {
+          cdFilename <- outcomeReference$caseDataFolder[outcomeReference$caseControlsFile == ccFilename][1]
+        } else {
+          cdFilename <- NULL
+        }
         args <- append(args, edArgs)
         edObjectsToCreate[[length(edObjectsToCreate) + 1]] <- list(args = args,
                                                                    ccFilename = ccFilename,
+                                                                   cdFilename = cdFilename,
                                                                    edFilename = edFilename)
       }
     }
@@ -347,6 +374,10 @@ runCcAnalyses <- function(connectionDetails,
   createExposureDataObject <- function(params) {
     caseControls <- readRDS(params$ccFilename)
     params$args$caseControls <- caseControls
+    if (!is.null(params$cdFilename)) {
+      caseData <- loadCaseData(params$cdFilename)
+      params$args$caseData <- caseData
+    }
     exposureData <- do.call("getDbExposureData", params$args)
     saveCaseControlsExposure(exposureData, params$edFilename)
   }

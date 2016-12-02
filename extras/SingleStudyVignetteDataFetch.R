@@ -27,7 +27,7 @@ pw <- NULL
 dbms <- "pdw"
 user <- NULL
 server <- "JRDUSAPSCTL01"
-cdmDatabaseSchema <- "CDM_Truven_MDCD_V417.dbo"
+cdmDatabaseSchema <- "CDM_Truven_MDCD_V464.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 oracleTempSchema <- NULL
 cohortTable <- "mschuemi_cc_vignette"
@@ -73,6 +73,23 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
                           useObservationEndAsNestingEndDate = TRUE,
                           getVisits = TRUE)
 
+# caseData <- getDbCaseData(connectionDetails = connectionDetails,
+#                           cdmDatabaseSchema = cdmDatabaseSchema,
+#                           oracleTempSchema = oracleTempSchema,
+#                           outcomeDatabaseSchema = cohortDatabaseSchema,
+#                           outcomeTable = cohortTable,
+#                           outcomeIds = 1,
+#                           useNestingCohort = TRUE,
+#                           nestingCohortDatabaseSchema = cohortDatabaseSchema,
+#                           nestingCohortTable = cohortTable,
+#                           nestingCohortId = 2,
+#                           useObservationEndAsNestingEndDate = TRUE,
+#                           getVisits = TRUE,
+#                           getExposures = FALSE,
+#                           exposureDatabaseSchema = cdmDatabaseSchema,
+#                           exposureTable = "drug_era",
+#                           exposureIds = 1124300)
+
 saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseData")
 
 caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
@@ -110,6 +127,13 @@ caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
                                           exposureTable = "drug_era",
                                           exposureIds = 1124300,
                                           covariateSettings = covariateSettings)
+
+# caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
+#                                           caseControls = caseControls,
+#                                           oracleTempSchema = oracleTempSchema,
+#                                           exposureIds = 1124300,
+#                                           covariateSettings = NULL,
+#                                           caseData = caseData)
 
 saveCaseControlsExposure(caseControlsExposure, "s:/temp/vignetteCaseControl/caseControlsExposure")
 

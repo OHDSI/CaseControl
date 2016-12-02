@@ -56,7 +56,7 @@ createCaseControlData <- function(caseControlsExposure,
     exposure <- exposure[!idx, ]
   }
   idx <- exposure$daysSinceExposureStart > (-riskWindowEnd) & exposure$daysSinceExposureEnd < (-riskWindowStart)
-  exposedRowIds <- exposure$rowId[idx]
+  exposedRowIds <- unique(exposure$rowId[idx])
   caseControlData <- caseControlsExposure$caseControls
   caseControlData$exposed <- 0
   caseControlData$exposed[caseControlData$rowId %in% exposedRowIds] <- 1
