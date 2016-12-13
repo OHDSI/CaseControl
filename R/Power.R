@@ -67,7 +67,7 @@ computeMdrr <- function(caseControlData, alpha = 0.05, power = 0.8, twoSided = T
     H <- 10
     while (H >= L) {
       M <- L + (H - L)/2
-      powerM <- computePower(z, r, p0, M, n, alpha)
+      powerM <- computePower(z, r, p0, exp(M), n, alpha)
       d <- powerM - power
       #writeLines(paste('M =', M, 'power = ',powerM))
       if (d > precision) {
@@ -81,7 +81,8 @@ computeMdrr <- function(caseControlData, alpha = 0.05, power = 0.8, twoSided = T
         return(M)
     }
   }
-  mdrr <- binarySearch(z, r, p0, n, power, alpha)
+  mdLogRr <- binarySearch(z, r, p0, n, power, alpha)
+  mdrr <- exp(mdLogRr)
 
   result <- data.frame(cases = sum(caseControlData$isCase == 1),
                        controls = sum(caseControlData$isCase == 0),
