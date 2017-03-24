@@ -254,3 +254,27 @@ test_that("Match on time in cohort", {
                        daysInCohortCaliper = 30)
   expect_equal(cc$personId, c(1, 3))
 })
+
+test_that("Restrict on age", {
+  caseData <- list(cases = data.frame(nestingCohortId = c(1),
+                                      outcomeId = c(1),
+                                      indexDate = as.Date(c("2001-01-01"))),
+                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+                                                           personId = c(1, 2, 3),
+                                                           observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
+                                                           startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
+                                                           endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
+                                                           dateOfBirth = as.Date(c("1995-01-01", "1995-01-01", "1990-01-01")),
+                                                           genderConceptId = c(8532, 8532, 8532),
+                                                           careSiteId = c(1, 1, 1),
+                                                           providerId = c(1, 1, 1))))
+
+  # One case, one control without retricting on age:
+  cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180, matchOnAge = TRUE)
+  expect_equal(cc$personId[order(cc$personId)], c(1, 2))
+
+  # No cases when restricting on age:
+  cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180, matchOnAge = TRUE, minAge = 8, maxAge = 12)
+
+  expect_equal(length(cc$personId), 0)
+})

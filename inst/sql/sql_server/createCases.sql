@@ -57,7 +57,7 @@ FROM (
 		start_date,
 } : {
 		CASE 
-			WHEN start_date > CAST('@study_start_date' AS DATE)
+			WHEN start_date < CAST('@study_start_date' AS DATE)
 				THEN CAST('@study_start_date' AS DATE)
 			ELSE start_date
 			END AS start_date,

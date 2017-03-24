@@ -9,7 +9,8 @@ selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
   ageCaliper = 2, matchOnGender = TRUE, matchOnProvider = FALSE,
   matchOnCareSite = FALSE, matchOnVisitDate = FALSE,
   visitDateCaliper = 30, matchOnTimeInCohort = FALSE,
-  daysInCohortCaliper = 30, removedUnmatchedCases = TRUE)
+  daysInCohortCaliper = 30, minAge = NULL, maxAge = NULL,
+  removedUnmatchedCases = TRUE)
 }
 \arguments{
 \item{caseData}{An object of type \code{caseData} as generated using the
@@ -44,6 +45,19 @@ date when matching on visit date.}
 interpreted as time observed prior to index.}
 
 \item{daysInCohortCaliper}{Maximum difference (in days) in time in cohort.}
+
+\item{minAge}{Minimum age at which patient time will be included in the analysis.
+Note that information prior to the min age is still used to determine
+exposure status after the minimum age (e.g. when a prescription was
+started just prior to reaching the minimum age). Also, outcomes
+occurring before the minimum age is reached will be considered as
+prior outcomes when using first outcomes only. Age should be specified
+in years, but non-integer values are allowed. If not specified, no age
+restriction will be applied.}
+
+\item{maxAge}{Maximum age at which patient time will be included in the analysis. Age
+should be specified in years, but non-integer values are allowed. If not
+specified, no age restriction will be applied.}
 
 \item{removedUnmatchedCases}{Should cases with no matched controls be removed?}
 }

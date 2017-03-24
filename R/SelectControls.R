@@ -41,6 +41,17 @@
 #' @param matchOnTimeInCohort     Match on time in nesting cohort? When not using nesting, this is
 #'                                interpreted as time observed prior to index.
 #' @param daysInCohortCaliper     Maximum difference (in days) in time in cohort.
+#' @param minAge                  Minimum age at which patient time will be included in the analysis.
+#'                                Note that information prior to the min age is still used to determine
+#'                                exposure status after the minimum age (e.g. when a prescription was
+#'                                started just prior to reaching the minimum age). Also, outcomes
+#'                                occurring before the minimum age is reached will be considered as
+#'                                prior outcomes when using first outcomes only. Age should be specified
+#'                                in years, but non-integer values are allowed. If not specified, no age
+#'                                restriction will be applied.
+#' @param maxAge                  Maximum age at which patient time will be included in the analysis. Age
+#'                                should be specified in years, but non-integer values are allowed. If not
+#'                                specified, no age restriction will be applied.
 #' @param removedUnmatchedCases   Should cases with no matched controls be removed?
 #'
 #' @return
@@ -63,6 +74,8 @@ selectControls <- function(caseData,
                            visitDateCaliper = 30,
                            matchOnTimeInCohort = FALSE,
                            daysInCohortCaliper = 30,
+                           minAge = NULL,
+                           maxAge = NULL,
                            removedUnmatchedCases = TRUE) {
   if (matchOnVisitDate && !caseData$metaData$hasVisits)
     stop("Cannot match on visits because no visit data was loaded. Please rerun getDbCaseData with getVisits = TRUE")
@@ -95,6 +108,16 @@ selectControls <- function(caseData,
     # Use one dummy visit so code won't break:
     visits <- ff::as.ffdf(data.frame(nestingCohortId = -1, visitStartDate = "1900-01-01"))
   }
+  if (missing(minAge) || is.null(minAge)) {
+    minAgeDays <- 0
+  } else {
+    minAgeDays <- as.integer(minAge * 365.25)
+  }
+  if (missing(maxAge) || is.null(maxAge)) {
+    maxAgeDays <- 9999999
+  } else {
+    maxAgeDays <- as.integer(maxAge * 365.25)
+  }
 
   caseControls <- .selectControls(nestingCohorts,
                                   cases,
@@ -110,7 +133,9 @@ selectControls <- function(caseData,
                                   matchOnVisitDate,
                                   visitDateCaliper,
                                   matchOnTimeInCohort,
-                                  daysInCohortCaliper)
+                                  daysInCohortCaliper,
+                                  minAgeDays,
+                                  maxAgeDays)
   caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
   delta <- Sys.time() - start
   writeLines(paste("Selection took", signif(delta, 3), attr(delta, "units")))
@@ -140,8 +165,13 @@ selectControls <- function(caseData,
   if (washoutPeriod != 0) {
     eventCount <- sum(caseControls$isCase)
     caseCount <- length(unique(caseControls$personId[caseControls$isCase]))
+    if (missing(minAge) | is.null(minAge) | missing(maxAge) | is.null(maxAge)) {
+      description = paste("Require", washoutPeriod, "days of prior obs.")
+    } else {
+      description = paste("Require", washoutPeriod, "days of prior obs + age restrict.")
+    }
     counts <- rbind(counts,
-                    data.frame(description = paste("Require", washoutPeriod, "days of prior obs."),
+                    data.frame(description = description,
                                        eventCount = eventCount,
                                        caseCount = caseCount))
   }

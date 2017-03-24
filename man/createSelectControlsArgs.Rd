@@ -8,8 +8,8 @@ createSelectControlsArgs(firstOutcomeOnly = TRUE, washoutPeriod = 180,
   controlsPerCase = 2, matchOnAge = TRUE, ageCaliper = 2,
   matchOnGender = TRUE, matchOnProvider = FALSE, matchOnCareSite = FALSE,
   matchOnVisitDate = FALSE, visitDateCaliper = 30,
-  matchOnTimeInCohort = FALSE, daysInCohortCaliper = 30,
-  removedUnmatchedCases = TRUE)
+  matchOnTimeInCohort = FALSE, daysInCohortCaliper = 30, minAge = NULL,
+  maxAge = NULL, removedUnmatchedCases = TRUE)
 }
 \arguments{
 \item{firstOutcomeOnly}{Use the first outcome per person?}
@@ -39,6 +39,19 @@ when matching on visit date.}
 isinterpreted as time observed prior to index.}
 
 \item{daysInCohortCaliper}{Maximum difference (in days) in time in cohort.}
+
+\item{minAge}{Minimum age at which patient time will be included in the
+analysis.Note that information prior to the min age is still used to
+determineexposure status after the minimum age (e.g. when a
+prescription wasstarted just prior to reaching the minimum age).
+Also, outcomesoccurring before the minimum age is reached will be
+considered asprior outcomes when using first outcomes only. Age
+should be specifiedin years, but non-integer values are allowed. If
+not specified, no agerestriction will be applied.}
+
+\item{maxAge}{Maximum age at which patient time will be included in the analysis.
+Ageshould be specified in years, but non-integer values are allowed.
+If notspecified, no age restriction will be applied.}
 
 \item{removedUnmatchedCases}{Should cases with no matched controls be removed?}
 }

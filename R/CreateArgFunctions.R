@@ -59,6 +59,17 @@ createGetDbCaseDataArgs <- function(useNestingCohort = FALSE,
 #' @param matchOnTimeInCohort     Match on time in nesting cohort? When not using nesting, this
 #'                                isinterpreted as time observed prior to index.
 #' @param daysInCohortCaliper     Maximum difference (in days) in time in cohort.
+#' @param minAge                  Minimum age at which patient time will be included in the
+#'                                analysis.Note that information prior to the min age is still used to
+#'                                determineexposure status after the minimum age (e.g. when a
+#'                                prescription wasstarted just prior to reaching the minimum age).
+#'                                Also, outcomesoccurring before the minimum age is reached will be
+#'                                considered asprior outcomes when using first outcomes only. Age
+#'                                should be specifiedin years, but non-integer values are allowed. If
+#'                                not specified, no agerestriction will be applied.
+#' @param maxAge                  Maximum age at which patient time will be included in the analysis.
+#'                                Ageshould be specified in years, but non-integer values are allowed.
+#'                                If notspecified, no age restriction will be applied.
 #' @param removedUnmatchedCases   Should cases with no matched controls be removed?
 #'
 #' @export
@@ -74,6 +85,8 @@ createSelectControlsArgs <- function(firstOutcomeOnly = TRUE,
                                      visitDateCaliper = 30,
                                      matchOnTimeInCohort = FALSE,
                                      daysInCohortCaliper = 30,
+                                     minAge = NULL,
+                                     maxAge = NULL,
                                      removedUnmatchedCases = TRUE) {
   # First: get default values:
   analysis <- list()
