@@ -14,4 +14,3 @@ saveCcAnalysisList(ccAnalysisList, file)
 \description{
 Write a list of objects of type \code{ccAnalysis} to file. The file is in JSON format.
 }
-

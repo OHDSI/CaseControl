@@ -17,4 +17,3 @@ Create a parameter object for the function getDbExposureData
 \details{
 Create an object defining the parameter values.
 }
-

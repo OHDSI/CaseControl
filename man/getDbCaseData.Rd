@@ -103,4 +103,3 @@ reasons. The generic \code{summary()} function has been implemented for this obj
 \description{
 Load all data about the cases and nesting cohort from the database.
 }
-

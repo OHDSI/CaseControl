@@ -57,4 +57,3 @@ much more efficient in some situations.}
 \description{
 Get exposure data for cases and controls from a database
 }
-

@@ -40,4 +40,3 @@ Fit the case-control model
 \details{
 Fits the model using a conditional logistic regression.
 }
-

@@ -22,4 +22,3 @@ Create a parameter object for the function createCaseControlData
 \details{
 Create an object defining the parameter values.
 }
-

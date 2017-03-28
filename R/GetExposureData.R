@@ -1,6 +1,6 @@
 # @file GetExposureData.R
 #
-# Copyright 2016 Observational Health Data Sciences and Informatics
+# Copyright 2017 Observational Health Data Sciences and Informatics
 #
 # This file is part of CaseControl
 #
@@ -142,7 +142,7 @@ getDbExposureData <- function(caseControls,
                                                           normalize = TRUE)
     }
     sql <- "TRUNCATE TABLE #case_controls; DROP TABLE #case_controls;"
-    sql <- SqlRender::translateSql(sql,
+    sql <- SqlRender::translateSql(sql = sql,
                                    targetDialect = connectionDetails$dbms,
                                    oracleTempSchema = oracleTempSchema)$sql
     DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)

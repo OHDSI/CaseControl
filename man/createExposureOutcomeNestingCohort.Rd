@@ -34,4 +34,3 @@ Create exposure-outcome-nesting-cohort combinations.
 \details{
 Create a set of hypotheses of interest, to be used with the \code{\link{runCcAnalyses}} function.
 }
-

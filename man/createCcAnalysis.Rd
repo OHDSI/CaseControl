@@ -48,4 +48,3 @@ Create a case-control analysis specification
 \details{
 Create a set of analysis choices, to be used with the \code{\link{runCcAnalyses}} function.
 }
-

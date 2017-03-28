@@ -16,4 +16,3 @@ A list of objects of type \code{drugComparatorOutcome}.
 Load a list of objects of type \code{exposureOutcomeNestingCohort} from file. The file is in JSON
 format.
 }
-

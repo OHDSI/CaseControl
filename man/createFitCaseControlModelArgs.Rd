@@ -29,4 +29,3 @@ Create a parameter object for the function fitCaseControlModel
 \details{
 Create an object defining the parameter values.
 }
-

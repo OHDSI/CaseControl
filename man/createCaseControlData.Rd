@@ -33,4 +33,3 @@ Create case-control data
 For each case and control, assesses whether exposure takes place within the risk window. The output
 can be directly used in a conditional logistic regression.
 }
-

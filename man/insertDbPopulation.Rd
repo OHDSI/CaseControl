@@ -40,4 +40,3 @@ Insert cases and controls into a database
 Inserts cases and controls into a database. The table in the database will have the same structure
 as the 'cohort' table in the Common Data Model.
 }
-

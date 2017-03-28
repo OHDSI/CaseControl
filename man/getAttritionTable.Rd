@@ -16,4 +16,3 @@ A data frame specifying the number of cases and events after various steps of fi
 \description{
 Get the attrition table for a population
 }
-

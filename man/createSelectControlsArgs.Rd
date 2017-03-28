@@ -61,4 +61,3 @@ Create a parameter object for the function selectControls
 \details{
 Create an object defining the parameter values.
 }
-

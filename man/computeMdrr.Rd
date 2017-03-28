@@ -33,4 +33,3 @@ Miettinen OS (1969) Individual matching in the case of all or none responses. Bi
 
 Rothman KJ, Boice JD (1979) Epidemiologic Analysis with a Programmable Calculator. NIH Publication No.79-1649.
 }
-

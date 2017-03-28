@@ -73,4 +73,3 @@ Select matched controls per case
 Select controls per case. Controls are matched on calendar time and the criteria defined in the
 arguments. Controls are randomly sampled to the required number.
 }
-

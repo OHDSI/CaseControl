@@ -31,4 +31,3 @@ Create a parameter object for the function getDbCaseData
 \details{
 Create an object defining the parameter values.
 }
-
