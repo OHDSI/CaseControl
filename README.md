@@ -13,11 +13,6 @@ Features
 - Sampling of controls per case
 - Fitting outcome models using conditional logisitc regression
 
-Example
-===========
-```r
-
-```
 Technology
 ==========
 CaseControl is an R package, with some functions implemented in C++.
@@ -62,7 +57,7 @@ Development
 ===========
 CaseControl is being developed in R Studio.
 
-###Development status
+### Development status
 [![Build Status](https://travis-ci.org/OHDSI/CaseControl.svg?branch=master)](https://travis-ci.org/OHDSI/CaseControl)
 [![codecov.io](https://codecov.io/github/OHDSI/CaseControl/coverage.svg?branch=master)](https://codecov.io/github/OHDSI/CaseControl?branch=master)
 
