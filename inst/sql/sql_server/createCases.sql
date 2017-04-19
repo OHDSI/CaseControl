@@ -29,6 +29,8 @@ limitations under the License.
 {DEFAULT @use_observation_end_as_nesting_end_date = TRUE} 
 {DEFAULT @study_start_date = '' }
 {DEFAULT @study_end_date = '' }
+{DEFAULT @case_crossover = FALSE}
+
 
 IF OBJECT_ID('tempdb..#nesting_cohort', 'U') IS NOT NULL
 	DROP TABLE #nesting_cohort;
@@ -103,7 +105,36 @@ FROM (
 {@study_end_date != '' } ? {		start_date < CAST('@study_end_date' AS DATE) }
 ) nesting_cohort
 INNER JOIN @cdm_database_schema.person
-ON nesting_cohort.person_id = person.person_id;
+ON nesting_cohort.person_id = person.person_id
+{@case_crossover} ? {
+INNER JOIN (
+{@outcome_table == 'condition_occurrence'} ? {	
+	SELECT person_id,
+	  condition_start_date AS index_date,
+	  condition_concept_id AS outcome_id
+	FROM @outcome_database_schema.condition_occurrence 
+	WHERE condition_concept_id IN (@outcome_ids)
+} : { 
+	{@outcome_table == 'condition_era'} ? {
+	SELECT person_id,
+	  condition_era_start_date AS index_date,
+	  condition_concept_id AS outcome_id
+	FROM @outcome_database_schema.condition_era 
+	WHERE condition_concept_id IN (@outcome_ids)
+	} : { /* outcome table has same structure as cohort table */
+	SELECT subject_id AS person_id,
+	  cohort_start_date AS index_date,
+	  cohort_definition_id AS outcome_id
+	FROM @outcome_database_schema.@outcome_table
+	WHERE cohort_definition_id IN (@outcome_ids)
+	}
+}
+	) outcome
+ON outcome.person_id = nesting_cohort.person_id
+AND outcome.index_date <= nesting_cohort.end_date
+AND	outcome.index_date >= nesting_cohort.observation_period_start_date
+}
+;
 	
 /**********************************************************************
 							Select cases
@@ -138,4 +169,4 @@ INNER JOIN (
 	) outcome
 ON outcome.person_id = nesting_cohort.person_id
 AND outcome.index_date <= nesting_cohort.end_date
-AND	outcome.index_date >= nesting_cohort.start_date;
+AND	outcome.index_date >= nesting_cohort.observation_period_start_date;

@@ -123,6 +123,8 @@ getDbCaseData <- function(connectionDetails,
     nestingCohortId <- -1
     useObservationEndAsNestingEndDate <- FALSE
   }
+  # Usign attr to implement hidden function argument:
+  caseCrossover <- !is.null(attr(useNestingCohort, "caseCrossover"))
 
   conn <- connect(connectionDetails)
   renderedSql <- SqlRender::loadRenderTranslateSql("createCases.sql",
@@ -139,7 +141,8 @@ getDbCaseData <- function(connectionDetails,
                                                    nesting_cohort_id = nestingCohortId,
                                                    use_observation_end_as_nesting_end_date = useObservationEndAsNestingEndDate,
                                                    study_start_date = studyStartDate,
-                                                   study_end_date = studyEndDate)
+                                                   study_end_date = studyEndDate,
+                                                   case_crossover = caseCrossover)
 
   writeLines("Executing multiple queries. This could take a while")
   executeSql(conn, renderedSql)
