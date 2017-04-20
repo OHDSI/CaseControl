@@ -41,7 +41,7 @@ IF OBJECT_ID('tempdb..#cases', 'U') IS NOT NULL
 /**********************************************************************
 						Create nesting cohort
 ***********************************************************************/
-SELECT nesting_cohort_id,
+SELECT DISTINCT nesting_cohort_id,
 	person.person_id,
 	observation_period_start_date,
 	start_date,
