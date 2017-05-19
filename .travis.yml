@@ -73,8 +73,3 @@ after_success:
   - curl --data "build=true" -X POST https://registry.hub.docker.com/u/ohdsi/broadsea-methodslibrary/trigger/f0b51cec-4027-4781-9383-4b38b42dd4f5/
   # Rebuild drat repo
   - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash deploy.sh
-
-env:
-  global:
-    secure: mYn0UB8tIQIwdZEZ8g7tKJgVA86oBE3IMENAOhKyU3/nsVminl1aAglBeTP3tdxqov4Xjz3+kHnEZTxQJCmV173kCqY2dR4KdiZ/Gg7fQn1BCxIHQRyM1uvVq+t0/IphX3mvjGntpu3m+IoCLbc423Q/CxnsEGSLqstQ5cpOx2ED3IV6kkk2RQQ9+waN7IFWHe8BcCLSGKYAq0F1GDx0WyzG8qtbCGWlmpMMyVWA75d0KthCS/+WXne9pol/Dztlars+7bnlsrJep3uOyUQgHV00TlI9JFNHQLBOzAiLiWYyC5/sISZ4IupCBvyG7aiVcTMZ39hiLZUxwJ0LKcY4KTC1GhoGXV2A5o5xwIEiLWfF35Udcgu12DKOimtcVgdLC90flXvuMIyC2Jerqak6Ry6zQvq0nDMRDv5Sj2PUsrNEBQY+qTnXFKDZUjILpbMhSaCUe0E6MWMFhF6UXcgYg1gXOGpdULOcrpiZvwkBSE/phT+vjsrq/AtYh2C42VvrePm2+Da2G5ykZB/3Da0ngsqcoo1At1yb6hiDgunjVpxjsX1DWdeaF0R++EILw3DrOR/4aR51mFdtLzmB+TzS0SPEtRibI6HZJGdaUxaDWowNTTqyfJ0ApXI8XtKSxFxFhKAJONoSIBZgGsrMKQeW5w7HW1CIOWP21W1whaoMj6I=
-
