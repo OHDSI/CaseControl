@@ -85,13 +85,6 @@
 #'                                           cross-validation to determine the hyper-parameter when
 #'                                           fitting the model.
 #'
-#' @return
-#' A data frame with the following columns: \tabular{ll}{ \verb{analysisId} \tab The unique identifier
-#' for a set of analysis choices.\cr \verb{exposureId} \tab The ID of the target drug.\cr
-#' \verb{outcomeId} \tab The ID of the outcome.\cr \verb{ccDataFolder} \tab The folder where the
-#' ccData object is stored.\cr \verb{ccEraDataFolder} \tab The folder where the ccEraData object is
-#' stored.\cr \verb{ccModelFile} \tab The file where the fitted SCCS model is stored.\cr }
-#'
 #' @export
 runCcAnalyses <- function(connectionDetails,
                           cdmDatabaseSchema,
@@ -198,7 +191,7 @@ runCcAnalyses <- function(connectionDetails,
       idx <- outcomeReference$analysisId %in% analysesIds
       outcomeIds <- unique(outcomeReference$outcomeId[idx])
       cdDataFileName <- .createCaseDataFileName(outputFolder, d)
-      idx <- outcomeReference$analysisId %in% analysesIds & is.na(outcomeReference$nestingCohortId)
+      idx <- outcomeReference$analysisId %in% analysesIds
       outcomeReference$caseDataFolder[idx] <- cdDataFileName
       if (!file.exists(cdDataFileName)) {
         args <- list(connectionDetails = connectionDetails,
@@ -471,21 +464,6 @@ runCcAnalyses <- function(connectionDetails,
 #' Create a summary report of the analyses
 #'
 #' @param outcomeReference   A data.frame as created by the \code{\link{runCcAnalyses}} function.
-#'
-#' @return
-#' A data frame with the following columns: \tabular{ll}{ \verb{analysisId} \tab The unique identifier
-#' for a set of analysis choices.\cr \verb{targetId} \tab The ID of the target drug.\cr
-#' \verb{comparatorId} \tab The ID of the comparator group.\cr \verb{indicationConceptIds} \tab The
-#' ID(s) of indications in which to nest to study. \cr \verb{outcomeId} \tab The ID of the outcome.\cr
-#' \verb{rr} \tab The estimated effect size.\cr \verb{ci95lb} \tab The lower bound of the 95 percent
-#' confidence interval.\cr \verb{ci95ub} \tab The upper bound of the 95 percent confidence
-#' interval.\cr \verb{treated} \tab The number of subjects in the treated group (after any trimming
-#' and matching).\cr \verb{comparator} \tab The number of subjects in the comparator group (after any
-#' trimming and matching).\cr \verb{eventsTreated} \tab The number of outcomes in the treated group
-#' (after any trimming and matching).\cr \verb{eventsComparator} \tab The number of outcomes in the
-#' comparator group (after any trimming and \cr \tab matching).\cr \verb{logRr} \tab The log of the
-#' estimated relative risk.\cr \verb{seLogRr} \tab The standard error of the log of the estimated
-#' relative risk.\cr }
 #'
 #' @export
 summarizeCcAnalyses <- function(outcomeReference) {

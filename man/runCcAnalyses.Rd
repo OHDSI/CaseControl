@@ -92,13 +92,6 @@ models.}
 cross-validation to determine the hyper-parameter when
 fitting the model.}
 }
-\value{
-A data frame with the following columns: \tabular{ll}{ \verb{analysisId} \tab The unique identifier
-for a set of analysis choices.\cr \verb{exposureId} \tab The ID of the target drug.\cr
-\verb{outcomeId} \tab The ID of the outcome.\cr \verb{ccDataFolder} \tab The folder where the
-ccData object is stored.\cr \verb{ccEraDataFolder} \tab The folder where the ccEraData object is
-stored.\cr \verb{ccModelFile} \tab The file where the fitted SCCS model is stored.\cr }
-}
 \description{
 Run a list of analyses
 }

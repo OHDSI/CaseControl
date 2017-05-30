@@ -156,7 +156,7 @@ print.summary.outcomeModel <- function(x, ...) {
   colnames(d) <- c("Cases", "Controls", "Exposed cases", "Exposed controls")
   rownames(d) <- "Count"
 
-  printCoefmat(d)
+  printCoefmat(d, P.values = FALSE, has.Pvalue = FALSE)
 
 
 }
