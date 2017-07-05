@@ -155,7 +155,7 @@ getDbExposureData <- function(caseControls,
                                        targetDialect = connectionDetails$dbms,
                                        oracleTempSchema = oracleTempSchema)$sql
         DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
-        RJDBC::dbDisconnect(connection)
+        DatabaseConnector::disconnect(connection)
 
         result <- list(caseControls = caseControls, exposure = exposure, metaData = attr(caseControls,
                                                                                          "metaData"))

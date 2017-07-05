@@ -203,7 +203,7 @@ getDbCaseData <- function(connectionDetails,
                                                      oracleTempSchema = oracleTempSchema)
     DatabaseConnector::executeSql(conn, renderedSql, progressBar = FALSE, reportOverallTime = FALSE)
   }
-  dbDisconnect(conn)
+  DatabaseConnector::disconnect(conn)
 
   metaData <- list(outcomeIds = outcomeIds,
                    call = match.call(),
@@ -436,7 +436,7 @@ insertDbPopulation <- function(caseControls,
                                  createTable = createTable,
                                  tempTable = FALSE,
                                  oracleTempSchema = NULL)
-  RJDBC::dbDisconnect(connection)
+  DatabaseConnector::disconnect(connection)
   delta <- Sys.time() - start
   writeLines(paste("Inserting rows took", signif(delta, 3), attr(delta, "units")))
   invisible(TRUE)

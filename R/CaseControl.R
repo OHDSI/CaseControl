@@ -22,7 +22,6 @@
 #' @name CaseControl
 #' @importFrom Rcpp evalCpp
 #' @importFrom SqlRender loadRenderTranslateSql translateSql
-#' @importFrom RJDBC dbDisconnect
 #' @importFrom survival strata
 #' @importFrom stats coef confint pnorm printCoefmat qnorm
 #' @import bit
