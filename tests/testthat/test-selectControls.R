@@ -278,3 +278,24 @@ test_that("Restrict on age", {
 
   expect_equal(length(cc$personId), 0)
 })
+
+
+test_that("Sampling with replacement", {
+  caseData <- list(cases = data.frame(nestingCohortId = c(1, 2),
+                                      outcomeId = c(1, 1),
+                                      indexDate = as.Date(c("2001-01-01", "2001-01-01"))),
+                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+                                                           personId = c(1, 2, 3),
+                                                           observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
+                                                           startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
+                                                           endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
+                                                           dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
+                                                           genderConceptId = c(8532, 8532, 8532),
+                                                           careSiteId = c(1, 1, 1),
+                                                           providerId = c(1, 1, 1))))
+
+  # Control should be used twice:
+  cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180)
+  expect_equal(cc$personId, c(1, 3, 2, 3))
+})
+

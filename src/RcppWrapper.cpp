@@ -26,8 +26,8 @@
 
 using namespace Rcpp;
 
-// [[Rcpp::export(".selectControls")]]
-DataFrame selectControls(const List& nestingCohorts, const List& cases, const List& visits, const bool firstOutcomeOnly, const int washoutPeriod,
+// [[Rcpp::export]]
+DataFrame selectControlsInternal(const List& nestingCohorts, const List& cases, const List& visits, const bool firstOutcomeOnly, const int washoutPeriod,
                     const int controlsPerCase, const bool matchOnAge, const double ageCaliper, const bool matchOnGender, const bool matchOnProvider,
                     const bool matchOnCareSite, const bool matchOnVisitDate, const int visitDateCaliper, const bool matchOnTimeInCohort,
                     const int daysInCohortCaliper, const int minAgeDays, const int maxAgeDays) {

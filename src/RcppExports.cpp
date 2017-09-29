@@ -5,9 +5,9 @@
 
 using namespace Rcpp;
 
-// selectControls
-DataFrame selectControls(const List& nestingCohorts, const List& cases, const List& visits, const bool firstOutcomeOnly, const int washoutPeriod, const int controlsPerCase, const bool matchOnAge, const double ageCaliper, const bool matchOnGender, const bool matchOnProvider, const bool matchOnCareSite, const bool matchOnVisitDate, const int visitDateCaliper, const bool matchOnTimeInCohort, const int daysInCohortCaliper, const int minAgeDays, const int maxAgeDays);
-RcppExport SEXP CaseControl_selectControls(SEXP nestingCohortsSEXP, SEXP casesSEXP, SEXP visitsSEXP, SEXP firstOutcomeOnlySEXP, SEXP washoutPeriodSEXP, SEXP controlsPerCaseSEXP, SEXP matchOnAgeSEXP, SEXP ageCaliperSEXP, SEXP matchOnGenderSEXP, SEXP matchOnProviderSEXP, SEXP matchOnCareSiteSEXP, SEXP matchOnVisitDateSEXP, SEXP visitDateCaliperSEXP, SEXP matchOnTimeInCohortSEXP, SEXP daysInCohortCaliperSEXP, SEXP minAgeDaysSEXP, SEXP maxAgeDaysSEXP) {
+// selectControlsInternal
+DataFrame selectControlsInternal(const List& nestingCohorts, const List& cases, const List& visits, const bool firstOutcomeOnly, const int washoutPeriod, const int controlsPerCase, const bool matchOnAge, const double ageCaliper, const bool matchOnGender, const bool matchOnProvider, const bool matchOnCareSite, const bool matchOnVisitDate, const int visitDateCaliper, const bool matchOnTimeInCohort, const int daysInCohortCaliper, const int minAgeDays, const int maxAgeDays);
+RcppExport SEXP _CaseControl_selectControlsInternal(SEXP nestingCohortsSEXP, SEXP casesSEXP, SEXP visitsSEXP, SEXP firstOutcomeOnlySEXP, SEXP washoutPeriodSEXP, SEXP controlsPerCaseSEXP, SEXP matchOnAgeSEXP, SEXP ageCaliperSEXP, SEXP matchOnGenderSEXP, SEXP matchOnProviderSEXP, SEXP matchOnCareSiteSEXP, SEXP matchOnVisitDateSEXP, SEXP visitDateCaliperSEXP, SEXP matchOnTimeInCohortSEXP, SEXP daysInCohortCaliperSEXP, SEXP minAgeDaysSEXP, SEXP maxAgeDaysSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -28,7 +28,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type daysInCohortCaliper(daysInCohortCaliperSEXP);
     Rcpp::traits::input_parameter< const int >::type minAgeDays(minAgeDaysSEXP);
     Rcpp::traits::input_parameter< const int >::type maxAgeDays(maxAgeDaysSEXP);
-    rcpp_result_gen = Rcpp::wrap(selectControls(nestingCohorts, cases, visits, firstOutcomeOnly, washoutPeriod, controlsPerCase, matchOnAge, ageCaliper, matchOnGender, matchOnProvider, matchOnCareSite, matchOnVisitDate, visitDateCaliper, matchOnTimeInCohort, daysInCohortCaliper, minAgeDays, maxAgeDays));
+    rcpp_result_gen = Rcpp::wrap(selectControlsInternal(nestingCohorts, cases, visits, firstOutcomeOnly, washoutPeriod, controlsPerCase, matchOnAge, ageCaliper, matchOnGender, matchOnProvider, matchOnCareSite, matchOnVisitDate, visitDateCaliper, matchOnTimeInCohort, daysInCohortCaliper, minAgeDays, maxAgeDays));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_CaseControl_selectControlsInternal", (DL_FUNC) &_CaseControl_selectControlsInternal, 17},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_CaseControl(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

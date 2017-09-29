@@ -119,23 +119,23 @@ selectControls <- function(caseData,
     maxAgeDays <- as.integer(maxAge * 365.25)
   }
 
-  caseControls <- .selectControls(nestingCohorts,
-                                  cases,
-                                  visits,
-                                  firstOutcomeOnly,
-                                  washoutPeriod,
-                                  controlsPerCase,
-                                  matchOnAge,
-                                  ageCaliper,
-                                  matchOnGender,
-                                  matchOnProvider,
-                                  matchOnCareSite,
-                                  matchOnVisitDate,
-                                  visitDateCaliper,
-                                  matchOnTimeInCohort,
-                                  daysInCohortCaliper,
-                                  minAgeDays,
-                                  maxAgeDays)
+  caseControls <- selectControlsInternal(nestingCohorts,
+                                         cases,
+                                         visits,
+                                         firstOutcomeOnly,
+                                         washoutPeriod,
+                                         controlsPerCase,
+                                         matchOnAge,
+                                         ageCaliper,
+                                         matchOnGender,
+                                         matchOnProvider,
+                                         matchOnCareSite,
+                                         matchOnVisitDate,
+                                         visitDateCaliper,
+                                         matchOnTimeInCohort,
+                                         daysInCohortCaliper,
+                                         minAgeDays,
+                                         maxAgeDays)
   caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
   delta <- Sys.time() - start
   writeLines(paste("Selection took", signif(delta, 3), attr(delta, "units")))
