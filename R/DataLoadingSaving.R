@@ -145,7 +145,7 @@ getDbCaseData <- function(connectionDetails,
                                                    case_crossover = caseCrossover)
 
   writeLines("Executing multiple queries. This could take a while")
-  executeSql(conn, renderedSql)
+  DatabaseConnector::executeSql(conn, renderedSql)
 
   writeLines("Fetching data from server")
   start <- Sys.time()
@@ -154,7 +154,7 @@ getDbCaseData <- function(connectionDetails,
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
                                                    oracleTempSchema = oracleTempSchema)
-  nestingCohorts <- querySql.ffdf(conn, renderedSql)
+  nestingCohorts <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
   colnames(nestingCohorts) <- SqlRender::snakeCaseToCamelCase(colnames(nestingCohorts))
 
   writeLines("- Fetching cases")
@@ -162,7 +162,7 @@ getDbCaseData <- function(connectionDetails,
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
                                                    oracleTempSchema = oracleTempSchema)
-  cases <- querySql(conn, renderedSql)
+  cases <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
   colnames(cases) <- SqlRender::snakeCaseToCamelCase(colnames(cases))
 
   if (getVisits) {
@@ -172,7 +172,7 @@ getDbCaseData <- function(connectionDetails,
                                                      dbms = connectionDetails$dbms,
                                                      oracleTempSchema = oracleTempSchema,
                                                      cdm_database_schema = cdmDatabaseSchema)
-    visits <- querySql.ffdf(conn, renderedSql)
+    visits <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
     colnames(visits) <- SqlRender::snakeCaseToCamelCase(colnames(visits))
 
     # Quicker to sort in ff than in the database (at least for PDW)
@@ -196,13 +196,11 @@ getDbCaseData <- function(connectionDetails,
   delta <- Sys.time() - start
   writeLines(paste("Loading took", signif(delta, 3), attr(delta, "units")))
 
-  if (connectionDetails$dbms == "oracle") {
-    renderedSql <- SqlRender::loadRenderTranslateSql("removeTempTables.sql",
-                                                     packageName = "CaseControl",
-                                                     dbms = connectionDetails$dbms,
-                                                     oracleTempSchema = oracleTempSchema)
-    DatabaseConnector::executeSql(conn, renderedSql, progressBar = FALSE, reportOverallTime = FALSE)
-  }
+  renderedSql <- SqlRender::loadRenderTranslateSql("removeTempTables.sql",
+                                                   packageName = "CaseControl",
+                                                   dbms = connectionDetails$dbms,
+                                                   oracleTempSchema = oracleTempSchema)
+  DatabaseConnector::executeSql(conn, renderedSql, progressBar = FALSE, reportOverallTime = FALSE)
   DatabaseConnector::disconnect(conn)
 
   metaData <- list(outcomeIds = outcomeIds,
@@ -212,6 +210,7 @@ getDbCaseData <- function(connectionDetails,
                    nestingCohortId = nestingCohortId)
   result <- list(nestingCohorts = nestingCohorts, cases = cases, metaData = metaData)
   open(result$nestingCohorts)
+  open(result$cases)
   if (getVisits) {
     result$visits <- visits
     open(result$visits)
@@ -246,27 +245,29 @@ saveCaseData <- function(caseData, folder) {
     stop("Data not of class caseData")
 
   nestingCohorts <- caseData$nestingCohorts
+  cases <- caseData$cases
   if (caseData$metaData$hasVisits) {
     visits <- caseData$visits
     if (caseData$metaData$hasExposures) {
       exposures <- caseData$exposures
-      ffbase::save.ffdf(nestingCohorts, visits, exposures, dir = folder)
+      ffbase::save.ffdf(nestingCohorts, cases, visits, exposures, dir = folder)
       open(caseData$exposures)
     } else {
-      ffbase::save.ffdf(nestingCohorts, visits, dir = folder)
+      ffbase::save.ffdf(nestingCohorts, cases, visits, dir = folder)
     }
     open(caseData$visits)
   } else {
     if (caseData$metaData$hasExposures) {
       exposures <- caseData$exposures
-      ffbase::save.ffdf(nestingCohorts, exposures, dir = folder)
+      ffbase::save.ffdf(nestingCohorts, cases, exposures, dir = folder)
       open(caseData$exposures)
     } else {
       ffbase::save.ffdf(nestingCohorts, dir = folder)
     }
   }
   open(caseData$nestingCohorts)
-  saveRDS(caseData$cases, file = file.path(folder, "cases.rds"))
+  open(caseData$cases)
+  # saveRDS(caseData$cases, file = file.path(folder, "cases.rds"))
   saveRDS(caseData$metaData, file = file.path(folder, "metaData.rds"))
   invisible(TRUE)
 }
@@ -292,16 +293,18 @@ loadCaseData <- function(folder, readOnly = TRUE) {
   if (!file.info(folder)$isdir)
     stop(paste("Not a folder:", folder))
 
-  cases <- readRDS(file.path(folder, "cases.rds"))
+  # cases <- readRDS(file.path(folder, "cases.rds"))
   metaData <- readRDS(file.path(folder, "metaData.rds"))
-  caseData <- list(cases = cases, metaData = metaData)
+  caseData <- list(metaData = metaData)
 
   temp <- setwd(folder)
   absolutePath <- setwd(temp)
   e <- new.env()
   ffbase::load.ffdf(absolutePath, e)
   caseData$nestingCohorts <- get("nestingCohorts", envir = e)
+  caseData$cases <- get("cases", envir = e)
   open(caseData$nestingCohorts, readonly = readOnly)
+  open(caseData$cases, readonly = readOnly)
   if (caseData$metaData$hasVisits) {
     caseData$visits <- get("visits", envir = e)
     open(caseData$visits, readonly = readOnly)
@@ -338,13 +341,10 @@ summary.caseData <- function(object, ...) {
     if (outcomeCounts$eventCount[i] == 0) {
       outcomeCounts$caseCount[i] <- 0
     } else {
-      t <- is.na(ffbase::ffmatch(object$nestingCohorts$nestingCohortId, ff::as.ff(cases)))
-      outcomeCounts$caseCount[i] <- length(ffbase::unique.ff(object$nestingCohorts[ffbase::ffwhich(t,
-                                                                                                   t == FALSE),
-                                                                                   "personId"]))
+      idx <- ffbase::`%in%`(object$nestingCohorts$nestingCohortId, cases)
+      outcomeCounts$caseCount[i] <- length(ffbase::unique.ff(object$nestingCohorts$personId[idx]))
     }
   }
-
   result <- list(metaData = object$metaData,
                  populationCount = populationCount,
                  populationWindowCount = populationWindowCount,

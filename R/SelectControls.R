@@ -89,7 +89,7 @@ selectControls <- function(caseData,
   start <- Sys.time()
   writeLines(paste("Selecting up to", controlsPerCase, "controls per case"))
 
-  cases <- caseData$cases[caseData$cases$outcomeId == outcomeId, c("nestingCohortId", "indexDate")]
+  cases <- ff::as.ram(caseData$cases[caseData$cases$outcomeId == outcomeId, c("nestingCohortId", "indexDate")])
   cases <- cases[order(cases$nestingCohortId), ]
   cases <- ff::as.ffdf(cases)
 

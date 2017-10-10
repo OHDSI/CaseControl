@@ -64,9 +64,6 @@ getDbExposureData <- function(caseControls,
                               cdmDatabaseSchema = exposureDatabaseSchema,
                               covariateSettings = NULL,
                               caseData = NULL) {
-  #caseControls <- readRDS("S:/Temp/CiCalibration_Mdcd/ccOutput/caseControls_cd1_cc1_o14.rds")
-  #caseData <- loadCaseData("S:/Temp/CiCalibration_Mdcd/ccOutput/caseData_cd1")
-  #exposureIds = 11
   if (nrow(caseControls) == 0) {
     exposures = data.frame(rowId = c(),
                            exposureId = c(),
@@ -77,10 +74,7 @@ getDbExposureData <- function(caseControls,
                    metaData = attr(caseControls, "metaData"))
     attr(result$caseControls, "metaData") <- NULL
     result$metaData$hasCovariates <- FALSE
-    class(result) <- "caseControlsExposure"
-    return(result)
-  }
-  if (is.null(covariateSettings) && !is.null(caseData) && caseData$metaData$hasExposures) {
+  } else if (is.null(covariateSettings) && !is.null(caseData) && caseData$metaData$hasExposures) {
     writeLines("Using pre-fetched exposures in caseData object")
     caseControls$rowId <- 1:nrow(caseControls)
     idx <- ffbase::`%in%`(caseData$exposures$exposureId, exposureIds)
@@ -106,8 +100,6 @@ getDbExposureData <- function(caseControls,
                    metaData = attr(caseControls, "metaData"))
     attr(result$caseControls, "metaData") <- NULL
     result$metaData$hasCovariates <- FALSE
-    class(result) <- "caseControlsExposure"
-    return(result)
   } else {
     connection <- DatabaseConnector::connect(connectionDetails)
     writeLines("Uploading cases and controls to database temp table")
@@ -170,9 +162,11 @@ getDbExposureData <- function(caseControls,
     } else {
       result$metaData$hasCovariates <- FALSE
     }
-    class(result) <- "caseControlsExposure"
-    return(result)
   }
+  result$caseControls$personId <- NULL
+  result$caseControls$indexDate <- NULL
+  class(result) <- "caseControlsExposure"
+  return(result)
 }
 
 #' Save the caseControlsExposure data to folder
