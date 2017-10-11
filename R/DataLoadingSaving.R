@@ -262,7 +262,7 @@ saveCaseData <- function(caseData, folder) {
       ffbase::save.ffdf(nestingCohorts, cases, exposures, dir = folder)
       open(caseData$exposures)
     } else {
-      ffbase::save.ffdf(nestingCohorts, dir = folder)
+      ffbase::save.ffdf(nestingCohorts, cases, dir = folder)
     }
   }
   open(caseData$nestingCohorts)
