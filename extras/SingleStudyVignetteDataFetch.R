@@ -20,14 +20,13 @@
 library(SqlRender)
 library(DatabaseConnector)
 library(CaseControl)
-setwd("s:/temp")
 options(fftempdir = "s:/fftemp")
 
 pw <- NULL
 dbms <- "pdw"
 user <- NULL
 server <- "JRDUSAPSCTL01"
-cdmDatabaseSchema <- "CDM_Truven_MDCD_V464.dbo"
+cdmDatabaseSchema <- "CDM_Truven_MDCD_V610.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 oracleTempSchema <- NULL
 cohortTable <- "mschuemi_cc_vignette"
@@ -58,7 +57,7 @@ sql <- SqlRender::renderSql(sql,
 sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
 DatabaseConnector::querySql(connection, sql)
 
-RJDBC::dbDisconnect(connection)
+DatabaseConnector::disconnect(connection)
 
 caseData <- getDbCaseData(connectionDetails = connectionDetails,
                           cdmDatabaseSchema = cdmDatabaseSchema,
@@ -115,10 +114,9 @@ saveRDS(caseControls, "s:/temp/vignetteCaseControl/caseControls.rds")
 caseControls <- readRDS("s:/temp/vignetteCaseControl/caseControls.rds")
 
 
-covariateSettings <- createCovariateSettings(useCovariateRiskScores = TRUE,
-                                             useCovariateRiskScoresCharlson = TRUE,
-                                             useCovariateRiskScoresDCSI = TRUE,
-                                             useCovariateRiskScoresCHADS2 = TRUE)
+covariateSettings <- createCovariateSettings(useCharlsonIndex = TRUE,
+                                             useChads2 = TRUE,
+                                             useDcsi = TRUE)
 
 caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
                                           caseControls = caseControls,

@@ -61,18 +61,13 @@ fitCaseControlModel <- function(caseControlData,
     status <- "NO EXPOSED SUBJECTS"
   } else {
     if (useCovariates) {
-      treatmentVarId <- ffbase::max.ff(caseControlsExposure$covariates$covariateId) + 1
-      prior$exclude <- treatmentVarId  # Exclude treatment variable from regularization
+      outcomes <- caseControlData[, c("rowId", "stratumId", "isCase")]
+      colnames(outcomes)[colnames(outcomes) == "isCase"] <- "y"
+      outcomes <- ff::as.ffdf(outcomes)
 
-      treatmentCovariate <- ff::ffdf(rowId = ff::as.ff(as.numeric(caseControlData$rowId)),
-                                     covariateId = ff::ff(treatmentVarId,
-                                                          length = nrow(caseControlData),
-                                                          vmode = "double"),
-                                     covariateValue = ff::as.ff(caseControlData$exposed,
-                                                                vmode = "double"))
-      covariates <- ffbase::ffdfappend(treatmentCovariate, caseControlsExposure$covariates)
+      covariates <- caseControlsExposure$covariates
+      covariates <- covariates[ffbase::`%in%`(covariates$rowId, outcomes$rowId), ]
       if (length(includeCovariateIds) != 0) {
-        includeCovariateIds <- c(includeCovariateIds, treatmentVarId)
         idx <- !is.na(ffbase::ffmatch(covariates$covariateId, ff::as.ff(includeCovariateIds)))
         covariates <- covariates[ffbase::ffwhich(idx, idx == TRUE), ]
       }
@@ -80,10 +75,20 @@ fitCaseControlModel <- function(caseControlData,
         idx <- is.na(ffbase::ffmatch(covariates$covariateId, ff::as.ff(excludeCovariateIds)))
         covariates <- covariates[ffbase::ffwhich(idx, idx == TRUE), ]
       }
-      outcomes <- caseControlData[, c("rowId", "stratumId", "isCase")]
-      colnames(outcomes)[colnames(outcomes) == "isCase"] <- "y"
-      covariates <- ffbase::merge.ffdf(covariates, ff::as.ffdf(outcomes[, c("rowId", "stratumId")]))
-      cyclopsData <- Cyclops::convertToCyclopsData(ff::as.ffdf(outcomes),
+      covariates <- FeatureExtraction::tidyCovariateData(covariates = covariates,
+                                                         covariateRef = caseControlsExposure$covariateRef,
+                                                         populationSize = nrow(outcomes))$covariates
+      treatmentVarId <- ffbase::max.ff(caseControlsExposure$covariates$covariateId) + 1
+      prior$exclude <- treatmentVarId  # Exclude treatment variable from regularization
+      treatmentCovariate <- ff::ffdf(rowId = ff::as.ff(as.numeric(caseControlData$rowId)),
+                                     covariateId = ff::ff(treatmentVarId,
+                                                          length = nrow(caseControlData),
+                                                          vmode = "double"),
+                                     covariateValue = ff::as.ff(caseControlData$exposed,
+                                                                vmode = "double"))
+      covariates <- ffbase::ffdfappend(treatmentCovariate, covariates)
+      covariates <- ffbase::merge.ffdf(covariates, outcomes)
+      cyclopsData <- Cyclops::convertToCyclopsData(outcomes,
                                                    covariates,
                                                    modelType = "clr",
                                                    addIntercept = FALSE)

@@ -182,7 +182,7 @@ The second group of arguments are not specific to a hypothesis of interest, and 
 
 ```{r tidy=FALSE,eval=TRUE}
 getDbCaseDataArgs1 <- createGetDbCaseDataArgs(useNestingCohort = FALSE,
-                                             getVisits = FALSE)
+                                              getVisits = FALSE)
 
 selectControlsArgs1 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 washoutPeriod = 180,
@@ -231,10 +231,9 @@ ccAnalysis2 <- createCcAnalysis(analysisId = 2,
                                 createCaseControlDataArgs = createCaseControlDataArgs1,
                                 fitCaseControlModelArgs = fitCaseControlModelArgs1)
 
-covariateSettings <- createCovariateSettings(useCovariateRiskScores = TRUE,
-                                             useCovariateRiskScoresCharlson = TRUE,
-                                             useCovariateRiskScoresDCSI = TRUE,
-                                             useCovariateRiskScoresCHADS2 = TRUE)
+covariateSettings <- createCovariateSettings(useCharlsonIndex = TRUE,
+                                             useChads2 = TRUE,
+                                             useDcsi = TRUE)
 
 getDbExposureDataArgs2 <- createGetDbExposureDataArgs(covariateSettings = covariateSettings)
 

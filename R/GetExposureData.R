@@ -141,8 +141,7 @@ getDbExposureData <- function(caseControls,
                                                           cohortTable = "#case_controls",
                                                           cohortTableIsTemp = TRUE,
                                                           rowIdField = "row_id",
-                                                          covariateSettings = covariateSettings,
-                                                          normalize = TRUE)
+                                                          covariateSettings = covariateSettings)
     }
     sql <- "TRUNCATE TABLE #case_controls; DROP TABLE #case_controls;"
     sql <- SqlRender::translateSql(sql = sql,

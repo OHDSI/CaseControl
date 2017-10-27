@@ -26,9 +26,9 @@ pw <- NULL
 dbms <- "pdw"
 user <- NULL
 server <- "JRDUSAPSCTL01"
-cdmDatabaseSchema <- "CDM_Truven_MDCD_V417.dbo"
+cdmDatabaseSchema <- "CDM_Truven_MDCD_V610.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
-cohortTable <- "mschuemi_sccs_vignette"
+cohortTable <- "mschuemi_cc_vignette"
 oracleTempSchema <- NULL
 outputFolder <- "s:/temp/vignetteCaseControl2"
 port <- 17001
@@ -130,11 +130,9 @@ ccAnalysis2 <- createCcAnalysis(analysisId = 2,
                                 createCaseControlDataArgs = createCaseControlDataArgs1,
                                 fitCaseControlModelArgs = fitCaseControlModelArgs1)
 
-covariateSettings <- createCovariateSettings(useCovariateRiskScores = TRUE,
-                                             useCovariateRiskScoresCharlson = TRUE,
-                                             useCovariateRiskScoresDCSI = TRUE,
-                                             useCovariateRiskScoresCHADS2 = TRUE)
-
+covariateSettings <- createCovariateSettings(useCharlsonIndex = TRUE,
+                                             useChads2 = TRUE,
+                                             useDcsi = TRUE)
 getDbExposureDataArgs2 <- createGetDbExposureDataArgs(covariateSettings = covariateSettings)
 
 fitCaseControlModelArgs2 <- createFitCaseControlModelArgs(useCovariates = TRUE,
