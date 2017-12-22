@@ -30,14 +30,14 @@ using namespace Rcpp;
 DataFrame selectControlsInternal(const List& nestingCohorts, const List& cases, const List& visits, const bool firstOutcomeOnly, const int washoutPeriod,
                     const int controlsPerCase, const bool matchOnAge, const double ageCaliper, const bool matchOnGender, const bool matchOnProvider,
                     const bool matchOnCareSite, const bool matchOnVisitDate, const int visitDateCaliper, const bool matchOnTimeInCohort,
-                    const int daysInCohortCaliper, const int minAgeDays, const int maxAgeDays) {
+                    const int daysInCohortCaliper, const int minAgeDays, const int maxAgeDays, const int seed) {
 
 	using namespace ohdsi::caseControl;
 
 	try {
 	  ControlSelector controlSelector(nestingCohorts, cases, visits, firstOutcomeOnly, washoutPeriod, controlsPerCase, matchOnAge, ageCaliper,
                                    matchOnGender, matchOnProvider, matchOnCareSite, matchOnVisitDate, visitDateCaliper, matchOnTimeInCohort, daysInCohortCaliper,
-                                   minAgeDays, maxAgeDays);
+                                   minAgeDays, maxAgeDays, seed);
 		return (controlSelector.selectControls());
 	} catch (std::exception &e) {
 		forward_exception_to_r(e);

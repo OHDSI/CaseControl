@@ -53,6 +53,7 @@
 #'                                should be specified in years, but non-integer values are allowed. If not
 #'                                specified, no age restriction will be applied.
 #' @param removedUnmatchedCases   Should cases with no matched controls be removed?
+#' @param seed                    The number generator seed. A null value sets seed via \code{\link{Sys.time}}.
 #'
 #' @return
 #' A data frame with these columns: \describe{ \item{personId}{The person ID} \item{indexDate}{The
@@ -76,7 +77,8 @@ selectControls <- function(caseData,
                            daysInCohortCaliper = 30,
                            minAge = NULL,
                            maxAge = NULL,
-                           removedUnmatchedCases = TRUE) {
+                           removedUnmatchedCases = TRUE,
+                           seed = NULL) {
   if (matchOnVisitDate && !caseData$metaData$hasVisits)
     stop("Cannot match on visits because no visit data was loaded. Please rerun getDbCaseData with getVisits = TRUE")
   if (matchOnProvider && matchOnCareSite)
@@ -119,6 +121,9 @@ selectControls <- function(caseData,
     maxAgeDays <- as.integer(maxAge * 365.25)
   }
 
+  if (is.null(seed))
+    seed = as.integer(Sys.time())
+
   caseControls <- selectControlsInternal(nestingCohorts,
                                          cases,
                                          visits,
@@ -135,7 +140,8 @@ selectControls <- function(caseData,
                                          matchOnTimeInCohort,
                                          daysInCohortCaliper,
                                          minAgeDays,
-                                         maxAgeDays)
+                                         maxAgeDays,
+                                         seed)
   caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
   delta <- Sys.time() - start
   writeLines(paste("Selection took", signif(delta, 3), attr(delta, "units")))

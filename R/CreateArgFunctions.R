@@ -71,6 +71,7 @@ createGetDbCaseDataArgs <- function(useNestingCohort = FALSE,
 #'                                Ageshould be specified in years, but non-integer values are allowed.
 #'                                If notspecified, no age restriction will be applied.
 #' @param removedUnmatchedCases   Should cases with no matched controls be removed?
+#' @param seed                    The number generator seed. A null value sets seed via Sys.time.
 #'
 #' @export
 createSelectControlsArgs <- function(firstOutcomeOnly = TRUE,
@@ -87,7 +88,8 @@ createSelectControlsArgs <- function(firstOutcomeOnly = TRUE,
                                      daysInCohortCaliper = 30,
                                      minAge = NULL,
                                      maxAge = NULL,
-                                     removedUnmatchedCases = TRUE) {
+                                     removedUnmatchedCases = TRUE,
+                                     seed = NULL) {
   # First: get default values:
   analysis <- list()
   for (name in names(formals(createSelectControlsArgs))) {

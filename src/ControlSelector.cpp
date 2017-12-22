@@ -35,7 +35,7 @@ namespace caseControl {
 ControlSelector::ControlSelector(const List& _nestingCohorts, const List& _cases, const List& _visits, const bool _firstOutcomeOnly, const int _washoutPeriod,
                                  const int _controlsPerCase, const bool _matchOnAge, const double _ageCaliper, const bool _matchOnGender, const bool _matchOnProvider,
                                  const bool _matchOnCareSite, const bool _matchOnVisitDate, const int _visitDateCaliper, const bool _matchOnTimeInCohort, const int _daysInCohortCaliper,
-                                 const int _minAgeDays, const int _maxAgeDays) :
+                                 const int _minAgeDays, const int _maxAgeDays, const int _seed) :
 firstOutcomeOnly(_firstOutcomeOnly), washoutPeriod(_washoutPeriod), controlsPerCase(_controlsPerCase), matchOnAge(_matchOnAge),
 ageCaliper(_ageCaliper), matchOnGender(_matchOnGender), matchOnProvider(_matchOnProvider), matchOnCareSite(_matchOnCareSite), matchOnVisitDate(_matchOnVisitDate),
 visitDateCaliper(_visitDateCaliper), matchOnTimeInCohort(_matchOnTimeInCohort), daysInCohortCaliper(_daysInCohortCaliper), minAgeDays(_minAgeDays), maxAgeDays(_maxAgeDays),
@@ -65,6 +65,7 @@ nestingCohortDatas(), personId2CaseData(), generator(), stratumId(0) {
       }
     }
   }
+  generator.seed(_seed);
   distribution = new std::uniform_int_distribution<int>(0,nestingCohortDatas.size() - 1);
   if (matchOnAge)
     std::sort (nestingCohortDatas.begin(), nestingCohortDatas.end());

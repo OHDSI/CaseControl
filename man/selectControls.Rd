@@ -10,7 +10,7 @@ selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
   matchOnCareSite = FALSE, matchOnVisitDate = FALSE,
   visitDateCaliper = 30, matchOnTimeInCohort = FALSE,
   daysInCohortCaliper = 30, minAge = NULL, maxAge = NULL,
-  removedUnmatchedCases = TRUE)
+  removedUnmatchedCases = TRUE, seed = NULL)
 }
 \arguments{
 \item{caseData}{An object of type \code{caseData} as generated using the
@@ -60,6 +60,8 @@ should be specified in years, but non-integer values are allowed. If not
 specified, no age restriction will be applied.}
 
 \item{removedUnmatchedCases}{Should cases with no matched controls be removed?}
+
+\item{seed}{The number generator seed. A null value sets seed via \code{\link{Sys.time}}.}
 }
 \value{
 A data frame with these columns: \describe{ \item{personId}{The person ID} \item{indexDate}{The

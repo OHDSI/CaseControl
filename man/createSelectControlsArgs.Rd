@@ -9,7 +9,7 @@ createSelectControlsArgs(firstOutcomeOnly = TRUE, washoutPeriod = 180,
   matchOnGender = TRUE, matchOnProvider = FALSE, matchOnCareSite = FALSE,
   matchOnVisitDate = FALSE, visitDateCaliper = 30,
   matchOnTimeInCohort = FALSE, daysInCohortCaliper = 30, minAge = NULL,
-  maxAge = NULL, removedUnmatchedCases = TRUE)
+  maxAge = NULL, removedUnmatchedCases = TRUE, seed = NULL)
 }
 \arguments{
 \item{firstOutcomeOnly}{Use the first outcome per person?}
@@ -54,6 +54,8 @@ Ageshould be specified in years, but non-integer values are allowed.
 If notspecified, no age restriction will be applied.}
 
 \item{removedUnmatchedCases}{Should cases with no matched controls be removed?}
+
+\item{seed}{The number generator seed. A null value sets seed via Sys.time.}
 }
 \description{
 Create a parameter object for the function selectControls

@@ -74,7 +74,7 @@ public:
   ControlSelector(const List& _nestingCohorts, const List& _cases, const List& _visits, const bool _firstOutcomeOnly, const int _washoutPeriod,
                   const int _controlsPerCase, const bool _matchOnAge, const double _ageCaliper, const bool _matchOnGender, const bool _matchOnProvider,
                   const bool _matchOnCareSite, const bool _matchOnVisitDate, const int _visitDateCaliper, const bool _matchOnTimeInCohort, const int _daysInCohortCaliper,
-                  const int _minAgeDays, const int _maxAgeDays);
+                  const int _minAgeDays, const int _maxAgeDays, const int _seed);
   DataFrame selectControls();
 
 private:
