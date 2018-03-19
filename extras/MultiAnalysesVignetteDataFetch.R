@@ -1,6 +1,6 @@
 # @file MultiAnalysesVignetteDataFetch.R
 #
-# Copyright 2017 Observational Health Data Sciences and Informatics
+# Copyright 2018 Observational Health Data Sciences and Informatics
 #
 # This file is part of CaseControl
 #
@@ -25,13 +25,13 @@ options(fftempdir = "s:/fftemp")
 pw <- NULL
 dbms <- "pdw"
 user <- NULL
-server <- "JRDUSAPSCTL01"
 cdmDatabaseSchema <- "CDM_Truven_MDCD_V610.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 cohortTable <- "mschuemi_cc_vignette"
 oracleTempSchema <- NULL
 outputFolder <- "s:/temp/vignetteCaseControl2"
-port <- 17001
+server <- Sys.getenv("PDW_SERVER")
+port <- Sys.getenv("PDW_PORT")
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms,
                                                                 server = server,
