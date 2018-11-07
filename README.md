@@ -26,7 +26,7 @@ Dependencies
  * Cyclops
  * DatabaseConnector
  * SqlRender
- * OhdsiRTools
+ * ParallelLogger
 
 Getting Started
 ===============

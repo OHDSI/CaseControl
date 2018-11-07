@@ -75,7 +75,7 @@ getDbExposureData <- function(caseControls,
     attr(result$caseControls, "metaData") <- NULL
     result$metaData$hasCovariates <- FALSE
   } else if (is.null(covariateSettings) && !is.null(caseData) && caseData$metaData$hasExposures) {
-    writeLines("Using pre-fetched exposures in caseData object")
+    ParallelLogger::logInfo("Using pre-fetched exposures in caseData object")
     caseControls$rowId <- 1:nrow(caseControls)
     idx <- ffbase::`%in%`(caseData$exposures$exposureId, exposureIds)
     if (ffbase::any.ff(idx)) {
@@ -102,7 +102,7 @@ getDbExposureData <- function(caseControls,
     result$metaData$hasCovariates <- FALSE
   } else {
     connection <- DatabaseConnector::connect(connectionDetails)
-    writeLines("Uploading cases and controls to database temp table")
+    ParallelLogger::logInfo("Uploading cases and controls to database temp table")
     start <- Sys.time()
     caseControls$rowId <- 1:nrow(caseControls)
     data <- caseControls[, c("rowId", "personId", "indexDate")]
@@ -117,9 +117,9 @@ getDbExposureData <- function(caseControls,
                                    tempTable = TRUE,
                                    oracleTempSchema = oracleTempSchema)
     delta <- Sys.time() - start
-    writeLines(paste("Uploading took", signif(delta, 3), attr(delta, "units")))
+    ParallelLogger::logInfo(paste("Uploading took", signif(delta, 3), attr(delta, "units")))
 
-    writeLines("Loading exposure data from server")
+    ParallelLogger::logInfo("Loading exposure data from server")
     start <- Sys.time()
     renderedSql <- SqlRender::loadRenderTranslateSql("queryExposure.sql",
                                                      packageName = "CaseControl",
@@ -131,7 +131,7 @@ getDbExposureData <- function(caseControls,
     exposure <- DatabaseConnector::querySql(connection, renderedSql)
     colnames(exposure) <- SqlRender::snakeCaseToCamelCase(colnames(exposure))
     delta <- Sys.time() - start
-    writeLines(paste("Loading took", signif(delta, 3), attr(delta, "units")))
+    ParallelLogger::logInfo(paste("Loading took", signif(delta, 3), attr(delta, "units")))
 
     if (!is.null(covariateSettings)) {
       covariates <- FeatureExtraction::getDbCovariateData(connection = connection,

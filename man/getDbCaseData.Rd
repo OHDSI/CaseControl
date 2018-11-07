@@ -6,8 +6,9 @@
 \usage{
 getDbCaseData(connectionDetails, cdmDatabaseSchema,
   oracleTempSchema = cdmDatabaseSchema,
-  outcomeDatabaseSchema = cdmDatabaseSchema, outcomeTable = "condition_era",
-  outcomeIds = c(), useNestingCohort = FALSE,
+  outcomeDatabaseSchema = cdmDatabaseSchema,
+  outcomeTable = "condition_era", outcomeIds = c(),
+  useNestingCohort = FALSE,
   nestingCohortDatabaseSchema = cdmDatabaseSchema,
   nestingCohortTable = "cohort", nestingCohortId = NULL,
   useObservationEndAsNestingEndDate = TRUE, getVisits = TRUE,

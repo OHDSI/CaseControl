@@ -6,10 +6,11 @@
 \usage{
 createSelectControlsArgs(firstOutcomeOnly = TRUE, washoutPeriod = 180,
   controlsPerCase = 2, matchOnAge = TRUE, ageCaliper = 2,
-  matchOnGender = TRUE, matchOnProvider = FALSE, matchOnCareSite = FALSE,
-  matchOnVisitDate = FALSE, visitDateCaliper = 30,
-  matchOnTimeInCohort = FALSE, daysInCohortCaliper = 30, minAge = NULL,
-  maxAge = NULL, removedUnmatchedCases = TRUE, seed = NULL)
+  matchOnGender = TRUE, matchOnProvider = FALSE,
+  matchOnCareSite = FALSE, matchOnVisitDate = FALSE,
+  visitDateCaliper = 30, matchOnTimeInCohort = FALSE,
+  daysInCohortCaliper = 30, minAge = NULL, maxAge = NULL,
+  removedUnmatchedCases = TRUE, seed = NULL)
 }
 \arguments{
 \item{firstOutcomeOnly}{Use the first outcome per person?}

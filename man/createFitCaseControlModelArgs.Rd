@@ -7,8 +7,9 @@
 createFitCaseControlModelArgs(useCovariates = FALSE,
   excludeCovariateIds = c(), includeCovariateIds = c(),
   prior = createPrior("laplace", useCrossValidation = TRUE),
-  control = createControl(cvType = "auto", startingVariance = 0.01, tolerance
-  = 2e-07, cvRepetitions = 10, selectorType = "byPid", noiseLevel = "quiet"))
+  control = createControl(cvType = "auto", startingVariance = 0.01,
+  tolerance = 2e-07, cvRepetitions = 10, selectorType = "byPid", noiseLevel
+  = "quiet"))
 }
 \arguments{
 \item{useCovariates}{Whether to use the covariates in the caseControlsExposure.}

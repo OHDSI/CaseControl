@@ -7,7 +7,7 @@ r_packages:
   - drat
 
 r_github_packages:
-  - OHDSI/OhdsiRTools
+  - OHDSI/ParallelLogger
   - OHDSI/SqlRender
   - OHDSI/DatabaseConnector
   - OHDSI/FeatureExtraction

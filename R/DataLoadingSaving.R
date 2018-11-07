@@ -144,12 +144,12 @@ getDbCaseData <- function(connectionDetails,
                                                    study_end_date = studyEndDate,
                                                    case_crossover = caseCrossover)
 
-  writeLines("Executing multiple queries. This could take a while")
+  ParallelLogger::logInfo("Executing multiple queries. This could take a while")
   DatabaseConnector::executeSql(conn, renderedSql)
 
-  writeLines("Fetching data from server")
+  ParallelLogger::logInfo("Fetching data from server")
   start <- Sys.time()
-  writeLines("- Fetching nesting cohorts")
+  ParallelLogger::logInfo("- Fetching nesting cohorts")
   renderedSql <- SqlRender::loadRenderTranslateSql("queryNestingCohort.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
@@ -157,7 +157,7 @@ getDbCaseData <- function(connectionDetails,
   nestingCohorts <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
   colnames(nestingCohorts) <- SqlRender::snakeCaseToCamelCase(colnames(nestingCohorts))
 
-  writeLines("- Fetching cases")
+  ParallelLogger::logInfo("- Fetching cases")
   renderedSql <- SqlRender::loadRenderTranslateSql("queryCases.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
@@ -166,7 +166,7 @@ getDbCaseData <- function(connectionDetails,
   colnames(cases) <- SqlRender::snakeCaseToCamelCase(colnames(cases))
 
   if (getVisits) {
-    writeLines("- Fetching visits")
+    ParallelLogger::logInfo("- Fetching visits")
     renderedSql <- SqlRender::loadRenderTranslateSql("queryVisits.sql",
                                                      packageName = "CaseControl",
                                                      dbms = connectionDetails$dbms,
@@ -181,7 +181,7 @@ getDbCaseData <- function(connectionDetails,
   }
 
   if (getExposures) {
-    writeLines("- Fetching exposures")
+    ParallelLogger::logInfo("- Fetching exposures")
     renderedSql <- SqlRender::loadRenderTranslateSql("queryAllExposures.sql",
                                                      packageName = "CaseControl",
                                                      dbms = connectionDetails$dbms,
@@ -194,7 +194,7 @@ getDbCaseData <- function(connectionDetails,
   }
 
   delta <- Sys.time() - start
-  writeLines(paste("Loading took", signif(delta, 3), attr(delta, "units")))
+  ParallelLogger::logInfo(paste("Loading took", signif(delta, 3), attr(delta, "units")))
 
   renderedSql <- SqlRender::loadRenderTranslateSql("removeTempTables.sql",
                                                    packageName = "CaseControl",
@@ -413,7 +413,7 @@ insertDbPopulation <- function(caseControls,
   colnames(caseControls) <- SqlRender::camelCaseToSnakeCase(colnames(caseControls))
 
   connection <- DatabaseConnector::connect(connectionDetails)
-  writeLines(paste("Writing",
+  ParallelLogger::logInfo(paste("Writing",
                    nrow(caseControls),
                    "rows to",
                    paste(cohortDatabaseSchema, cohortTable, sep = ".")))
@@ -438,6 +438,6 @@ insertDbPopulation <- function(caseControls,
                                  oracleTempSchema = NULL)
   DatabaseConnector::disconnect(connection)
   delta <- Sys.time() - start
-  writeLines(paste("Inserting rows took", signif(delta, 3), attr(delta, "units")))
+  ParallelLogger::logInfo(paste("Inserting rows took", signif(delta, 3), attr(delta, "units")))
   invisible(TRUE)
 }

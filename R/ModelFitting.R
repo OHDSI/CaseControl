@@ -141,7 +141,7 @@ fitCaseControlModel <- function(caseControlData,
   outcomeModel$outcomeCounts <- outcomeCounts
   class(outcomeModel) <- "outcomeModel"
   delta <- Sys.time() - start
-  writeLines(paste("Fitting model took", signif(delta, 3), attr(delta, "units")))
+  ParallelLogger::logInfo(paste("Fitting model took", signif(delta, 3), attr(delta, "units")))
   return(outcomeModel)
 }
 

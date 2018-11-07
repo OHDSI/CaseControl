@@ -6,8 +6,10 @@
 \usage{
 runCcAnalyses(connectionDetails, cdmDatabaseSchema,
   oracleTempSchema = cdmDatabaseSchema,
-  exposureDatabaseSchema = cdmDatabaseSchema, exposureTable = "drug_era",
-  outcomeDatabaseSchema = cdmDatabaseSchema, outcomeTable = "condition_era",
+  exposureDatabaseSchema = cdmDatabaseSchema,
+  exposureTable = "drug_era",
+  outcomeDatabaseSchema = cdmDatabaseSchema,
+  outcomeTable = "condition_era",
   nestingCohortDatabaseSchema = cdmDatabaseSchema,
   nestingCohortTable = "condition_era", outputFolder = "./CcOutput",
   ccAnalysisList, exposureOutcomeNestingCohortList,

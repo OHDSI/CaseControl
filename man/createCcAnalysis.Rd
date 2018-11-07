@@ -4,10 +4,10 @@
 \alias{createCcAnalysis}
 \title{Create a case-control analysis specification}
 \usage{
-createCcAnalysis(analysisId = 1, description = "", exposureType = NULL,
-  outcomeType = NULL, nestingCohortType = NULL, getDbCaseDataArgs,
-  selectControlsArgs, getDbExposureDataArgs, createCaseControlDataArgs,
-  fitCaseControlModelArgs)
+createCcAnalysis(analysisId = 1, description = "",
+  exposureType = NULL, outcomeType = NULL, nestingCohortType = NULL,
+  getDbCaseDataArgs, selectControlsArgs, getDbExposureDataArgs,
+  createCaseControlDataArgs, fitCaseControlModelArgs)
 }
 \arguments{
 \item{analysisId}{An integer that will be used later to refer to this specific set

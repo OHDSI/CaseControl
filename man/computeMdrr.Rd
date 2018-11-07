@@ -4,7 +4,8 @@
 \alias{computeMdrr}
 \title{Compute the minimum detectable relative risk}
 \usage{
-computeMdrr(caseControlData, alpha = 0.05, power = 0.8, twoSided = TRUE)
+computeMdrr(caseControlData, alpha = 0.05, power = 0.8,
+  twoSided = TRUE)
 }
 \arguments{
 \item{caseControlData}{A data frame describing the cases and controls as created using the

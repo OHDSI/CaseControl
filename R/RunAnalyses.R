@@ -108,13 +108,13 @@ runCcAnalyses <- function(connectionDetails,
   for (exposureOutcomeNestingCohort in exposureOutcomeNestingCohortList) stopifnot(class(exposureOutcomeNestingCohort) ==
                                                                                      "exposureOutcomeNestingCohort")
   for (ccAnalysis in ccAnalysisList) stopifnot(class(ccAnalysis) == "ccAnalysis")
-  uniqueExposureOutcomeNcList <- unique(OhdsiRTools::selectFromList(exposureOutcomeNestingCohortList,
+  uniqueExposureOutcomeNcList <- unique(ParallelLogger::selectFromList(exposureOutcomeNestingCohortList,
                                                                     c("exposureId",
                                                                       "outcomeId",
                                                                       "nestingCohortId")))
   if (length(uniqueExposureOutcomeNcList) != length(exposureOutcomeNestingCohortList))
     stop("Duplicate exposure-outcome-nesting cohort combinations are not allowed")
-  uniqueAnalysisIds <- unlist(unique(OhdsiRTools::selectFromList(ccAnalysisList, "analysisId")))
+  uniqueAnalysisIds <- unlist(unique(ParallelLogger::selectFromList(ccAnalysisList, "analysisId")))
   if (length(uniqueAnalysisIds) != length(ccAnalysisList))
     stop("Duplicate analysis IDs are not allowed")
 
@@ -142,12 +142,12 @@ runCcAnalyses <- function(connectionDetails,
   }
 
   cdObjectsToCreate <- list()
-  getDbCaseDataArgsList <- unique(OhdsiRTools::selectFromList(ccAnalysisList,
+  getDbCaseDataArgsList <- unique(ParallelLogger::selectFromList(ccAnalysisList,
                                                               c("getDbCaseDataArgs")))
   for (d in 1:length(getDbCaseDataArgsList)) {
     getDbCaseDataArgs <- getDbCaseDataArgsList[[d]]
-    analyses <- OhdsiRTools::matchInList(ccAnalysisList, getDbCaseDataArgs)
-    analysesIds <- unlist(OhdsiRTools::selectFromList(analyses, "analysisId"))
+    analyses <- ParallelLogger::matchInList(ccAnalysisList, getDbCaseDataArgs)
+    analysesIds <- unlist(ParallelLogger::selectFromList(analyses, "analysisId"))
     if (getDbCaseDataArgs$getDbCaseDataArgs$useNestingCohort) {
       nestingCohortIds <- unique(outcomeReference$nestingCohortId[outcomeReference$analysisId %in%
                                                                     analysesIds])
@@ -217,12 +217,12 @@ runCcAnalyses <- function(connectionDetails,
   }
 
   ccObjectsToCreate <- list()
-  selectControlsArgsList <- unique(OhdsiRTools::selectFromList(ccAnalysisList,
+  selectControlsArgsList <- unique(ParallelLogger::selectFromList(ccAnalysisList,
                                                                c("selectControlsArgs")))
   for (i in 1:length(selectControlsArgsList)) {
     selectControlsArgs <- selectControlsArgsList[[i]]
-    analyses <- OhdsiRTools::matchInList(ccAnalysisList, selectControlsArgs)
-    analysesIds <- unlist(OhdsiRTools::selectFromList(analyses, "analysisId"))
+    analyses <- ParallelLogger::matchInList(ccAnalysisList, selectControlsArgs)
+    analysesIds <- unlist(ParallelLogger::selectFromList(analyses, "analysisId"))
     cdDataFileNames <- unique(outcomeReference$caseDataFolder[outcomeReference$analysisId %in% analysesIds])
     for (cdDataFileName in cdDataFileNames) {
       cdId <- gsub("^.*caseData_", "", cdDataFileName)
@@ -251,7 +251,7 @@ runCcAnalyses <- function(connectionDetails,
     edArgsList <- edArgsList[!sapply(edArgsList, is.null)]
     for (ed in 1:length(edArgsList)) {
       edArgs <- edArgsList[[ed]]
-      analysisIds <- unlist(unique(OhdsiRTools::selectFromList(OhdsiRTools::matchInList(ccAnalysisList,
+      analysisIds <- unlist(unique(ParallelLogger::selectFromList(ParallelLogger::matchInList(ccAnalysisList,
                                                                                         list(getDbExposureDataArgs = edArgs)),
                                                                "analysisId")))
       idx <- outcomeReference$caseControlsFile == ccFilename & outcomeReference$analysisId %in%
@@ -288,7 +288,7 @@ runCcAnalyses <- function(connectionDetails,
     ccdArgsList <- ccdArgsList[!sapply(ccdArgsList, is.null)]
     for (ccd in 1:length(ccdArgsList)) {
       ccdArgs <- ccdArgsList[[ccd]]
-      analysisIds <- unlist(unique(OhdsiRTools::selectFromList(OhdsiRTools::matchInList(ccAnalysisList,
+      analysisIds <- unlist(unique(ParallelLogger::selectFromList(ParallelLogger::matchInList(ccAnalysisList,
                                                                                         list(createCaseControlDataArgs = ccdArgs)),
                                                                "analysisId")))
       idx <- outcomeReference$exposureDataFile == edFilename & outcomeReference$analysisId %in%
@@ -337,19 +337,19 @@ runCcAnalyses <- function(connectionDetails,
 
   ### Actual construction of objects ###
 
-  writeLines("*** Creating caseData objects ***")
+  ParallelLogger::logInfo("*** Creating caseData objects ***")
   createCaseDataObject <- function(params) {
     caseData <- do.call("getDbCaseData", params$args)
     saveCaseData(caseData, params$cdDataFileName)
   }
   if (length(cdObjectsToCreate) != 0) {
-    cluster <- OhdsiRTools::makeCluster(getDbCaseDataThreads)
-    OhdsiRTools::clusterRequire(cluster, "CaseControl")
-    dummy <- OhdsiRTools::clusterApply(cluster, cdObjectsToCreate, createCaseDataObject)
-    OhdsiRTools::stopCluster(cluster)
+    cluster <- ParallelLogger::makeCluster(getDbCaseDataThreads)
+    ParallelLogger::clusterRequire(cluster, "CaseControl")
+    dummy <- ParallelLogger::clusterApply(cluster, cdObjectsToCreate, createCaseDataObject)
+    ParallelLogger::stopCluster(cluster)
   }
 
-  writeLines("*** Creating caseControls objects ***")
+  ParallelLogger::logInfo("*** Creating caseControls objects ***")
   createCaseControlsObject <- function(params) {
     caseData <- loadCaseData(params$cdDataFileName, readOnly = TRUE)
     params$args$caseData <- caseData
@@ -357,13 +357,13 @@ runCcAnalyses <- function(connectionDetails,
     saveRDS(caseControls, params$ccFilename)
   }
   if (length(ccObjectsToCreate) != 0) {
-    cluster <- OhdsiRTools::makeCluster(selectControlsThreads)
-    OhdsiRTools::clusterRequire(cluster, "CaseControl")
-    dummy <- OhdsiRTools::clusterApply(cluster, ccObjectsToCreate, createCaseControlsObject)
-    OhdsiRTools::stopCluster(cluster)
+    cluster <- ParallelLogger::makeCluster(selectControlsThreads)
+    ParallelLogger::clusterRequire(cluster, "CaseControl")
+    dummy <- ParallelLogger::clusterApply(cluster, ccObjectsToCreate, createCaseControlsObject)
+    ParallelLogger::stopCluster(cluster)
   }
 
-  writeLines("*** Creating caseControlsExposure objects ***")
+  ParallelLogger::logInfo("*** Creating caseControlsExposure objects ***")
   createExposureDataObject <- function(params) {
     caseControls <- readRDS(params$ccFilename)
     params$args$caseControls <- caseControls
@@ -375,13 +375,13 @@ runCcAnalyses <- function(connectionDetails,
     saveCaseControlsExposure(exposureData, params$edFilename)
   }
   if (length(edObjectsToCreate) != 0) {
-    cluster <- OhdsiRTools::makeCluster(getDbExposureDataThreads)
-    OhdsiRTools::clusterRequire(cluster, "CaseControl")
-    dummy <- OhdsiRTools::clusterApply(cluster, edObjectsToCreate, createExposureDataObject)
-    OhdsiRTools::stopCluster(cluster)
+    cluster <- ParallelLogger::makeCluster(getDbExposureDataThreads)
+    ParallelLogger::clusterRequire(cluster, "CaseControl")
+    dummy <- ParallelLogger::clusterApply(cluster, edObjectsToCreate, createExposureDataObject)
+    ParallelLogger::stopCluster(cluster)
   }
 
-  writeLines("*** Creating caseControlData objects ***")
+  ParallelLogger::logInfo("*** Creating caseControlData objects ***")
   createCaseControlDataObject <- function(params) {
     exposureData <- loadCaseControlsExposure(params$edFilename)
     params$args$caseControlsExposure <- exposureData
@@ -389,13 +389,13 @@ runCcAnalyses <- function(connectionDetails,
     saveRDS(caseControlData, params$ccdFilename)
   }
   if (length(ccdObjectsToCreate) != 0) {
-    cluster <- OhdsiRTools::makeCluster(createCaseControlDataThreads)
-    OhdsiRTools::clusterRequire(cluster, "CaseControl")
-    dummy <- OhdsiRTools::clusterApply(cluster, ccdObjectsToCreate, createCaseControlDataObject)
-    OhdsiRTools::stopCluster(cluster)
+    cluster <- ParallelLogger::makeCluster(createCaseControlDataThreads)
+    ParallelLogger::clusterRequire(cluster, "CaseControl")
+    dummy <- ParallelLogger::clusterApply(cluster, ccdObjectsToCreate, createCaseControlDataObject)
+    ParallelLogger::stopCluster(cluster)
   }
 
-  writeLines("*** Creating case-control model objects ***")
+  ParallelLogger::logInfo("*** Creating case-control model objects ***")
   createCaseControlModelObject <- function(params) {
     caseControlData <- readRDS(params$ccdFilename)
     exposureData <- loadCaseControlsExposure(params$edFilename)
@@ -405,10 +405,10 @@ runCcAnalyses <- function(connectionDetails,
     saveRDS(model, params$modelFilename)
   }
   if (length(modelObjectsToCreate) != 0) {
-    cluster <- OhdsiRTools::makeCluster(fitCaseControlModelThreads)
-    OhdsiRTools::clusterRequire(cluster, "CaseControl")
-    dummy <- OhdsiRTools::clusterApply(cluster, modelObjectsToCreate, createCaseControlModelObject)
-    OhdsiRTools::stopCluster(cluster)
+    cluster <- ParallelLogger::makeCluster(fitCaseControlModelThreads)
+    ParallelLogger::clusterRequire(cluster, "CaseControl")
+    dummy <- ParallelLogger::clusterApply(cluster, modelObjectsToCreate, createCaseControlModelObject)
+    ParallelLogger::stopCluster(cluster)
   }
 
   invisible(outcomeReference)

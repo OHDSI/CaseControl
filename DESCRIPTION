@@ -1,8 +1,8 @@
 Package: CaseControl
 Type: Package
 Title: Case-Control
-Version: 1.4.2
-Date: 2018-03-19
+Version: 1.5.0
+Date: 2018-11-07
 Author: Martijn Schuemie
 Maintainer: Martijn Schuemie <schuemie@ohdsi.org>
 Description: CaseControl is an R package for performing (nested) matched case-control analyses in an observational database in the OMOP Common Data Model.
@@ -19,7 +19,7 @@ Imports:
     ff,
     ffbase (>= 0.12.1),
     Rcpp (>= 0.11.2),
-    OhdsiRTools (>= 1.1.1),
+    ParallelLogger,
     plyr
 Suggests:
     testthat,
@@ -29,4 +29,4 @@ Suggests:
 License: Apache License 2.0
 LinkingTo: Rcpp
 NeedsCompilation: yes
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

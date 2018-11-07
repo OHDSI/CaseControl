@@ -4,7 +4,8 @@
 \alias{saveExposureOutcomeNestingCohortList}
 \title{Save a list of drugComparatorOutcome to file}
 \usage{
-saveExposureOutcomeNestingCohortList(exposureOutcomeNestingCohortList, file)
+saveExposureOutcomeNestingCohortList(exposureOutcomeNestingCohortList,
+  file)
 }
 \arguments{
 \item{exposureOutcomeNestingCohortList}{The exposureOutcomeNestingCohort list to be written to

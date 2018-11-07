@@ -93,7 +93,7 @@ saveCcAnalysisList <- function(ccAnalysisList, file) {
   for (i in 1:length(ccAnalysisList)) {
     stopifnot(class(ccAnalysisList[[i]]) == "ccAnalysis")
   }
-  OhdsiRTools::saveSettingsToJson(ccAnalysisList, file)
+  ParallelLogger::saveSettingsToJson(ccAnalysisList, file)
 }
 
 #' Load a list of ccAnalysis from file
@@ -108,7 +108,7 @@ saveCcAnalysisList <- function(ccAnalysisList, file) {
 #'
 #' @export
 loadCcAnalysisList <- function(file) {
-  return(OhdsiRTools::loadSettingsFromJson(file))
+  return(ParallelLogger::loadSettingsFromJson(file))
 }
 
 #' Create exposure-outcome-nesting-cohort combinations.
@@ -171,7 +171,7 @@ saveExposureOutcomeNestingCohortList <- function(exposureOutcomeNestingCohortLis
   for (i in 1:length(exposureOutcomeNestingCohortList)) {
     stopifnot(class(exposureOutcomeNestingCohortList[[i]]) == "exposureOutcomeNestingCohort")
   }
-  OhdsiRTools::saveSettingsToJson(exposureOutcomeNestingCohortList, file)
+  ParallelLogger::saveSettingsToJson(exposureOutcomeNestingCohortList, file)
 }
 
 #' Load a list of exposureOutcomeNestingCohort from file
@@ -187,5 +187,5 @@ saveExposureOutcomeNestingCohortList <- function(exposureOutcomeNestingCohortLis
 #'
 #' @export
 loadExposureOutcomeNestingCohortList <- function(file) {
-  return(OhdsiRTools::loadSettingsFromJson(file))
+  return(ParallelLogger::loadSettingsFromJson(file))
 }

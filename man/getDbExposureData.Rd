@@ -4,8 +4,9 @@
 \alias{getDbExposureData}
 \title{Get exposure data for cases and controls from a database}
 \usage{
-getDbExposureData(caseControls, connectionDetails, oracleTempSchema = NULL,
-  exposureDatabaseSchema, exposureTable = "drug_era", exposureIds = c(),
+getDbExposureData(caseControls, connectionDetails,
+  oracleTempSchema = NULL, exposureDatabaseSchema,
+  exposureTable = "drug_era", exposureIds = c(),
   cdmDatabaseSchema = exposureDatabaseSchema, covariateSettings = NULL,
   caseData = NULL)
 }

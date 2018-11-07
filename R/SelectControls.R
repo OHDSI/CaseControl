@@ -83,13 +83,13 @@ selectControls <- function(caseData,
     stop("Cannot match on visits because no visit data was loaded. Please rerun getDbCaseData with getVisits = TRUE")
   if (matchOnProvider && matchOnCareSite)
     stop("Cannot match on both provider and care site")
-    if (matchOnProvider && ffbase::all.ff(ffbase::is.na.ff(caseData$nestingCohorts$providerId)))
+  if (matchOnProvider && ffbase::all.ff(ffbase::is.na.ff(caseData$nestingCohorts$providerId)))
     stop("Cannot match on provider because no providers specified in the person table")
   if (matchOnCareSite && ffbase::all.ff(ffbase::is.na.ff(caseData$nestingCohorts$careSiteId)))
     stop("Cannot match on care site because no care sites specified in the person table")
 
   start <- Sys.time()
-  writeLines(paste("Selecting up to", controlsPerCase, "controls per case"))
+  ParallelLogger::logInfo(paste("Selecting up to", controlsPerCase, "controls per case"))
 
   cases <- ff::as.ram(caseData$cases[caseData$cases$outcomeId == outcomeId, c("nestingCohortId", "indexDate")])
   cases <- cases[order(cases$nestingCohortId), ]
@@ -102,7 +102,7 @@ selectControls <- function(caseData,
   if (matchOnVisitDate && caseData$metaData$hasVisits) {
     visits <- caseData$visits
     if (!Cyclops::isSorted(visits, c("nestingCohortId", "visitStartDate"))) {
-      writeLines("- Sorting visits")
+      ParallelLogger::logInfo("- Sorting visits")
       rownames(visits) <- NULL  #Needs to be null or the ordering of ffdf will fail
       visits <- visits[ff::ffdforder(visits[c("nestingCohortId", "visitStartDate")]), ]
     }
@@ -144,7 +144,7 @@ selectControls <- function(caseData,
                                          seed)
   caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
   delta <- Sys.time() - start
-  writeLines(paste("Selection took", signif(delta, 3), attr(delta, "units")))
+  ParallelLogger::logInfo(paste("Selection took", signif(delta, 3), attr(delta, "units")))
 
   # Create counts
   counts <- data.frame()
@@ -156,7 +156,7 @@ selectControls <- function(caseData,
   } else {
     t <- is.na(ffbase::ffmatch(caseData$nestingCohorts$nestingCohortId, ff::as.ff(cases)))
     caseCount <- length(ffbase::unique.ff(caseData$nestingCohorts[ffbase::ffwhich(t, t == FALSE),
-                                          "personId"]))
+                                                                  "personId"]))
   }
   counts <- rbind(counts, data.frame(description = "Original counts",
                                      eventCount = eventCount,
@@ -178,8 +178,8 @@ selectControls <- function(caseData,
     }
     counts <- rbind(counts,
                     data.frame(description = description,
-                                       eventCount = eventCount,
-                                       caseCount = caseCount))
+                               eventCount = eventCount,
+                               caseCount = caseCount))
   }
   if (removedUnmatchedCases) {
     strataWithControls <- caseControls$stratumId[caseControls$isCase == FALSE]
