@@ -71,6 +71,7 @@
 #'                                           when there are many outcomes but only few exposures. Prefetching
 #'                                           does not speed up performance when covariates also need to be
 #'                                           constructed.
+#' @param compressCaseDataFiles              Should compression be used when saving?
 #' @param getDbCaseDataThreads               The number of parallel threads to use for building the
 #'                                           caseData objects.
 #' @param selectControlsThreads              The number of parallel threads to use for selecting
@@ -99,6 +100,7 @@ runCcAnalyses <- function(connectionDetails,
                           ccAnalysisList,
                           exposureOutcomeNestingCohortList,
                           prefetchExposureData = FALSE,
+                          compressCaseDataFiles = FALSE,
                           getDbCaseDataThreads = 1,
                           selectControlsThreads = 1,
                           getDbExposureDataThreads = 1,
@@ -184,6 +186,7 @@ runCcAnalyses <- function(connectionDetails,
             args$useObservationEndAsNestingEndDate <- FALSE
           }
           cdObjectsToCreate[[length(cdObjectsToCreate) + 1]] <- list(args = args,
+                                                                     compressCaseDataFiles = compressCaseDataFiles,
                                                                      cdDataFileName = file.path(outputFolder, cdDataFileName))
         }
       }
@@ -380,14 +383,26 @@ runCcAnalyses <- function(connectionDetails,
   invisible(outcomeReference)
 }
 
+
+getCaseData <- function(caseDataFileName) {
+  if (mget("caseDataFileName", envir = globalenv(), ifnotfound = "") == caseDataFileName) {
+    caseData <- get("caseData", envir = globalenv())
+  } else {
+    caseData <- loadCaseData(caseDataFileName, readOnly = TRUE)
+    assign("caseData", caseData, envir = globalenv())
+    assign("caseDataFileName", caseDataFileName, envir = globalenv())
+  }
+  return(caseData)
+}
+
 createCaseDataObject <- function(params) {
   caseData <- do.call("getDbCaseData", params$args)
-  saveCaseData(caseData, params$cdDataFileName)
+  saveCaseData(caseData, params$cdDataFileName, compress = params$compressCaseDataFiles)
   return(NULL)
 }
 
 createCaseControlsObject <- function(params) {
-  caseData <- loadCaseData(params$cdDataFileName, readOnly = TRUE)
+  caseData <- getCaseData(params$cdDataFileName)
   params$args$caseData <- caseData
   caseControls <- do.call("selectControls", params$args)
   saveRDS(caseControls, params$ccFilename)

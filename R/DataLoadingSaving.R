@@ -231,12 +231,13 @@ getDbCaseData <- function(connectionDetails,
 #' @param caseData   An object of type \code{caseData} as generated using \code{\link{getDbCaseData}}.
 #' @param folder     The name of the folder where the data will be written. The folder should not yet
 #'                   exist.
+#' @param compress   Should compression be used when saving?
 #'
 #' @details
 #' The data will be written to a set of files in the specified folder.
 #'
 #' @export
-saveCaseData <- function(caseData, folder) {
+saveCaseData <- function(caseData, folder, compress = FALSE) {
   if (missing(caseData))
     stop("Must specify caseData")
   if (missing(folder))
@@ -250,24 +251,47 @@ saveCaseData <- function(caseData, folder) {
     visits <- caseData$visits
     if (caseData$metaData$hasExposures) {
       exposures <- caseData$exposures
-      ffbase::save.ffdf(nestingCohorts, cases, visits, exposures, dir = folder)
+      if (compress) {
+        saveCompressedFfdf(nestingCohorts, file.path(folder, "nestingCohorts"))
+        saveCompressedFfdf(cases, file.path(folder, "cases"))
+        saveCompressedFfdf(visits, file.path(folder, "visits"))
+        saveCompressedFfdf(exposures, file.path(folder, "exposures"))
+      } else {
+        ffbase::save.ffdf(nestingCohorts, cases, visits, exposures, dir = folder)
+      }
       open(caseData$exposures)
     } else {
-      ffbase::save.ffdf(nestingCohorts, cases, visits, dir = folder)
+      if (compress) {
+        saveCompressedFfdf(nestingCohorts, file.path(folder, "nestingCohorts"))
+        saveCompressedFfdf(cases, file.path(folder, "cases"))
+        saveCompressedFfdf(visits, file.path(folder, "visits"))
+      } else {
+        ffbase::save.ffdf(nestingCohorts, cases, visits, dir = folder)
+      }
     }
     open(caseData$visits)
   } else {
     if (caseData$metaData$hasExposures) {
       exposures <- caseData$exposures
-      ffbase::save.ffdf(nestingCohorts, cases, exposures, dir = folder)
+      if (compress) {
+        saveCompressedFfdf(nestingCohorts, file.path(folder, "nestingCohorts"))
+        saveCompressedFfdf(cases, file.path(folder, "cases"))
+        saveCompressedFfdf(exposures, file.path(folder, "exposures"))
+      } else {
+        ffbase::save.ffdf(nestingCohorts, cases, exposures, dir = folder)
+      }
       open(caseData$exposures)
     } else {
-      ffbase::save.ffdf(nestingCohorts, cases, dir = folder)
+      if (compress) {
+        saveCompressedFfdf(nestingCohorts, file.path(folder, "nestingCohorts"))
+        saveCompressedFfdf(cases, file.path(folder, "cases"))
+      } else {
+        ffbase::save.ffdf(nestingCohorts, cases, dir = folder)
+      }
     }
   }
   open(caseData$nestingCohorts)
   open(caseData$cases)
-  # saveRDS(caseData$cases, file = file.path(folder, "cases.rds"))
   saveRDS(caseData$metaData, file = file.path(folder, "metaData.rds"))
   invisible(TRUE)
 }
@@ -293,27 +317,37 @@ loadCaseData <- function(folder, readOnly = TRUE) {
   if (!file.info(folder)$isdir)
     stop(paste("Not a folder:", folder))
 
-  # cases <- readRDS(file.path(folder, "cases.rds"))
   metaData <- readRDS(file.path(folder, "metaData.rds"))
   caseData <- list(metaData = metaData)
 
   temp <- setwd(folder)
   absolutePath <- setwd(temp)
-  e <- new.env()
-  ffbase::load.ffdf(absolutePath, e)
-  caseData$nestingCohorts <- get("nestingCohorts", envir = e)
-  caseData$cases <- get("cases", envir = e)
-  open(caseData$nestingCohorts, readonly = readOnly)
-  open(caseData$cases, readonly = readOnly)
-  if (caseData$metaData$hasVisits) {
-    caseData$visits <- get("visits", envir = e)
-    open(caseData$visits, readonly = readOnly)
+  if (file.exists(file.path(absolutePath, "nestingCohorts.zip"))) {
+    caseData$nestingCohorts <- loadCompressedFfdf(file.path(absolutePath, "nestingCohorts"))
+    caseData$cases <- loadCompressedFfdf(file.path(absolutePath, "cases"))
+    if (caseData$metaData$hasVisits) {
+      caseData$visits <- loadCompressedFfdf(file.path(absolutePath, "visits"))
+    }
+    if (caseData$metaData$hasExposures) {
+      caseData$exposures <- loadCompressedFfdf(file.path(absolutePath, "exposures"))
+    }
+  } else {
+    e <- new.env()
+    ffbase::load.ffdf(absolutePath, e)
+    caseData$nestingCohorts <- get("nestingCohorts", envir = e)
+    caseData$cases <- get("cases", envir = e)
+    open(caseData$nestingCohorts, readonly = readOnly)
+    open(caseData$cases, readonly = readOnly)
+    if (caseData$metaData$hasVisits) {
+      caseData$visits <- get("visits", envir = e)
+      open(caseData$visits, readonly = readOnly)
+    }
+    if (caseData$metaData$hasExposures) {
+      caseData$exposures <- get("exposures", envir = e)
+      open(caseData$exposures, readonly = readOnly)
+    }
+    rm(e)
   }
-  if (caseData$metaData$hasExposures) {
-    caseData$exposures <- get("exposures", envir = e)
-    open(caseData$exposures, readonly = readOnly)
-  }
-  rm(e)
   class(caseData) <- "caseData"
   return(caseData)
 }
@@ -440,4 +474,33 @@ insertDbPopulation <- function(caseControls,
   delta <- Sys.time() - start
   ParallelLogger::logInfo(paste("Inserting rows took", signif(delta, 3), attr(delta, "units")))
   invisible(TRUE)
+}
+
+saveCompressedFfdf <- function(ffdf, fileName) {
+  dir.create(dirname(fileName), showWarnings = FALSE, recursive = TRUE)
+  saveRDS(ffdf, paste0(fileName, ".rds"))
+  fileNames <- sapply(bit::physical(ffdf), function(x) bit::physical(x)$filename)
+  sourceDir <- dirname(fileNames[1])
+  oldWd <- setwd(sourceDir)
+  on.exit(setwd(oldWd))
+  sourceNames <- basename(fileNames)
+  ff::close.ffdf(ffdf)
+  DatabaseConnector::createZipFile(zipFile = paste0(fileName, ".zip"), files = sourceNames)
+  ff::open.ffdf(ffdf)
+}
+
+loadCompressedFfdf <- function(fileName) {
+  ffdf <- readRDS(paste0(fileName, ".rds"))
+  tempRoot <- ff::fftempfile("temp")
+  utils::unzip(zipfile = paste0(fileName, ".zip"), exdir = tempRoot)
+  for (ff in bit::physical(ffdf)) {
+    newFileName <- ff::fftempfile("")
+    file.rename(file.path(tempRoot, basename(bit::physical(ff)$filename)), newFileName)
+    bit::physical(ff)$filename <- newFileName
+    bit::physical(ff)$finalizer <- "delete"
+    ff::open.ff(ff)
+    reg.finalizer(attr(ff,"physical"), ff::finalize.ff_pointer, onexit = bit::physical(ff)$finonexit)
+  }
+  unlink(tempRoot, recursive = TRUE)
+  return(ffdf)
 }

@@ -10,7 +10,7 @@ VignetteBuilder: knitr
 Depends:
     R (>= 3.2.2),
     Cyclops (>= 1.3.0),
-    DatabaseConnector (>= 2.0.0),
+    DatabaseConnector (>= 2.2.0),
     survival,
 	  FeatureExtraction  (>= 2.0.0)
 Imports:
