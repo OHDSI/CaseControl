@@ -160,9 +160,9 @@ runCcAnalyses <- function(connectionDetails,
         }
         outcomeIds <- unique(outcomeReference$outcomeId[idx])
 
-        cdDataFileName <- .createCaseDataFileName(outputFolder, d, nestingCohortId)
+        cdDataFileName <- .createCaseDataFileName(d, nestingCohortId)
         outcomeReference$caseDataFolder[idx] <- cdDataFileName
-        if (!file.exists(cdDataFileName)) {
+        if (!file.exists(file.path(outputFolder, cdDataFileName))) {
           args <- list(connectionDetails = connectionDetails,
                        cdmDatabaseSchema = cdmDatabaseSchema,
                        oracleTempSchema = oracleTempSchema,
@@ -184,7 +184,7 @@ runCcAnalyses <- function(connectionDetails,
             args$useObservationEndAsNestingEndDate <- FALSE
           }
           cdObjectsToCreate[[length(cdObjectsToCreate) + 1]] <- list(args = args,
-                                                                     cdDataFileName = cdDataFileName)
+                                                                     cdDataFileName = file.path(outputFolder, cdDataFileName))
         }
       }
     } else {
@@ -193,7 +193,7 @@ runCcAnalyses <- function(connectionDetails,
       cdDataFileName <- .createCaseDataFileName(outputFolder, d)
       idx <- outcomeReference$analysisId %in% analysesIds
       outcomeReference$caseDataFolder[idx] <- cdDataFileName
-      if (!file.exists(cdDataFileName)) {
+      if (!file.exists(file.path(outputFolder, cdDataFileName))) {
         args <- list(connectionDetails = connectionDetails,
                      cdmDatabaseSchema = cdmDatabaseSchema,
                      oracleTempSchema = oracleTempSchema,
@@ -211,7 +211,7 @@ runCcAnalyses <- function(connectionDetails,
         }
         args <- append(args, getDbCaseDataArgs$getDbCaseDataArgs)
         cdObjectsToCreate[[length(cdObjectsToCreate) + 1]] <- list(args = args,
-                                                                   cdDataFileName = cdDataFileName)
+                                                                   cdDataFileName = file.path(outputFolder, cdDataFileName))
       }
     }
   }
@@ -230,14 +230,14 @@ runCcAnalyses <- function(connectionDetails,
         cdDataFileName
       outcomeIds <- unique(outcomeReference$outcomeId[idx])
       for (outcomeId in outcomeIds) {
-        ccFilename <- .createCaseControlsFileName(outputFolder, cdId, i, outcomeId)
+        ccFilename <- .createCaseControlsFileName(cdId, i, outcomeId)
         outcomeReference$caseControlsFile[idx & outcomeReference$outcomeId == outcomeId] <- ccFilename
-        if (!file.exists(ccFilename)) {
+        if (!file.exists(file.path(outputFolder, ccFilename))) {
           args <- list(outcomeId = outcomeId)
           args <- append(args, selectControlsArgs$selectControlsArgs)
           ccObjectsToCreate[[length(ccObjectsToCreate) + 1]] <- list(args = args,
-                                                                     cdDataFileName = cdDataFileName,
-                                                                     ccFilename = ccFilename)
+                                                                     cdDataFileName = file.path(outputFolder, cdDataFileName),
+                                                                     ccFilename = file.path(outputFolder, ccFilename))
         }
       }
     }
@@ -259,7 +259,7 @@ runCcAnalyses <- function(connectionDetails,
       exposureIds <- unique(outcomeReference$exposureId[idx])
       edFilename <- .createExposureDataFileName(ccFilename, ed)
       outcomeReference$exposureDataFile[idx] <- edFilename
-      if (!file.exists(edFilename)) {
+      if (!file.exists(file.path(outputFolder, edFilename))) {
         args <- list(connectionDetails = connectionDetails,
                      oracleTempSchema = oracleTempSchema,
                      exposureDatabaseSchema = exposureDatabaseSchema,
@@ -273,9 +273,9 @@ runCcAnalyses <- function(connectionDetails,
         }
         args <- append(args, edArgs)
         edObjectsToCreate[[length(edObjectsToCreate) + 1]] <- list(args = args,
-                                                                   ccFilename = ccFilename,
-                                                                   cdFilename = cdFilename,
-                                                                   edFilename = edFilename)
+                                                                   ccFilename = file.path(outputFolder, ccFilename),
+                                                                   cdFilename = file.path(outputFolder, cdFilename),
+                                                                   edFilename = file.path(outputFolder, edFilename))
       }
     }
   }
@@ -297,12 +297,12 @@ runCcAnalyses <- function(connectionDetails,
       for (exposureId in exposureIds) {
         ccdFilename <- .createCaseControlDataFileName(edFilename, exposureId, ccd)
         outcomeReference$caseControlDataFile[idx & outcomeReference$exposureId == exposureId] <- ccdFilename
-        if (!file.exists(ccdFilename)) {
+        if (!file.exists(file.path(outputFolder, ccdFilename))) {
           args <- ccdArgs
           args$exposureId <- exposureId
           ccdObjectsToCreate[[length(ccdObjectsToCreate) + 1]] <- list(args = args,
-                                                                       ccdFilename = ccdFilename,
-                                                                       edFilename = edFilename)
+                                                                       ccdFilename = file.path(outputFolder, ccdFilename),
+                                                                       edFilename = file.path(outputFolder, edFilename))
         }
       }
     }
@@ -311,9 +311,9 @@ runCcAnalyses <- function(connectionDetails,
   modelObjectsToCreate <- list()
   for (ccAnalysis in ccAnalysisList) {
     # ccAnalysis = ccAnalysisList[[1]]
-    analysisFolder <- file.path(outputFolder, paste("Analysis_", ccAnalysis$analysisId, sep = ""))
-    if (!file.exists(analysisFolder))
-      dir.create(analysisFolder)
+    analysisFolder <- paste("Analysis_", ccAnalysis$analysisId, sep = "")
+    if (!file.exists(file.path(outputFolder, analysisFolder)))
+      dir.create(file.path(outputFolder, analysisFolder))
     for (i in which(outcomeReference$analysisId == ccAnalysis$analysisId)) {
       # i = 1
       exposureId <- outcomeReference$exposureId[i]
@@ -326,9 +326,9 @@ runCcAnalyses <- function(connectionDetails,
         args <- ccAnalysis$fitCaseControlModelArgs
         args$control$threads <- cvThreads
         modelObjectsToCreate[[length(modelObjectsToCreate) + 1]] <- list(args = args,
-                                                                         ccdFilename = ccdFilename,
-                                                                         edFilename = edFilename,
-                                                                         modelFilename = modelFilename)
+                                                                         ccdFilename = file.path(outputFolder, ccdFilename),
+                                                                         edFilename = file.path(outputFolder, edFilename),
+                                                                         modelFilename = file.path(outputFolder, modelFilename))
       }
     }
   }
@@ -338,10 +338,6 @@ runCcAnalyses <- function(connectionDetails,
   ### Actual construction of objects ###
 
   ParallelLogger::logInfo("*** Creating caseData objects ***")
-  createCaseDataObject <- function(params) {
-    caseData <- do.call("getDbCaseData", params$args)
-    saveCaseData(caseData, params$cdDataFileName)
-  }
   if (length(cdObjectsToCreate) != 0) {
     cluster <- ParallelLogger::makeCluster(getDbCaseDataThreads)
     ParallelLogger::clusterRequire(cluster, "CaseControl")
@@ -350,12 +346,6 @@ runCcAnalyses <- function(connectionDetails,
   }
 
   ParallelLogger::logInfo("*** Creating caseControls objects ***")
-  createCaseControlsObject <- function(params) {
-    caseData <- loadCaseData(params$cdDataFileName, readOnly = TRUE)
-    params$args$caseData <- caseData
-    caseControls <- do.call("selectControls", params$args)
-    saveRDS(caseControls, params$ccFilename)
-  }
   if (length(ccObjectsToCreate) != 0) {
     cluster <- ParallelLogger::makeCluster(selectControlsThreads)
     ParallelLogger::clusterRequire(cluster, "CaseControl")
@@ -364,16 +354,6 @@ runCcAnalyses <- function(connectionDetails,
   }
 
   ParallelLogger::logInfo("*** Creating caseControlsExposure objects ***")
-  createExposureDataObject <- function(params) {
-    caseControls <- readRDS(params$ccFilename)
-    params$args$caseControls <- caseControls
-    if (!is.null(params$cdFilename)) {
-      caseData <- loadCaseData(params$cdFilename)
-      params$args$caseData <- caseData
-    }
-    exposureData <- do.call("getDbExposureData", params$args)
-    saveCaseControlsExposure(exposureData, params$edFilename)
-  }
   if (length(edObjectsToCreate) != 0) {
     cluster <- ParallelLogger::makeCluster(getDbExposureDataThreads)
     ParallelLogger::clusterRequire(cluster, "CaseControl")
@@ -382,12 +362,6 @@ runCcAnalyses <- function(connectionDetails,
   }
 
   ParallelLogger::logInfo("*** Creating caseControlData objects ***")
-  createCaseControlDataObject <- function(params) {
-    exposureData <- loadCaseControlsExposure(params$edFilename)
-    params$args$caseControlsExposure <- exposureData
-    caseControlData <- do.call("createCaseControlData", params$args)
-    saveRDS(caseControlData, params$ccdFilename)
-  }
   if (length(ccdObjectsToCreate) != 0) {
     cluster <- ParallelLogger::makeCluster(createCaseControlDataThreads)
     ParallelLogger::clusterRequire(cluster, "CaseControl")
@@ -396,14 +370,6 @@ runCcAnalyses <- function(connectionDetails,
   }
 
   ParallelLogger::logInfo("*** Creating case-control model objects ***")
-  createCaseControlModelObject <- function(params) {
-    caseControlData <- readRDS(params$ccdFilename)
-    exposureData <- loadCaseControlsExposure(params$edFilename)
-    params$args$caseControlData <- caseControlData
-    params$args$caseControlsExposure <- exposureData
-    model <- do.call("fitCaseControlModel", params$args)
-    saveRDS(model, params$modelFilename)
-  }
   if (length(modelObjectsToCreate) != 0) {
     cluster <- ParallelLogger::makeCluster(fitCaseControlModelThreads)
     ParallelLogger::clusterRequire(cluster, "CaseControl")
@@ -414,16 +380,60 @@ runCcAnalyses <- function(connectionDetails,
   invisible(outcomeReference)
 }
 
-.createCaseDataFileName <- function(folder, loadId, nestingCohortId = NULL) {
+createCaseDataObject <- function(params) {
+  caseData <- do.call("getDbCaseData", params$args)
+  saveCaseData(caseData, params$cdDataFileName)
+  return(NULL)
+}
+
+createCaseControlsObject <- function(params) {
+  caseData <- loadCaseData(params$cdDataFileName, readOnly = TRUE)
+  params$args$caseData <- caseData
+  caseControls <- do.call("selectControls", params$args)
+  saveRDS(caseControls, params$ccFilename)
+  return(NULL)
+}
+
+createExposureDataObject <- function(params) {
+  caseControls <- readRDS(params$ccFilename)
+  params$args$caseControls <- caseControls
+  if (!is.null(params$cdFilename)) {
+    caseData <- loadCaseData(params$cdFilename)
+    params$args$caseData <- caseData
+  }
+  exposureData <- do.call("getDbExposureData", params$args)
+  saveCaseControlsExposure(exposureData, params$edFilename)
+  return(NULL)
+}
+
+createCaseControlDataObject <- function(params) {
+  exposureData <- loadCaseControlsExposure(params$edFilename)
+  params$args$caseControlsExposure <- exposureData
+  caseControlData <- do.call("createCaseControlData", params$args)
+  saveRDS(caseControlData, params$ccdFilename)
+  return(NULL)
+}
+
+createCaseControlModelObject <- function(params) {
+  caseControlData <- readRDS(params$ccdFilename)
+  exposureData <- loadCaseControlsExposure(params$edFilename)
+  params$args$caseControlData <- caseControlData
+  params$args$caseControlsExposure <- exposureData
+  model <- do.call("fitCaseControlModel", params$args)
+  saveRDS(model, params$modelFilename)
+  return(NULL)
+}
+
+.createCaseDataFileName <- function(loadId, nestingCohortId = NULL) {
   name <- paste0("caseData_cd", loadId)
   if (!is.null(nestingCohortId) && !is.na(nestingCohortId))
     name <- paste0(name, "_n", nestingCohortId)
-  return(file.path(folder, name))
+  return(name)
 }
 
-.createCaseControlsFileName <- function(folder, cdId, i, outcomeId) {
+.createCaseControlsFileName <- function(cdId, i, outcomeId) {
   name <- paste0("caseControls_", cdId, "_cc", i, "_o", outcomeId, ".rds")
-  return(file.path(folder, name))
+  return(name)
 }
 
 .createExposureDataFileName <- function(ccFilename, ed) {
@@ -464,9 +474,10 @@ runCcAnalyses <- function(connectionDetails,
 #' Create a summary report of the analyses
 #'
 #' @param outcomeReference   A data.frame as created by the \code{\link{runCcAnalyses}} function.
+#' @param outputFolder       Name of the folder where all the outputs have been written to.
 #'
 #' @export
-summarizeCcAnalyses <- function(outcomeReference) {
+summarizeCcAnalyses <- function(outcomeReference, outputFolder) {
   columns <- c("analysisId", "exposureId", "nestingCohortId", "outcomeId")
   result <- outcomeReference[, columns]
   result$rr <- 0
@@ -481,7 +492,7 @@ summarizeCcAnalyses <- function(outcomeReference) {
   result$seLogRr <- 0
   for (i in 1:nrow(outcomeReference)) {
     if (outcomeReference$modelFile[i] != "") {
-      model <- readRDS(outcomeReference$modelFile[i])
+      model <- readRDS(file.path(outputFolder, outcomeReference$modelFile[i]))
       result$rr[i] <- if (is.null(coef(model)))
         NA else exp(coef(model))
       result$ci95lb[i] <- if (is.null(coef(model)))
