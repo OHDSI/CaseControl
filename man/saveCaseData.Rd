@@ -4,13 +4,15 @@
 \alias{saveCaseData}
 \title{Save the case data to folder}
 \usage{
-saveCaseData(caseData, folder)
+saveCaseData(caseData, folder, compress = FALSE)
 }
 \arguments{
 \item{caseData}{An object of type \code{caseData} as generated using \code{\link{getDbCaseData}}.}
 
 \item{folder}{The name of the folder where the data will be written. The folder should not yet
 exist.}
+
+\item{compress}{Should compression be used when saving?}
 }
 \description{
 \code{saveCaseData} saves an object of type caseData to folder.

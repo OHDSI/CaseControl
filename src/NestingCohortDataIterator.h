@@ -39,8 +39,6 @@ struct NestingCohortData {
     return (dateOfBirth < other.dateOfBirth);
   }
 
-  std::vector<int> indexDates;
-  std::vector<int> visitDates;
   int64_t nestingCohortId;
   int64_t personId;
   int observationPeriodStartDate;
@@ -50,6 +48,8 @@ struct NestingCohortData {
   int genderConceptId;
   int64_t providerId;
   int64_t careSiteId;
+  std::vector<int> indexDates;
+  std::vector<int> visitDates;
 };
 
 class NestingCohortDataIterator {

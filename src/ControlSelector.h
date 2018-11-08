@@ -83,8 +83,6 @@ private:
   int isMatch(const NestingCohortData& controlData, const CaseData& caseData, const int& indexDate);
   int binarySearchDateOfBirthLowerBound(const int& key);
   int binarySearchDateOfBirthUpperBound(const int& _lowerBound, const int& key);
-  std::vector<NestingCohortData> nestingCohortDatas;
-  std::map<int64_t, CaseData> personId2CaseData;
   bool firstOutcomeOnly;
   int washoutPeriod;
   int controlsPerCase;
@@ -99,6 +97,8 @@ private:
   int daysInCohortCaliper;
   int minAgeDays;
   int maxAgeDays;
+  std::vector<NestingCohortData> nestingCohortDatas;
+  std::map<int64_t, CaseData> personId2CaseData;
   std::mt19937 generator;
   std::uniform_int_distribution<int> *distribution;
   Result result;

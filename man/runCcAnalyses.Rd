@@ -13,10 +13,10 @@ runCcAnalyses(connectionDetails, cdmDatabaseSchema,
   nestingCohortDatabaseSchema = cdmDatabaseSchema,
   nestingCohortTable = "condition_era", outputFolder = "./CcOutput",
   ccAnalysisList, exposureOutcomeNestingCohortList,
-  prefetchExposureData = FALSE, getDbCaseDataThreads = 1,
-  selectControlsThreads = 1, getDbExposureDataThreads = 1,
-  createCaseControlDataThreads = 1, fitCaseControlModelThreads = 1,
-  cvThreads = 1)
+  prefetchExposureData = FALSE, compressCaseDataFiles = FALSE,
+  getDbCaseDataThreads = 1, selectControlsThreads = 1,
+  getDbExposureDataThreads = 1, createCaseControlDataThreads = 1,
+  fitCaseControlModelThreads = 1, cvThreads = 1)
 }
 \arguments{
 \item{connectionDetails}{An R object of type \code{ConnectionDetails} created using
@@ -74,6 +74,8 @@ for a set of cases and controls. Prefetching can be faster
 when there are many outcomes but only few exposures. Prefetching
 does not speed up performance when covariates also need to be
 constructed.}
+
+\item{compressCaseDataFiles}{Should compression be used when saving?}
 
 \item{getDbCaseDataThreads}{The number of parallel threads to use for building the
 caseData objects.}
