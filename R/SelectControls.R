@@ -89,7 +89,8 @@ selectControls <- function(caseData,
     stop("Cannot match on care site because no care sites specified in the person table")
 
   start <- Sys.time()
-  ParallelLogger::logInfo(paste("Selecting up to", controlsPerCase, "controls per case"))
+  ParallelLogger::logInfo("Selecting up to ", controlsPerCase, " controls per case for outcome ", outcomeId)
+  # ParallelLogger::logDebug("Case data object has ", ffbase::sum.ff(caseData$cases$outcomeId == outcomeId), " cases with outcomeId ", outcomeId)
 
   cases <- ff::as.ram(caseData$cases[caseData$cases$outcomeId == outcomeId, c("nestingCohortId", "indexDate")])
   cases <- cases[order(cases$nestingCohortId), ]

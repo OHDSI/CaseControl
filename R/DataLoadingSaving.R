@@ -244,7 +244,7 @@ saveCaseData <- function(caseData, folder, compress = FALSE) {
     stop("Must specify folder")
   if (class(caseData) != "caseData")
     stop("Data not of class caseData")
-
+  ParallelLogger::logTrace("Saving case data to ", folder)
   nestingCohorts <- caseData$nestingCohorts
   cases <- caseData$cases
   if (caseData$metaData$hasVisits) {
@@ -316,6 +316,7 @@ loadCaseData <- function(folder, readOnly = TRUE) {
     stop(paste("Cannot find folder", folder))
   if (!file.info(folder)$isdir)
     stop(paste("Not a folder:", folder))
+  ParallelLogger::logTrace("Loading case data from ", folder)
 
   metaData <- readRDS(file.path(folder, "metaData.rds"))
   caseData <- list(metaData = metaData)
@@ -348,6 +349,7 @@ loadCaseData <- function(folder, readOnly = TRUE) {
     }
     rm(e)
   }
+  ParallelLogger::logDebug("Case data object has ", nrow(caseData$nestingCohorts), " nesting cohorts")
   class(caseData) <- "caseData"
   return(caseData)
 }

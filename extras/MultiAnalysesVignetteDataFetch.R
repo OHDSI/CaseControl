@@ -25,7 +25,7 @@ options(fftempdir = "s:/fftemp")
 pw <- NULL
 dbms <- "pdw"
 user <- NULL
-cdmDatabaseSchema <- "CDM_Truven_MDCD_V610.dbo"
+cdmDatabaseSchema <- "CDM_Truven_MDCD_V780.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 cohortTable <- "mschuemi_cc_vignette"
 oracleTempSchema <- NULL
@@ -58,6 +58,8 @@ sql <- SqlRender::renderSql(sql,
 sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
 DatabaseConnector::querySql(connection, sql)
 
+DatabaseConnector::disconnect(connection)
+
 negativeControls <- c(705178,
                       705944,
                       710650,
@@ -80,7 +82,6 @@ negativeControls <- c(705178,
                       1560278,
                       1584910,
                       19010309,
-                      19044727,
                       40163731)
 diclofenac <- 1124300
 giBleed <- 1
@@ -174,18 +175,7 @@ saveCcAnalysisList(ccAnalysisList, "s:/temp/vignetteCaseControl2/ccAnalysisList.
 # loadExposureOutcomeNestingCohortList('s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt')
 # ccAnalysisList <- loadCcAnalysisList('s:/temp/vignetteCaseControl2/ccAnalysisList.txt')
 
-outcomeDatabaseSchema <- cohortDatabaseSchema
-outcomeTable <- cohortTable
-nestingCohortDatabaseSchema <- cohortDatabaseSchema
-nestingCohortTable <- cohortTable
-exposureDatabaseSchema <- cdmDatabaseSchema
-exposureTable <- "drug_era"
-getDbCaseDataThreads <- 1
-selectControlsThreads <- 1
-getDbExposureDataThreads <- 1
-createCaseControlDataThreads <- 1
-fitCaseControlModelThreads <- 1
-exposureOutcomeNestingCohortList <- exposureOutcomeNcList
+ParallelLogger::addDefaultFileLogger(file.path(outputFolder, "log.txt"))
 
 result <- runCcAnalyses(connectionDetails = connectionDetails,
                         cdmDatabaseSchema = cdmDatabaseSchema,
@@ -199,6 +189,7 @@ result <- runCcAnalyses(connectionDetails = connectionDetails,
                         outputFolder = outputFolder,
                         exposureOutcomeNestingCohortList = exposureOutcomeNcList,
                         ccAnalysisList = ccAnalysisList,
+                        compressCaseDataFiles = TRUE,
                         getDbCaseDataThreads = 1,
                         selectControlsThreads = 4,
                         getDbExposureDataThreads = 3,
@@ -208,7 +199,7 @@ result <- runCcAnalyses(connectionDetails = connectionDetails,
 
 # result <- readRDS('s:/temp/sccsVignette2/outcomeModelReference.rds')
 
-analysisSum <- summarizeCcAnalyses(result)
+analysisSum <- summarizeCcAnalyses(result, outputFolder)
 saveRDS(analysisSum, "s:/temp/sccsVignette2/analysisSummary.rds")
 
 x <- readRDS(result$modelFile[1])
