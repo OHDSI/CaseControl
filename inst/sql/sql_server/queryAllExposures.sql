@@ -20,12 +20,17 @@ limitations under the License.
 {DEFAULT @exposure_database_schema = 'cdm4_sim.dbo'} 
 {DEFAULT @exposure_table = 'drug_era'} 
 {DEFAULT @exposure_ids = 1} 
+{DEFAULT @sample_nesting_cohorts = FALSE}
 
 SELECT exposure.person_id,
   exposure_id,
   exposure_start_date,
   exposure_end_date
 FROM #nesting_cohort nesting_cohort
+{@sample_nesting_cohorts} ? {
+INNER JOIN #sample_nesting sampled_nesting_cohorts
+ON nesting_cohort.nesting_cohort_id = sampled_nesting_cohorts.nesting_cohort_id
+}
 INNER JOIN (
 {@exposure_table == 'drug_era'} ? {
 	SELECT person_id,

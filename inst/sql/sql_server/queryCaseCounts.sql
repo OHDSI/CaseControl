@@ -1,5 +1,5 @@
 /**********************************************************************
-@file queryVisits.sql
+@file queryCases.sql
 
 Copyright 2018 Observational Health Data Sciences and Informatics
 
@@ -19,15 +19,11 @@ limitations under the License.
 ***********************************************************************/
 {DEFAULT @sample_nesting_cohorts = FALSE}
 
-SELECT DISTINCT nesting_cohort.nesting_cohort_id,
-	visit_start_date
-FROM @cdm_database_schema.visit_occurrence
-INNER JOIN #nesting_cohort nesting_cohort
-ON visit_occurrence.person_id = nesting_cohort.person_id
-AND visit_start_date >= nesting_cohort.start_date
-AND visit_start_date <= nesting_cohort.end_date
+SELECT outcome_id,
+	COUNT(*) AS case_count
+FROM #cases cases
 {@sample_nesting_cohorts} ? {
 INNER JOIN #sample_nesting sampled_nesting_cohorts
-ON nesting_cohort.nesting_cohort_id = sampled_nesting_cohorts.nesting_cohort_id
+ON cases.nesting_cohort_id = sampled_nesting_cohorts.nesting_cohort_id
 }
-;
+GROUP BY outcome_id;

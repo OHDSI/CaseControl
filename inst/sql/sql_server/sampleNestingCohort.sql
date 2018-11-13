@@ -1,5 +1,5 @@
 /**********************************************************************
-@file queryVisits.sql
+@file queryNestingCohort.sql
 
 Copyright 2018 Observational Health Data Sciences and Informatics
 
@@ -17,17 +17,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ***********************************************************************/
-{DEFAULT @sample_nesting_cohorts = FALSE}
+{DEFAULT @max_nesting_cohort_size = 10000000} 
 
-SELECT DISTINCT nesting_cohort.nesting_cohort_id,
-	visit_start_date
-FROM @cdm_database_schema.visit_occurrence
-INNER JOIN #nesting_cohort nesting_cohort
-ON visit_occurrence.person_id = nesting_cohort.person_id
-AND visit_start_date >= nesting_cohort.start_date
-AND visit_start_date <= nesting_cohort.end_date
-{@sample_nesting_cohorts} ? {
-INNER JOIN #sample_nesting sampled_nesting_cohorts
-ON nesting_cohort.nesting_cohort_id = sampled_nesting_cohorts.nesting_cohort_id
-}
-;
+SELECT nesting_cohort_id
+INTO #sample_nesting
+FROM (
+	SELECT nesting_cohort_id,
+		ROW_NUMBER() OVER (ORDER BY NEWID()) AS rn
+	FROM #nesting_cohort
+	) temp
+WHERE rn <= @max_nesting_cohort_size;

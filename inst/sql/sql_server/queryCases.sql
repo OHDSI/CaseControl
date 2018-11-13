@@ -17,8 +17,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ***********************************************************************/
+{DEFAULT @sample_nesting_cohorts = FALSE}
+{DEFAULT @sample_cases = FALSE}
+{DEFAULT @max_cases_per_outcome = 500000}
 
+{@sample_cases} ? {
 SELECT nesting_cohort_id,
     outcome_id,
 	index_date
-FROM #cases;
+FROM (
+}
+SELECT cases.nesting_cohort_id,
+    outcome_id,
+	index_date
+{@sample_cases} ? {
+	, ROW_NUMBER() OVER (PARTITION BY outcome_id ORDER BY NEWID()) AS rn 
+}
+FROM #cases cases
+{@sample_nesting_cohorts} ? {
+INNER JOIN #sample_nesting sampled_nesting_cohorts
+ON cases.nesting_cohort_id = sampled_nesting_cohorts.nesting_cohort_id
+}
+{@sample_cases} ? {
+) temp
+WHERE rn <= @max_cases_per_outcome
+}
+;

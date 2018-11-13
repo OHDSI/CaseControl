@@ -90,6 +90,9 @@
 #' @param maxNestingCohortSize                If the nesting cohort is larger than
 #'                                     this number it will be sampled to this size. \code{maxCohortSize = 0}
 #'                                     indicates no maximum size.
+#' @param maxCasesPerOutcome              If there are more than this number of cases for a single
+#'                                        outcome cases will be sampled to this size. \code{maxCasesPerOutcome = 0}
+#'                                        indicates no maximum size.
 #'
 #' @export
 getDbCaseData <- function(connectionDetails,
@@ -110,7 +113,8 @@ getDbCaseData <- function(connectionDetails,
                           exposureIds = c(),
                           studyStartDate = "",
                           studyEndDate = "",
-                          maxNestingCohortSize = 1e7) {
+                          maxNestingCohortSize = 1e7,
+                          maxCasesPerOutcome = 5e5) {
   if (useNestingCohort == TRUE && missing(nestingCohortId)) {
     stop("Must provide nesting cohort ID if useNestingCohort is TRUE")
   }
@@ -153,7 +157,6 @@ getDbCaseData <- function(connectionDetails,
 
   ParallelLogger::logInfo("Fetching data from server")
   start <- Sys.time()
-  ParallelLogger::logInfo("- Fetching nesting cohorts")
   if (maxNestingCohortSize == 0) {
     sampleNestingCohorts <- FALSE
   } else {
@@ -163,24 +166,52 @@ getDbCaseData <- function(connectionDetails,
     if (nestingCohortCount > maxNestingCohortSize) {
       ParallelLogger::logInfo("Downsampling nesting cohort from ", nestingCohortCount, " to ", maxNestingCohortSize)
       sampleNestingCohorts <- TRUE
+      renderedSql <- SqlRender::loadRenderTranslateSql("sampleNestingCohort.sql",
+                                                       packageName = "CaseControl",
+                                                       dbms = connectionDetails$dbms,
+                                                       oracleTempSchema = oracleTempSchema,
+                                                       max_nesting_cohort_size = maxNestingCohortSize)
+      DatabaseConnector::executeSql(conn, renderedSql)
+
     } else {
       sampleNestingCohorts <- FALSE
     }
   }
+  ParallelLogger::logInfo("- Fetching nesting cohorts")
   renderedSql <- SqlRender::loadRenderTranslateSql("queryNestingCohort.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
                                                    oracleTempSchema = oracleTempSchema,
-                                                   sample_nesting_cohorts = sampleNestingCohorts,
-                                                   sample_size = maxNestingCohortSize)
+                                                   sample_nesting_cohorts = sampleNestingCohorts)
   nestingCohorts <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
   colnames(nestingCohorts) <- SqlRender::snakeCaseToCamelCase(colnames(nestingCohorts))
 
+  if (maxCasesPerOutcome == 0) {
+    sampleCases <- FALSE
+  } else {
+    sql <- SqlRender::loadRenderTranslateSql("queryCaseCounts.sql",
+                                             packageName = "CaseControl",
+                                             dbms = connectionDetails$dbms,
+                                             oracleTempSchema = oracleTempSchema,
+                                             sample_nesting_cohorts = sampleNestingCohorts)
+    caseCounts <- DatabaseConnector::querySql(conn, sql)
+    colnames(caseCounts) <- SqlRender::snakeCaseToCamelCase(colnames(caseCounts))
+    sampleCases <- FALSE
+    for (i in 1:nrow(caseCounts)) {
+      if (caseCounts$caseCount[i] > maxCasesPerOutcome) {
+        ParallelLogger::logInfo("Downsampling cases for outcome ", caseCounts$outcomeId[i], " from ", caseCounts$caseCount[i], " to ", maxCasesPerOutcome)
+        sampleCases <- TRUE
+      }
+    }
+  }
   ParallelLogger::logInfo("- Fetching cases")
   renderedSql <- SqlRender::loadRenderTranslateSql("queryCases.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
-                                                   oracleTempSchema = oracleTempSchema)
+                                                   oracleTempSchema = oracleTempSchema,
+                                                   sample_nesting_cohorts = sampleNestingCohorts,
+                                                   sample_cases = sampleCases,
+                                                   max_cases_per_outcome = maxCasesPerOutcome)
   cases <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
   colnames(cases) <- SqlRender::snakeCaseToCamelCase(colnames(cases))
 
@@ -190,7 +221,8 @@ getDbCaseData <- function(connectionDetails,
                                                      packageName = "CaseControl",
                                                      dbms = connectionDetails$dbms,
                                                      oracleTempSchema = oracleTempSchema,
-                                                     cdm_database_schema = cdmDatabaseSchema)
+                                                     cdm_database_schema = cdmDatabaseSchema,
+                                                     sample_nesting_cohorts = sampleNestingCohorts)
     visits <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
     colnames(visits) <- SqlRender::snakeCaseToCamelCase(colnames(visits))
 
@@ -207,7 +239,8 @@ getDbCaseData <- function(connectionDetails,
                                                      oracleTempSchema = oracleTempSchema,
                                                      exposure_database_schema = exposureDatabaseSchema,
                                                      exposure_table = exposureTable,
-                                                     exposure_ids = exposureIds)
+                                                     exposure_ids = exposureIds,
+                                                     sample_nesting_cohorts = sampleNestingCohorts)
     exposures <- querySql.ffdf(conn, renderedSql)
     colnames(exposures) <- SqlRender::snakeCaseToCamelCase(colnames(exposures))
   }
@@ -218,7 +251,8 @@ getDbCaseData <- function(connectionDetails,
   renderedSql <- SqlRender::loadRenderTranslateSql("removeTempTables.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
-                                                   oracleTempSchema = oracleTempSchema)
+                                                   oracleTempSchema = oracleTempSchema,
+                                                   sample_nesting_cohorts = sampleNestingCohorts)
   DatabaseConnector::executeSql(conn, renderedSql, progressBar = FALSE, reportOverallTime = FALSE)
   DatabaseConnector::disconnect(conn)
 

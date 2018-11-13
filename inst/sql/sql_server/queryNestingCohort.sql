@@ -18,10 +18,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ***********************************************************************/
 {DEFAULT @sample_nesting_cohorts = FALSE}
-{DEFAULT @sample_size = 10000000} 
 
-{@sample_nesting_cohorts} ? {
-SELECT nesting_cohort_id,
+SELECT nesting_cohort.nesting_cohort_id,
 	person_id,
 	observation_period_start_date,
 	start_date,
@@ -30,23 +28,9 @@ SELECT nesting_cohort_id,
 	gender_concept_id,
 	provider_id,
 	care_site_id
-FROM (
-}
-	SELECT nesting_cohort_id,
-		person_id,
-		observation_period_start_date,
-		start_date,
-		end_date,
-		date_of_birth,
-		gender_concept_id,
-		provider_id,
-		care_site_id
+FROM #nesting_cohort nesting_cohort
 {@sample_nesting_cohorts} ? {
-		, ROW_NUMBER() OVER (ORDER BY NEWID()) AS rn
-}
-	FROM #nesting_cohort
-{@sample_nesting_cohorts} ? {
-	) temp
-WHERE rn <= @sample_size
+INNER JOIN #sample_nesting sampled_nesting_cohorts
+ON nesting_cohort.nesting_cohort_id = sampled_nesting_cohorts.nesting_cohort_id
 }
 ;
