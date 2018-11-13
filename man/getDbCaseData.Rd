@@ -14,7 +14,7 @@ getDbCaseData(connectionDetails, cdmDatabaseSchema,
   useObservationEndAsNestingEndDate = TRUE, getVisits = TRUE,
   getExposures = FALSE, exposureDatabaseSchema = cdmDatabaseSchema,
   exposureTable = "drug_era", exposureIds = c(), studyStartDate = "",
-  studyEndDate = "")
+  studyEndDate = "", maxNestingCohortSize = 1e+07)
 }
 \arguments{
 \item{connectionDetails}{An R object of type \code{ConnectionDetails} created
@@ -95,6 +95,10 @@ used. Date format is 'yyyymmdd'.}
 
 \item{studyEndDate}{A calendar date specifying the maximum date where data is
 used. Date format is 'yyyymmdd'.}
+
+\item{maxNestingCohortSize}{If the nesting cohort is larger than
+this number it will be sampled to this size. \code{maxCohortSize = 0}
+indicates no maximum size.}
 }
 \value{
 Returns an object of type \code{caseData}, containing information on the cases, the nesting cohort,

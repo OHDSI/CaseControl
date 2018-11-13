@@ -16,13 +16,17 @@
 #'                                            isused. Date format is 'yyyymmdd'.
 #' @param studyEndDate                        A calendar date specifying the maximum date where data
 #'                                            isused. Date format is 'yyyymmdd'.
+#' @param maxNestingCohortSize                If the nesting cohort is larger thanthis number it will
+#'                                            be sampled to this size. maxCohortSize = 0indicates no
+#'                                            maximum size.
 #'
 #' @export
 createGetDbCaseDataArgs <- function(useNestingCohort = FALSE,
                                     useObservationEndAsNestingEndDate = TRUE,
                                     getVisits = TRUE,
                                     studyStartDate = "",
-                                    studyEndDate = "") {
+                                    studyEndDate = "",
+                                    maxNestingCohortSize = 1e+07) {
   # First: get default values:
   analysis <- list()
   for (name in names(formals(createGetDbCaseDataArgs))) {

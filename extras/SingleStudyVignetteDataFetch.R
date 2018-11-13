@@ -25,7 +25,7 @@ options(fftempdir = "s:/fftemp")
 pw <- NULL
 dbms <- "pdw"
 user <- NULL
-cdmDatabaseSchema <- "CDM_Truven_MDCD_V610.dbo"
+cdmDatabaseSchema <- "CDM_Truven_MDCD_V780.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 oracleTempSchema <- NULL
 cohortTable <- "mschuemi_cc_vignette"

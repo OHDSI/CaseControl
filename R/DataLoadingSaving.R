@@ -87,6 +87,9 @@
 #'                                            used. Date format is 'yyyymmdd'.
 #' @param studyEndDate                        A calendar date specifying the maximum date where data is
 #'                                            used. Date format is 'yyyymmdd'.
+#' @param maxNestingCohortSize                If the nesting cohort is larger than
+#'                                     this number it will be sampled to this size. \code{maxCohortSize = 0}
+#'                                     indicates no maximum size.
 #'
 #' @export
 getDbCaseData <- function(connectionDetails,
@@ -106,7 +109,8 @@ getDbCaseData <- function(connectionDetails,
                           exposureTable = "drug_era",
                           exposureIds = c(),
                           studyStartDate = "",
-                          studyEndDate = "") {
+                          studyEndDate = "",
+                          maxNestingCohortSize = 1e7) {
   if (useNestingCohort == TRUE && missing(nestingCohortId)) {
     stop("Must provide nesting cohort ID if useNestingCohort is TRUE")
   }
@@ -150,10 +154,25 @@ getDbCaseData <- function(connectionDetails,
   ParallelLogger::logInfo("Fetching data from server")
   start <- Sys.time()
   ParallelLogger::logInfo("- Fetching nesting cohorts")
+  if (maxNestingCohortSize == 0) {
+    sampleNestingCohorts <- FALSE
+  } else {
+    sql <- "SELECT COUNT(*) FROM #nesting_cohort;"
+    sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms, oracleTempSchema = oracleTempSchema)$sql
+    nestingCohortCount <- DatabaseConnector::querySql(conn, sql)[1, 1]
+    if (nestingCohortCount > maxNestingCohortSize) {
+      ParallelLogger::logInfo("Downsampling nesting cohort from ", nestingCohortCount, " to ", maxNestingCohortSize)
+      sampleNestingCohorts <- TRUE
+    } else {
+      sampleNestingCohorts <- FALSE
+    }
+  }
   renderedSql <- SqlRender::loadRenderTranslateSql("queryNestingCohort.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
-                                                   oracleTempSchema = oracleTempSchema)
+                                                   oracleTempSchema = oracleTempSchema,
+                                                   sample_nesting_cohorts = sampleNestingCohorts,
+                                                   sample_size = maxNestingCohortSize)
   nestingCohorts <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
   colnames(nestingCohorts) <- SqlRender::snakeCaseToCamelCase(colnames(nestingCohorts))
 

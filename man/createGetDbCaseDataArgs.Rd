@@ -6,7 +6,8 @@
 \usage{
 createGetDbCaseDataArgs(useNestingCohort = FALSE,
   useObservationEndAsNestingEndDate = TRUE, getVisits = TRUE,
-  studyStartDate = "", studyEndDate = "")
+  studyStartDate = "", studyEndDate = "",
+  maxNestingCohortSize = 1e+07)
 }
 \arguments{
 \item{useNestingCohort}{Should the study be nested in a cohort (e.g. people witha
@@ -24,6 +25,10 @@ isused. Date format is 'yyyymmdd'.}
 
 \item{studyEndDate}{A calendar date specifying the maximum date where data
 isused. Date format is 'yyyymmdd'.}
+
+\item{maxNestingCohortSize}{If the nesting cohort is larger thanthis number it will
+be sampled to this size. maxCohortSize = 0indicates no
+maximum size.}
 }
 \description{
 Create a parameter object for the function getDbCaseData
