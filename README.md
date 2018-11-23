@@ -1,6 +1,11 @@
 CaseControl
 ===========
 
+[![Build Status](https://travis-ci.org/OHDSI/CaseControl.svg?branch=master)](https://travis-ci.org/OHDSI/CaseControl)
+[![codecov.io](https://codecov.io/github/OHDSI/CaseControl/coverage.svg?branch=master)](https://codecov.io/github/OHDSI/CaseControl?branch=master)
+
+CaseControl is part of the [OHDSI Methods Library](https://ohdsi.github.io/MethodsLibrary).
+
 Introduction
 ============
 CaseControl is an R package for performing (nested) matched case-control analyses in an observational database in the OMOP Common Data Model.
@@ -21,15 +26,8 @@ System Requirements
 ===================
 Requires R (version 3.2.2 or higher). Installation on Windows requires [RTools](http://cran.r-project.org/bin/windows/Rtools/). Libraries used in CaseControl require Java.
 
-Dependencies
+Installation
 ============
- * Cyclops
- * DatabaseConnector
- * SqlRender
- * ParallelLogger
-
-Getting Started
-===============
 1. On Windows, make sure [RTools](http://cran.r-project.org/bin/windows/Rtools/) is installed.
 2. The DatabaseConnector and SqlRender packages require Java. Java can be downloaded from
 <a href="http://www.java.com" target="_blank">http://www.java.com</a>.
@@ -41,13 +39,16 @@ Getting Started
   install.packages("CaseControl")
   ```
 
-Getting Involved
-================
+User Documentation
+==================
 * Vignette: [Single studies using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/SingleStudies.pdf)
 * Vignette: [Running multiple analyses at once using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/MultipleAnalyses.pdf)
 * Package manual: [CaseControl.pdf](https://raw.githubusercontent.com/OHDSI/CaseControl/master/extras/CaseControl.pdf)
+
+Support
+=======
 * Developer questions/comments/feedback: <a href="http://forums.ohdsi.org/c/developers">OHDSI Forum</a>
-* We use the <a href="../../issues">GitHub issue tracker</a> for all bugs/issues/enhancements
+* We use the <a href=".https://github.com/OHDSI/CaseControl/issues">GitHub issue tracker</a> for all bugs/issues/enhancements
 
 License
 =======
@@ -58,7 +59,5 @@ Development
 CaseControl is being developed in R Studio.
 
 ### Development status
-[![Build Status](https://travis-ci.org/OHDSI/CaseControl.svg?branch=master)](https://travis-ci.org/OHDSI/CaseControl)
-[![codecov.io](https://codecov.io/github/OHDSI/CaseControl/coverage.svg?branch=master)](https://codecov.io/github/OHDSI/CaseControl?branch=master)
 
 Beta
