@@ -185,6 +185,7 @@ getDbCaseData <- function(connectionDetails,
                                                    sample_nesting_cohorts = sampleNestingCohorts)
   nestingCohorts <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
   colnames(nestingCohorts) <- SqlRender::snakeCaseToCamelCase(colnames(nestingCohorts))
+  nestingCohorts <- addDummyRowIfEmpty(nestingCohorts)
 
   if (maxCasesPerOutcome == 0) {
     sampleCases <- FALSE
@@ -197,10 +198,12 @@ getDbCaseData <- function(connectionDetails,
     caseCounts <- DatabaseConnector::querySql(conn, sql)
     colnames(caseCounts) <- SqlRender::snakeCaseToCamelCase(colnames(caseCounts))
     sampleCases <- FALSE
-    for (i in 1:nrow(caseCounts)) {
-      if (caseCounts$caseCount[i] > maxCasesPerOutcome) {
-        ParallelLogger::logInfo("Downsampling cases for outcome ", caseCounts$outcomeId[i], " from ", caseCounts$caseCount[i], " to ", maxCasesPerOutcome)
-        sampleCases <- TRUE
+    if (nrow(caseCounts) > 0) {
+      for (i in 1:nrow(caseCounts)) {
+        if (caseCounts$caseCount[i] > maxCasesPerOutcome) {
+          ParallelLogger::logInfo("Downsampling cases for outcome ", caseCounts$outcomeId[i], " from ", caseCounts$caseCount[i], " to ", maxCasesPerOutcome)
+          sampleCases <- TRUE
+        }
       }
     }
   }
@@ -214,6 +217,7 @@ getDbCaseData <- function(connectionDetails,
                                                    max_cases_per_outcome = maxCasesPerOutcome)
   cases <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
   colnames(cases) <- SqlRender::snakeCaseToCamelCase(colnames(cases))
+  cases <- addDummyRowIfEmpty(cases)
 
   if (getVisits) {
     ParallelLogger::logInfo("- Fetching visits")
@@ -225,6 +229,7 @@ getDbCaseData <- function(connectionDetails,
                                                      sample_nesting_cohorts = sampleNestingCohorts)
     visits <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
     colnames(visits) <- SqlRender::snakeCaseToCamelCase(colnames(visits))
+    visits <- addDummyRowIfEmpty(visits)
 
     # Quicker to sort in ff than in the database (at least for PDW)
     rownames(visits) <- NULL  #Needs to be null or the ordering of ffdf will fail
@@ -243,6 +248,7 @@ getDbCaseData <- function(connectionDetails,
                                                      sample_nesting_cohorts = sampleNestingCohorts)
     exposures <- querySql.ffdf(conn, renderedSql)
     colnames(exposures) <- SqlRender::snakeCaseToCamelCase(colnames(exposures))
+    exposures <- addDummyRowIfEmpty(exposures)
   }
 
   delta <- Sys.time() - start
@@ -274,6 +280,16 @@ getDbCaseData <- function(connectionDetails,
   }
   class(result) <- "caseData"
   return(result)
+}
+
+addDummyRowIfEmpty <- function(object) {
+  if (nrow(object) == 0) {
+    result <- ff::as.ffdf(as.data.frame(t(rep(NA, ncol(object)))))
+    colnames(result) <- colnames(object)
+    return(result)
+  } else {
+    return(object)
+  }
 }
 
 #' Save the case data to folder

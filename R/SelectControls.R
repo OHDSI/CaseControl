@@ -91,74 +91,79 @@ selectControls <- function(caseData,
   start <- Sys.time()
   ParallelLogger::logInfo("Selecting up to ", controlsPerCase, " controls per case for outcome ", outcomeId)
   # ParallelLogger::logDebug("Case data object has ", ffbase::sum.ff(caseData$cases$outcomeId == outcomeId), " cases with outcomeId ", outcomeId)
+  idx <- caseData$cases$outcomeId == outcomeId
+  if (ffbase::any.ff(idx, na.rm = TRUE)) {
+    cases <- ff::as.ram(caseData$cases[idx, c("nestingCohortId", "indexDate")])
+    cases <- cases[order(cases$nestingCohortId), ]
+    cases <- ff::as.ffdf(cases)
 
-  cases <- ff::as.ram(caseData$cases[caseData$cases$outcomeId == outcomeId, c("nestingCohortId", "indexDate")])
-  cases <- cases[order(cases$nestingCohortId), ]
-  cases <- ff::as.ffdf(cases)
+    nestingCohorts <- caseData$nestingCohorts
+    rownames(nestingCohorts) <- NULL  #Needs to be null or the ordering of ffdf will fail
+    nestingCohorts <- nestingCohorts[ff::ffdforder(nestingCohorts[c("nestingCohortId")]), ]
 
-  nestingCohorts <- caseData$nestingCohorts
-  rownames(nestingCohorts) <- NULL  #Needs to be null or the ordering of ffdf will fail
-  nestingCohorts <- nestingCohorts[ff::ffdforder(nestingCohorts[c("nestingCohortId")]), ]
+    if (matchOnVisitDate && caseData$metaData$hasVisits) {
+      visits <- caseData$visits
+      if (!Cyclops::isSorted(visits, c("nestingCohortId", "visitStartDate"))) {
+        ParallelLogger::logInfo("- Sorting visits")
+        rownames(visits) <- NULL  #Needs to be null or the ordering of ffdf will fail
+        visits <- visits[ff::ffdforder(visits[c("nestingCohortId", "visitStartDate")]), ]
+      }
+    } else {
+      # Use one dummy visit so code won't break:
+      visits <- ff::as.ffdf(data.frame(nestingCohortId = -1, visitStartDate = "1900-01-01"))
+    }
+    if (missing(minAge) || is.null(minAge)) {
+      minAgeDays <- 0
+    } else {
+      minAgeDays <- as.integer(minAge * 365.25)
+    }
+    if (missing(maxAge) || is.null(maxAge)) {
+      maxAgeDays <- 9999999
+    } else {
+      maxAgeDays <- as.integer(maxAge * 365.25)
+    }
 
-  if (matchOnVisitDate && caseData$metaData$hasVisits) {
-    visits <- caseData$visits
-    if (!Cyclops::isSorted(visits, c("nestingCohortId", "visitStartDate"))) {
-      ParallelLogger::logInfo("- Sorting visits")
-      rownames(visits) <- NULL  #Needs to be null or the ordering of ffdf will fail
-      visits <- visits[ff::ffdforder(visits[c("nestingCohortId", "visitStartDate")]), ]
+    if (is.null(seed))
+      seed = as.integer(Sys.time())
+
+    caseControls <- selectControlsInternal(nestingCohorts,
+                                           cases,
+                                           visits,
+                                           firstOutcomeOnly,
+                                           washoutPeriod,
+                                           controlsPerCase,
+                                           matchOnAge,
+                                           ageCaliper,
+                                           matchOnGender,
+                                           matchOnProvider,
+                                           matchOnCareSite,
+                                           matchOnVisitDate,
+                                           visitDateCaliper,
+                                           matchOnTimeInCohort,
+                                           daysInCohortCaliper,
+                                           minAgeDays,
+                                           maxAgeDays,
+                                           seed)
+    caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
+    delta <- Sys.time() - start
+    ParallelLogger::logInfo(paste("Selection took", signif(delta, 3), attr(delta, "units")))
+
+    # Create counts
+    cases <- caseData$cases[caseData$cases$outcomeId == outcomeId, "nestingCohortId"]
+    eventCount <- length(cases)
+    if (eventCount == 0) {
+      caseCount <- 0
+    } else {
+      t <- is.na(ffbase::ffmatch(caseData$nestingCohorts$nestingCohortId, ff::as.ff(cases)))
+      caseCount <- length(ffbase::unique.ff(caseData$nestingCohorts[ffbase::ffwhich(t, t == FALSE),
+                                                                    "personId"]))
     }
   } else {
-    # Use one dummy visit so code won't break:
-    visits <- ff::as.ffdf(data.frame(nestingCohortId = -1, visitStartDate = "1900-01-01"))
-  }
-  if (missing(minAge) || is.null(minAge)) {
-    minAgeDays <- 0
-  } else {
-    minAgeDays <- as.integer(minAge * 365.25)
-  }
-  if (missing(maxAge) || is.null(maxAge)) {
-    maxAgeDays <- 9999999
-  } else {
-    maxAgeDays <- as.integer(maxAge * 365.25)
-  }
-
-  if (is.null(seed))
-    seed = as.integer(Sys.time())
-
-  caseControls <- selectControlsInternal(nestingCohorts,
-                                         cases,
-                                         visits,
-                                         firstOutcomeOnly,
-                                         washoutPeriod,
-                                         controlsPerCase,
-                                         matchOnAge,
-                                         ageCaliper,
-                                         matchOnGender,
-                                         matchOnProvider,
-                                         matchOnCareSite,
-                                         matchOnVisitDate,
-                                         visitDateCaliper,
-                                         matchOnTimeInCohort,
-                                         daysInCohortCaliper,
-                                         minAgeDays,
-                                         maxAgeDays,
-                                         seed)
-  caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
-  delta <- Sys.time() - start
-  ParallelLogger::logInfo(paste("Selection took", signif(delta, 3), attr(delta, "units")))
-
-  # Create counts
-  counts <- data.frame()
-
-  cases <- caseData$cases[caseData$cases$outcomeId == outcomeId, "nestingCohortId"]
-  eventCount <- length(cases)
-  if (eventCount == 0) {
     caseCount <- 0
-  } else {
-    t <- is.na(ffbase::ffmatch(caseData$nestingCohorts$nestingCohortId, ff::as.ff(cases)))
-    caseCount <- length(ffbase::unique.ff(caseData$nestingCohorts[ffbase::ffwhich(t, t == FALSE),
-                                                                  "personId"]))
+    eventCount <- 0
+    caseControls <- data.frame()
   }
+  counts <- data.frame()
   counts <- rbind(counts, data.frame(description = "Original counts",
                                      eventCount = eventCount,
                                      caseCount = caseCount))
