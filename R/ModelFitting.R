@@ -57,7 +57,7 @@ fitCaseControlModel <- function(caseControlData,
   treatmentEstimate <- NULL
   fit <- NULL
   status <- "NO MODEL FITTED"
-  if (max(caseControlData$exposed) == 0) {
+  if (nrow(caseControlData) == 0 || max(caseControlData$exposed) == 0) {
     status <- "NO EXPOSED SUBJECTS"
   } else {
     if (useCovariates) {
@@ -133,11 +133,18 @@ fitCaseControlModel <- function(caseControlData,
   outcomeModel$outcomeModelTreatmentEstimate <- treatmentEstimate
   outcomeModel$outcomeModelCoefficients <- coefficients
   outcomeModel$outcomeModelStatus <- status
-  outcomeCounts <- data.frame(cases = sum(caseControlData$isCase),
-                              controls = sum(!caseControlData$isCase),
-                              exposedCases = sum(caseControlData$isCase & caseControlData$exposed),
-                              exposedControls = sum(!caseControlData$isCase &
-      caseControlData$exposed))
+  if (nrow(caseControlData) == 0) {
+    outcomeCounts <- data.frame(cases = 0,
+                                controls = 0,
+                                exposedCases = 0,
+                                exposedControls = 0)
+  } else {
+    outcomeCounts <- data.frame(cases = sum(caseControlData$isCase),
+                                controls = sum(!caseControlData$isCase),
+                                exposedCases = sum(caseControlData$isCase & caseControlData$exposed),
+                                exposedControls = sum(!caseControlData$isCase &
+                                                        caseControlData$exposed))
+  }
   outcomeModel$outcomeCounts <- outcomeCounts
   class(outcomeModel) <- "outcomeModel"
   delta <- Sys.time() - start
