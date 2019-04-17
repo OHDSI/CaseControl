@@ -18,7 +18,7 @@ Depends:
   survival,
   FeatureExtraction  (>= 2.0.0)
 Imports:
-  SqlRender (>= 1.4.5),
+  SqlRender (>= 1.6.0),
   bit,
   ff,
   ffbase (>= 0.12.1),

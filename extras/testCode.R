@@ -173,10 +173,10 @@ DatabaseConnector::executeSql(connection, sql)
 
 # Check number of subjects per cohort:
 sql <- "SELECT cohort_definition_id, COUNT(*) AS count FROM @cohortDatabaseSchema.@cohortTable GROUP BY cohort_definition_id"
-sql <- SqlRender::renderSql(sql,
-                            cohortDatabaseSchema = cohortDatabaseSchema,
-                            cohortTable = cohortTable)$sql
-sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+sql <- SqlRender::render(sql,
+                         cohortDatabaseSchema = cohortDatabaseSchema,
+                         cohortTable = cohortTable)
+sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms)
 DatabaseConnector::querySql(connection, sql)
 
 RJDBC::dbDisconnect(connection)

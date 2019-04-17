@@ -149,9 +149,9 @@ getDbExposureData <- function(caseControls,
                                                           covariateSettings = covariateSettings)
     }
     sql <- "TRUNCATE TABLE #case_controls; DROP TABLE #case_controls;"
-    sql <- SqlRender::translateSql(sql = sql,
-                                   targetDialect = connectionDetails$dbms,
-                                   oracleTempSchema = oracleTempSchema)$sql
+    sql <- SqlRender::translate(sql = sql,
+                                targetDialect = connectionDetails$dbms,
+                                oracleTempSchema = oracleTempSchema)
     DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
     DatabaseConnector::disconnect(connection)
 

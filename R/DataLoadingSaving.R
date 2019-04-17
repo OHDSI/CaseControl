@@ -161,7 +161,7 @@ getDbCaseData <- function(connectionDetails,
     sampleNestingCohorts <- FALSE
   } else {
     sql <- "SELECT COUNT(*) FROM #nesting_cohort;"
-    sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms, oracleTempSchema = oracleTempSchema)$sql
+    sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms, oracleTempSchema = oracleTempSchema)
     nestingCohortCount <- DatabaseConnector::querySql(conn, sql)[1, 1]
     if (nestingCohortCount > maxNestingCohortSize) {
       ParallelLogger::logInfo("Downsampling nesting cohort from ", nestingCohortCount, " to ", maxNestingCohortSize)
@@ -525,10 +525,10 @@ insertDbPopulation <- function(caseControls,
   start <- Sys.time()
   if (!createTable) {
     sql <- "DELETE FROM @table WHERE cohort_definition_id IN (@cohort_ids);"
-    sql <- SqlRender::renderSql(sql,
-                                table = paste(cohortDatabaseSchema, cohortTable, sep = "."),
-                                cohort_ids = cohortIds)$sql
-    sql <- SqlRender::translateSql(sql = sql, targetDialect = connectionDetails$dbms)$sql
+    sql <- SqlRender::render(sql,
+                             table = paste(cohortDatabaseSchema, cohortTable, sep = "."),
+                             cohort_ids = cohortIds)
+    sql <- SqlRender::translate(sql = sql, targetDialect = connectionDetails$dbms)
     DatabaseConnector::executeSql(connection = connection,
                                   sql = sql,
                                   progressBar = FALSE,
