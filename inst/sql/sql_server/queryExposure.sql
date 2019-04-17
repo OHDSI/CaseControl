@@ -23,6 +23,7 @@ limitations under the License.
 
 SELECT row_id,
   exposure_id,
+  DATEDIFF(DAY, observation_period_start_date, exposure_start_date) AS days_prior_observation,
   DATEDIFF(DAY, exposure_start_date, cohort_start_date) AS days_since_exposure_start,
   DATEDIFF(DAY, exposure_end_date, cohort_start_date) AS days_since_exposure_end
 FROM #case_controls case_controls
@@ -47,5 +48,9 @@ SELECT subject_id AS person_id,
 }
 }
 	) exposure
-ON case_controls.subject_id = exposure.person_id
-AND  exposure.exposure_start_date <= cohort_start_date
+	ON case_controls.subject_id = exposure.person_id
+		AND  exposure.exposure_start_date <= cohort_start_date
+INNER JOIN @exposure_database_schema.observation_period
+	ON case_controls.subject_id = observation_period.person_id
+		AND observation_period_start_date <= cohort_start_date
+		AND observation_period_end_date >= cohort_start_date;

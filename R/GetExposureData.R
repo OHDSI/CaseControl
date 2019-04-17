@@ -64,11 +64,12 @@ getDbExposureData <- function(caseControls,
                               cdmDatabaseSchema = exposureDatabaseSchema,
                               covariateSettings = NULL,
                               caseData = NULL) {
+  exposure <- data.frame(rowId = c(),
+                          exposureId = c(),
+                          daysPriorObservation = c(),
+                          daysSinceExposureStart = c(),
+                          daysSinceExposureEnd = c())
   if (nrow(caseControls) == 0) {
-    exposures = data.frame(rowId = c(),
-                           exposureId = c(),
-                           daysSinceExposureStart = c(),
-                           daysSinceExposureEnd = c())
     result <- list(caseControls = caseControls,
                    exposure = data.frame(),
                    metaData = attr(caseControls, "metaData"))
@@ -79,21 +80,25 @@ getDbExposureData <- function(caseControls,
     caseControls$rowId <- 1:nrow(caseControls)
     idx <- ffbase::`%in%`(caseData$exposures$exposureId, exposureIds)
     if (ffbase::any.ff(idx)) {
-      exposures <- caseData$exposures[idx, ]
-      idx <- ffbase::`%in%`(exposures$personId, caseControls$personId)
+      selectExposures <- caseData$exposures[idx, ]
+      idx <- ffbase::`%in%`(selectExposures$personId, caseControls$personId)
       if (ffbase::any.ff(idx)) {
-        exposures <- exposures[idx, ]
-        exposure <- merge(ff::as.ram(exposures), caseControls[, c("personId", "indexDate", "rowId")])
+        # Need to find observation period start date per rowId:
+        nestingCohorts <- caseData$nestingCohorts[ffbase::`%in%`(caseData$nestingCohorts$personId, caseControls$personId), c("personId", "observationPeriodStartDate")]
+        nestingCohorts <- merge(ff::as.ram(nestingCohorts), caseControls[, c("personId", "indexDate", "rowId")])
+        nestingCohorts <- nestingCohorts[nestingCohorts$indexDate >= nestingCohorts$observationPeriodStartDate, ]
+        nestingCohorts <- aggregate(observationPeriodStartDate ~ rowId, nestingCohorts, max)
+
+        # Construct exposure object:
+        exposure <- selectExposures[idx, ]
+        exposure <- merge(ff::as.ram(exposure), caseControls[, c("personId", "indexDate", "rowId")])
+        exposure <- merge(exposure, nestingCohorts)
+        exposure$daysPriorObservation <- exposure$exposureStartDate - exposure$observationPeriodStartDate
         exposure$daysSinceExposureStart <- exposure$indexDate - exposure$exposureStartDate
         exposure$daysSinceExposureEnd <- exposure$indexDate - exposure$exposureEndDate
         exposure <- exposure[exposure$daysSinceExposureStart >= 0, ]
-        exposure <- exposure[, c("rowId", "exposureId", "daysSinceExposureStart", "daysSinceExposureEnd")]
-      } else {
-        exposure <- data.frame()
-
+        exposure <- exposure[, c("rowId", "exposureId", "daysPriorObservation", "daysSinceExposureStart", "daysSinceExposureEnd")]
       }
-    } else {
-      exposure <- data.frame()
     }
     result <- list(caseControls = caseControls,
                    exposure = exposure,

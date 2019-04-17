@@ -30,6 +30,7 @@
 #'                               This number should be non-positive.
 #' @param riskWindowEnd          The end of the risk window (in days) relative to the index date. This
 #'                               number should be non-positive.
+#' @param exposureWashoutPeriod  Minimum required numbers of days of observation for inclusion of an exposure.
 #'
 #' @return
 #' A data frame with these columns: \describe{ \item{personId}{The person ID} \item{indexDate}{The
@@ -41,7 +42,8 @@ createCaseControlData <- function(caseControlsExposure,
                                   exposureId,
                                   firstExposureOnly = FALSE,
                                   riskWindowStart = 0,
-                                  riskWindowEnd = 0) {
+                                  riskWindowEnd = 0,
+                                  exposureWashoutPeriod = 0) {
   if (riskWindowStart > riskWindowEnd)
     stop("riskWindowStart cannot be after riskWindowEnd")
   if (riskWindowStart > 0)
@@ -55,7 +57,10 @@ createCaseControlData <- function(caseControlsExposure,
     idx <- duplicated(exposure$rowId)
     exposure <- exposure[!idx, ]
   }
-  idx <- exposure$daysSinceExposureStart > (-riskWindowEnd) & exposure$daysSinceExposureEnd < (-riskWindowStart)
+  if (exposureWashoutPeriod != 0) {
+    exposure <- exposure[exposure$daysPriorObservation >= exposureWashoutPeriod, ]
+  }
+  idx <- exposure$daysSinceExposureStart >= (-riskWindowEnd) & exposure$daysSinceExposureEnd <= (-riskWindowStart)
   if (length(idx) == 0) {
     caseControlData <- data.frame()
   } else {

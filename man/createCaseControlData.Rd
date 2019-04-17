@@ -5,7 +5,8 @@
 \title{Create case-control data}
 \usage{
 createCaseControlData(caseControlsExposure, exposureId,
-  firstExposureOnly = FALSE, riskWindowStart = 0, riskWindowEnd = 0)
+  firstExposureOnly = FALSE, riskWindowStart = 0, riskWindowEnd = 0,
+  exposureWashoutPeriod = 0)
 }
 \arguments{
 \item{caseControlsExposure}{An object of type \code{caseControlsExposure} as created using the
@@ -20,6 +21,8 @@ This number should be non-positive.}
 
 \item{riskWindowEnd}{The end of the risk window (in days) relative to the index date. This
 number should be non-positive.}
+
+\item{exposureWashoutPeriod}{Minimum required numbers of days of observation for inclusion of an exposure.}
 }
 \value{
 A data frame with these columns: \describe{ \item{personId}{The person ID} \item{indexDate}{The
