@@ -18,14 +18,14 @@ test_that("Washout period for cases", {
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       removedUnmatchedCases = FALSE)
+                       controlSelectionCriteria = createMatchingCriteria(removedUnmatchedCases = FALSE))
   expect_equal(cc$personId, c(1))
 
   # Case before washout period:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 365,
-                       removedUnmatchedCases = FALSE)
+                       controlSelectionCriteria = createMatchingCriteria(removedUnmatchedCases = FALSE))
   expect_equal(nrow(cc), 0)
 })
 
@@ -44,11 +44,18 @@ test_that("Washout period for controls", {
                                                            providerId = c(1, 1, 1))))
 
   # One control after washout period:
-  cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180)
+  cc <- selectControls(caseData = caseData,
+                       outcomeId = 1,
+                       washoutPeriod = 180,
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2))
   expect_equal(cc$personId, c(1, 2))
 
-  # Both controls afterwashout period:
-  cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 0, matchOnTimeInCohort = FALSE)
+  # Both controls after washout period:
+
+  cc <- selectControls(caseData = caseData,
+                       outcomeId = 1,
+                       washoutPeriod = 0,
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2))
   expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
 })
 
@@ -90,14 +97,14 @@ test_that("Match on gender", {
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnGender = FALSE)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnGender = FALSE))
   expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
 
   # One control with same gender:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnGender = TRUE)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnGender = TRUE))
   expect_equal(cc$personId, c(1, 2))
 })
 
@@ -116,15 +123,17 @@ test_that("Match on age", {
                                                            providerId = c(1, 1, 1))))
 
   # Two control without matching on age:
-  cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180, matchOnAge = FALSE)
+  cc <- selectControls(caseData = caseData,
+                       outcomeId = 1,
+                       washoutPeriod = 180,
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnAge = FALSE))
   expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
 
   # One control with simlar age:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnAge = TRUE,
-                       ageCaliper = 2)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnAge = TRUE, ageCaliper = 2))
   expect_equal(cc$personId, c(1, 2))
 })
 
@@ -146,14 +155,14 @@ test_that("Match on provider", {
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnProvider = FALSE)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnProvider = FALSE))
   expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
 
   # One control with simlar provider:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnProvider = TRUE)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnProvider = TRUE))
   expect_equal(cc$personId, c(1, 3))
 })
 
@@ -171,18 +180,18 @@ test_that("Match on care site", {
                                                            careSiteId = c(1, 2, 1),
                                                            providerId = c(1, 1, 1))))
 
-  # Two control without matching on provider:
+  # Two control without matching on care site:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnCareSite = FALSE)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnCareSite = FALSE))
   expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
 
-  # One control with simlar provider:
+  # One control with simlar care site:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnCareSite = TRUE)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnCareSite = TRUE))
   expect_equal(cc$personId, c(1, 3))
 })
 
@@ -207,15 +216,14 @@ test_that("Match on visit", {
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnVisitDate = FALSE)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnVisitDate = FALSE))
   expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
 
   # One control with matching visit date:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnVisitDate = TRUE,
-                       visitDateCaliper = 30)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnVisitDate = TRUE, visitDateCaliper = 30))
   expect_equal(cc$personId, c(1, 2))
   expect_equal(cc$indexDate, as.Date(c("2001-01-01", "2001-01-02")))
 })
@@ -239,19 +247,21 @@ test_that("Match on time in cohort", {
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnGender = FALSE,
-                       matchOnAge = FALSE,
-                       matchOnTimeInCohort = FALSE)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2,
+                                                                         matchOnAge = FALSE,
+                                                                         matchOnGender = FALSE,
+                                                                         matchOnTimeInCohort = FALSE))
   expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
 
   # One control with simlar time in cohort:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
-                       matchOnGender = FALSE,
-                       matchOnAge = FALSE,
-                       matchOnTimeInCohort = TRUE,
-                       daysInCohortCaliper = 30)
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2,
+                                                                         matchOnAge = FALSE,
+                                                                         matchOnGender = FALSE,
+                                                                         matchOnTimeInCohort = TRUE,
+                                                                         daysInCohortCaliper = 30))
   expect_equal(cc$personId, c(1, 3))
 })
 
@@ -270,20 +280,27 @@ test_that("Restrict on age", {
                                                            providerId = c(1, 1, 1))))
 
   # One case, one control without retricting on age:
-  cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180, matchOnAge = TRUE)
+  cc <- selectControls(caseData = caseData,
+                       outcomeId = 1,
+                       washoutPeriod = 180,
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnAge = TRUE))
   expect_equal(cc$personId[order(cc$personId)], c(1, 2))
 
   # No cases when restricting on age:
-  cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180, matchOnAge = TRUE, minAge = 8, maxAge = 12)
-
+  cc <- selectControls(caseData = caseData,
+                       outcomeId = 1,
+                       washoutPeriod = 180,
+                       controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnAge = TRUE),
+                       minAge = 8,
+                       maxAge = 12)
   expect_equal(length(cc$personId), 0)
 })
 
 
 test_that("Sampling with replacement", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1, 2),
-                                      outcomeId = c(1, 1),
-                                      indexDate = as.Date(c("2001-01-01", "2001-01-01"))),
+  caseData <- list(cases = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2),
+                                                  outcomeId = c(1, 1),
+                                                  indexDate = as.Date(c("2001-01-01", "2001-01-01")))),
                    nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),

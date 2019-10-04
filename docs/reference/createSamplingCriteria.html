@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Create a parameter object for the function selectControls — createSelectControlsArgs • CaseControl</title>
+<title>Create sampling criteria — createSamplingCriteria • CaseControl</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -32,9 +32,9 @@
 
 
 
-<meta property="og:title" content="Create a parameter object for the function selectControls — createSelectControlsArgs" />
+<meta property="og:title" content="Create sampling criteria — createSamplingCriteria" />
 
-<meta property="og:description" content="Create a parameter object for the function selectControls" />
+<meta property="og:description" content="Criteria to use when controls are simlpy sampled from the (nesting) population." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,61 +121,35 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Create a parameter object for the function selectControls</h1>
-    <small class="dont-index">Source: <a href='https://github.com/OHDSI/CaseControl/blob/master/R/CreateArgFunctions.R'><code>R/CreateArgFunctions.R</code></a></small>
-    <div class="hidden name"><code>createSelectControlsArgs.Rd</code></div>
+    <h1>Create sampling criteria</h1>
+    <small class="dont-index">Source: <a href='https://github.com/OHDSI/CaseControl/blob/master/R/SelectControls.R'><code>R/SelectControls.R</code></a></small>
+    <div class="hidden name"><code>createSamplingCriteria.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Create a parameter object for the function selectControls</p>
+    <p>Criteria to use when controls are simlpy sampled from the (nesting) population.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>createSelectControlsArgs</span>(<span class='kw'>firstOutcomeOnly</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>washoutPeriod</span> <span class='kw'>=</span> <span class='fl'>180</span>,
-  <span class='kw'>controlSelectionCriteria</span> <span class='kw'>=</span> <span class='fu'><a href='createMatchingCriteria.html'>createMatchingCriteria</a></span>(), <span class='kw'>minAge</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>maxAge</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>createSamplingCriteria</span>(<span class='kw'>controlsPerCase</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>firstOutcomeOnly</th>
-      <td><p>Use the first outcome per person?</p></td>
+      <th>controlsPerCase</th>
+      <td><p>Maximum number of controls to select per case.</p></td>
     </tr>
     <tr>
-      <th>washoutPeriod</th>
-      <td><p>Minimum required numbers of days of observation for inclusion
-aseither case or control.</p></td>
-    </tr>
-    <tr>
-      <th>controlSelectionCriteria</th>
-      <td><p>Either a matchingCriteria object as generated using the
-createMatchingCriteria function, or a samplingCriteriaobject as
-generated using the linkcreateSamplingCriteriafunction.</p></td>
-    </tr>
-    <tr>
-      <th>minAge</th>
-      <td><p>Minimum age at which patient time will be included in the
-analysis.Note that information prior to the min age is still used
-to determineexposure status after the minimum age (e.g. when a
-prescription wasstarted just prior to reaching the minimum age).
-Also, outcomesoccurring before the minimum age is reached will be
-considered asprior outcomes when using first outcomes only. Age
-should be specifiedin years, but non-integer values are allowed.
-If not specified, no agerestriction will be applied.</p></td>
-    </tr>
-    <tr>
-      <th>maxAge</th>
-      <td><p>Maximum age at which patient time will be included in the
-analysis. Ageshould be specified in years, but non-integer values
-are allowed. If notspecified, no age restriction will be applied.</p></td>
+      <th>seed</th>
+      <td><p>The number generator seed. A null value sets seed via <code><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></code>.</p></td>
     </tr>
     </table>
     
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Create an object defining the parameter values.</p>
+    <p>A settings object to be used in the <code><a href='selectControls.html'>selectControls</a></code> function.</p>
     
 
   </div>
@@ -184,7 +158,7 @@ are allowed. If notspecified, no age restriction will be applied.</p></td>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#details">Details</a></li>
+      <li><a href="#value">Value</a></li>
           </ul>
 
   </div>

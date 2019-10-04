@@ -5,7 +5,7 @@
 \title{Create a parameter object for the function getDbCaseData}
 \usage{
 createGetDbCaseDataArgs(useNestingCohort = FALSE,
-  useObservationEndAsNestingEndDate = TRUE, getVisits = TRUE,
+  useObservationEndAsNestingEndDate = TRUE, getVisits = FALSE,
   studyStartDate = "", studyEndDate = "",
   maxNestingCohortSize = 1e+07, maxCasesPerOutcome = 5e+05)
 }

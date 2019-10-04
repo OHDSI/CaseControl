@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Select matched controls per case — selectControls • CaseControl</title>
+<title>Select controls — selectControls • CaseControl</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -16,13 +16,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -30,9 +32,9 @@
 
 
 
-<meta property="og:title" content="Select matched controls per case — selectControls" />
+<meta property="og:title" content="Select controls — selectControls" />
 
-<meta property="og:description" content="Select matched controls per case" />
+<meta property="og:description" content="Select controls" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -45,6 +47,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
+
 
 
   </head>
@@ -63,7 +66,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CaseControl</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">2.0.0</span>
       </span>
     </div>
 
@@ -71,7 +74,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -101,7 +104,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/OHDSI/CaseControl">
-    <span class="fa fa-github fa-lg"></span>
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -112,29 +115,27 @@
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Select matched controls per case</h1>
+    <h1>Select controls</h1>
     <small class="dont-index">Source: <a href='https://github.com/OHDSI/CaseControl/blob/master/R/SelectControls.R'><code>R/SelectControls.R</code></a></small>
     <div class="hidden name"><code>selectControls.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Select matched controls per case</p>
+    <p>Select controls</p>
     
     </div>
 
     <pre class="usage"><span class='fu'>selectControls</span>(<span class='no'>caseData</span>, <span class='no'>outcomeId</span>, <span class='kw'>firstOutcomeOnly</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>washoutPeriod</span> <span class='kw'>=</span> <span class='fl'>180</span>, <span class='kw'>controlsPerCase</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>matchOnAge</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>ageCaliper</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>matchOnGender</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>matchOnProvider</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>matchOnCareSite</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>matchOnVisitDate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>visitDateCaliper</span> <span class='kw'>=</span> <span class='fl'>30</span>, <span class='kw'>matchOnTimeInCohort</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>daysInCohortCaliper</span> <span class='kw'>=</span> <span class='fl'>30</span>, <span class='kw'>minAge</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>maxAge</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>removedUnmatchedCases</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+  <span class='kw'>washoutPeriod</span> <span class='kw'>=</span> <span class='fl'>180</span>,
+  <span class='kw'>controlSelectionCriteria</span> <span class='kw'>=</span> <span class='fu'><a href='createMatchingCriteria.html'>createMatchingCriteria</a></span>(), <span class='kw'>minAge</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>maxAge</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -158,47 +159,11 @@
 either case or control.</p></td>
     </tr>
     <tr>
-      <th>controlsPerCase</th>
-      <td><p>Maximum number of controls to select per case.</p></td>
-    </tr>
-    <tr>
-      <th>matchOnAge</th>
-      <td><p>Match on age?</p></td>
-    </tr>
-    <tr>
-      <th>ageCaliper</th>
-      <td><p>Maximum difference (in years) in age when matching on age.</p></td>
-    </tr>
-    <tr>
-      <th>matchOnGender</th>
-      <td><p>Match on gender?</p></td>
-    </tr>
-    <tr>
-      <th>matchOnProvider</th>
-      <td><p>Match on provider (as specified in the person table)?</p></td>
-    </tr>
-    <tr>
-      <th>matchOnCareSite</th>
-      <td><p>Match on care site (as specified in the person table)?</p></td>
-    </tr>
-    <tr>
-      <th>matchOnVisitDate</th>
-      <td><p>Should the index date of the control be changed to the nearest visit
-date?</p></td>
-    </tr>
-    <tr>
-      <th>visitDateCaliper</th>
-      <td><p>Maximum difference (in days) between the index date and the visit
-date when matching on visit date.</p></td>
-    </tr>
-    <tr>
-      <th>matchOnTimeInCohort</th>
-      <td><p>Match on time in nesting cohort? When not using nesting, this is
-interpreted as time observed prior to index.</p></td>
-    </tr>
-    <tr>
-      <th>daysInCohortCaliper</th>
-      <td><p>Maximum difference (in days) in time in cohort.</p></td>
+      <th>controlSelectionCriteria</th>
+      <td><p>Either a <code>matchingCriteria</code> object as generated using the <code>
+<a href='createMatchingCriteria.html'>createMatchingCriteria</a></code> function, or a <code>samplingCriteria</code>
+object as generated using the <code><a href='createSamplingCriteria.html'>createSamplingCriteria</a></code>
+function.</p></td>
     </tr>
     <tr>
       <th>minAge</th>
@@ -217,14 +182,6 @@ restriction will be applied.</p></td>
 should be specified in years, but non-integer values are allowed. If not
 specified, no age restriction will be applied.</p></td>
     </tr>
-    <tr>
-      <th>removedUnmatchedCases</th>
-      <td><p>Should cases with no matched controls be removed?</p></td>
-    </tr>
-    <tr>
-      <th>seed</th>
-      <td><p>The number generator seed. A null value sets seed via <code><a href='https://www.rdocumentation.org/packages/base/topics/Sys.time'>Sys.time</a></code>.</p></td>
-    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -232,13 +189,13 @@ specified, no age restriction will be applied.</p></td>
     <p>A data frame with these columns:</p><dl class='dl-horizontal'>
 <dt>personId</dt><dd><p>The person ID</p></dd> <dt>indexDate</dt><dd><p>The
 index date</p></dd> <dt>isCase</dt><dd><p>Is the person a case or a control?</p></dd> <dt>stratumId</dt><dd><p>The ID linking cases
-and controls in a matched set</p></dd> </dl>
+and controls in a matched set (only available when matching)</p></dd> </dl>
 
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Select controls per case. Controls are matched on calendar time and the criteria defined in the
-arguments. Controls are randomly sampled to the required number.</p>
+    <p>Select controls either by individually matching controls to each case, or by random sampling controls from the
+(nested) population.</p>
     
 
   </div>
@@ -255,19 +212,23 @@ arguments. Controls are randomly sampled to the required number.</p>
   </div>
 </div>
 
+
       <footer>
       <div class="copyright">
   <p>Developed by Martijn Schuemie.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.9100.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

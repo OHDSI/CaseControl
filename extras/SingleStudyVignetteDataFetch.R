@@ -20,7 +20,7 @@
 library(SqlRender)
 library(DatabaseConnector)
 library(CaseControl)
-options(fftempdir = "c:/fftemp")
+options(fftempdir = "s:/fftemp")
 
 pw <- NULL
 dbms <- "pdw"
@@ -91,7 +91,7 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
 
 saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseData")
 
-caseData <- loadCaseData("c:/temp/vignetteCaseControl/caseData")
+caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
 
 caseData
 

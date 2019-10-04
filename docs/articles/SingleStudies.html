@@ -7,8 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Single studies using the CaseControl package • CaseControl</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="Single studies using the CaseControl package">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
@@ -30,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CaseControl</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">2.0.0</span>
       </span>
     </div>
 
@@ -38,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -67,7 +68,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/OHDSI/CaseControl">
-    <span class="fa fa-github fa-lg"></span>
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -80,13 +81,14 @@
 <!--/.navbar -->
 
       
+
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Single studies using the CaseControl package</h1>
                         <h4 class="author">Martijn J. Schuemie</h4>
             
-            <h4 class="date">2019-04-17</h4>
+            <h4 class="date">2019-10-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/CaseControl/blob/master/vignettes/SingleStudies.Rmd"><code>vignettes/SingleStudies.Rmd</code></a></small>
       <div class="hidden name"><code>SingleStudies.Rmd</code></div>
@@ -105,10 +107,10 @@
 <a href="#installation-instructions" class="anchor"></a>Installation instructions</h1>
 <p>Before installing the <code>CaseControl</code> package make sure you have Java available. Java can be downloaded from <a href="http://www.java.com">www.java.com</a>. For Windows users, RTools is also necessary. RTools can be downloaded from <a href="http://cran.r-project.org/bin/windows/Rtools/">CRAN</a>.</p>
 <p>The <code>CaseControl</code> package is currently maintained in a <a href="https://github.com/OHDSI/CaseControl">Github repository</a>, and has dependencies on other packages in Github. All of these packages can be downloaded and installed from within R using the <code>drat</code> package:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"drat"</span>)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2">drat<span class="op">::</span><span class="kw">addRepo</span>(<span class="st">"OHDSI"</span>)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"CaseControl"</span>)</a></code></pre></div>
-<p>Once installed, you can type <code><a href="https://www.rdocumentation.org/packages/base/topics/library">library(CaseControl)</a></code> to load the package.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"drat"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a>drat<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/drat/man/addRepo.html">addRepo</a></span>(<span class="st">"OHDSI"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="kw"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"CaseControl"</span>)</span></code></pre></div>
+<p>Once installed, you can type <code><a href="https://rdrr.io/r/base/library.html">library(CaseControl)</a></code> to load the package.</p>
 </div>
 <div id="overview" class="section level1">
 <h1 class="hasAnchor">
@@ -127,15 +129,15 @@
 <h1 class="hasAnchor">
 <a href="#configuring-the-connection-to-the-server" class="anchor"></a>Configuring the connection to the server</h1>
 <p>We need to tell R how to connect to the server where the data are. <code>CaseControl</code> uses the <code>DatabaseConnector</code> package, which provides the <code>createConnectionDetails</code> function. Type <code>?createConnectionDetails</code> for the specific settings required for the various database management systems (DBMS). For example, one might connect to a PostgreSQL database using this code:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">connectionDetails &lt;-<span class="st"> </span><span class="kw">createConnectionDetails</span>(<span class="dt">dbms =</span> <span class="st">"postgresql"</span>, </a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">                                             <span class="dt">server =</span> <span class="st">"localhost/ohdsi"</span>, </a>
-<a class="sourceLine" id="cb2-3" data-line-number="3">                                             <span class="dt">user =</span> <span class="st">"joe"</span>, </a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">                                             <span class="dt">password =</span> <span class="st">"supersecret"</span>)</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb2-6" data-line-number="6">cdmDatabaseSchema &lt;-<span class="st"> "my_cdm_data"</span></a>
-<a class="sourceLine" id="cb2-7" data-line-number="7">cohortDatabaseSchema &lt;-<span class="st"> "my_results"</span></a>
-<a class="sourceLine" id="cb2-8" data-line-number="8">cohortTable &lt;-<span class="st"> "my_cohorts"</span></a>
-<a class="sourceLine" id="cb2-9" data-line-number="9">cdmVersion &lt;-<span class="st"> "5"</span></a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>connectionDetails &lt;-<span class="st"> </span><span class="kw">createConnectionDetails</span>(<span class="dt">dbms =</span> <span class="st">"postgresql"</span>, </span>
+<span id="cb2-2"><a href="#cb2-2"></a>                                             <span class="dt">server =</span> <span class="st">"localhost/ohdsi"</span>, </span>
+<span id="cb2-3"><a href="#cb2-3"></a>                                             <span class="dt">user =</span> <span class="st">"joe"</span>, </span>
+<span id="cb2-4"><a href="#cb2-4"></a>                                             <span class="dt">password =</span> <span class="st">"supersecret"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5"></a></span>
+<span id="cb2-6"><a href="#cb2-6"></a>cdmDatabaseSchema &lt;-<span class="st"> "my_cdm_data"</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>cohortDatabaseSchema &lt;-<span class="st"> "my_results"</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a>cohortTable &lt;-<span class="st"> "my_cohorts"</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>cdmVersion &lt;-<span class="st"> "5"</span></span></code></pre></div>
 <p>The last three lines define the <code>cdmDatabaseSchema</code> and <code>cohortDatabaseSchema</code> variables,as well as the CDM version. We’ll use these later to tell R where the data in CDM format live, where we have stored our cohorts of interest, and what version CDM is used. Note that for Microsoft SQL Server, databaseschemas need to specify both the database and the schema, so for example <code>cdmDatabaseSchema &lt;- "my_cdm_data.dbo"</code>.</p>
 </div>
 <div id="preparing-the-health-outcome-of-interest-and-nesting-cohort" class="section level1">
@@ -143,63 +145,63 @@
 <a href="#preparing-the-health-outcome-of-interest-and-nesting-cohort" class="anchor"></a>Preparing the health outcome of interest and nesting cohort</h1>
 <p>We need to define the exposures and outcomes for our study. Additionally, we can specify a cohort in which to nest the study. The CDM also already contains standard cohorts in the <code>drug_era</code> and <code>condition_era</code> table that could be used if those meet the requirement of the study, but often we require custom cohort definitions. One way to define cohorts is by writing SQL statements against the OMOP CDM that populate a table of events in which we are interested. The resulting table should have the same structure as the <code>cohort</code> table in the CDM, meaning it should have the fields <code>cohort_definition_id</code>, <code>cohort_start_date</code>, <code>cohort_end_date</code>,and <code>subject_id</code>.</p>
 <p>For our example study, we will rely on <code>drug_era</code> to define exposures, and we have created a file called <em>vignette.sql</em> with the following contents to define the outcome and the nesting cohort:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">/***********************************</span></a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="co">File vignette.sql </span></a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">***********************************/</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="kw">IF</span> OBJECT_ID(<span class="st">'@cohortDatabaseSchema.@cohortTable'</span>, <span class="st">'U'</span>) <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/NULL">NULL</a></span></a>
-<a class="sourceLine" id="cb3-6" data-line-number="6">  <span class="kw">DROP</span> <span class="kw">TABLE</span> @cohortDatabaseSchema.@cohortTable;</a>
-<a class="sourceLine" id="cb3-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="kw">SELECT</span> <span class="dv">1</span> <span class="kw">AS</span> cohort_definition_id,</a>
-<a class="sourceLine" id="cb3-9" data-line-number="9">    condition_start_date <span class="kw">AS</span> cohort_start_date,</a>
-<a class="sourceLine" id="cb3-10" data-line-number="10">    condition_end_date <span class="kw">AS</span> cohort_end_date,</a>
-<a class="sourceLine" id="cb3-11" data-line-number="11">    condition_occurrence.person_id <span class="kw">AS</span> subject_id</a>
-<a class="sourceLine" id="cb3-12" data-line-number="12"><span class="kw">INTO</span> @cohortDatabaseSchema.@cohortTable</a>
-<a class="sourceLine" id="cb3-13" data-line-number="13"><span class="kw">FROM</span> @cdmDatabaseSchema.condition_occurrence</a>
-<a class="sourceLine" id="cb3-14" data-line-number="14"><span class="kw">INNER</span> <span class="kw">JOIN</span> @cdmDatabaseSchema.visit_occurrence</a>
-<a class="sourceLine" id="cb3-15" data-line-number="15">    <span class="kw">ON</span> condition_occurrence.visit_occurrence_id = visit_occurrence.visit_occurrence_id</a>
-<a class="sourceLine" id="cb3-16" data-line-number="16"><span class="kw">WHERE</span> condition_concept_id <span class="kw">IN</span> (</a>
-<a class="sourceLine" id="cb3-17" data-line-number="17">        <span class="kw">SELECT</span> descendant_concept_id</a>
-<a class="sourceLine" id="cb3-18" data-line-number="18">        <span class="kw">FROM</span> @cdmDatabaseSchema.concept_ancestor</a>
-<a class="sourceLine" id="cb3-19" data-line-number="19">        <span class="kw">WHERE</span> ancestor_concept_id = <span class="dv">192671</span> <span class="co">-- GI - Gastrointestinal haemorrhage</span></a>
-<a class="sourceLine" id="cb3-20" data-line-number="20">        )</a>
-<a class="sourceLine" id="cb3-21" data-line-number="21">    <span class="kw">AND</span> visit_occurrence.visit_concept_id <span class="kw">IN</span> (<span class="dv">9201</span>, <span class="dv">9203</span>);</a>
-<a class="sourceLine" id="cb3-22" data-line-number="22">    </a>
-<a class="sourceLine" id="cb3-23" data-line-number="23"><span class="kw">INSERT</span> <span class="kw">INTO</span> @cohortDatabaseSchema.@cohortTable </a>
-<a class="sourceLine" id="cb3-24" data-line-number="24">(cohort_definition_id, cohort_start_date, cohort_end_date, subject_id)</a>
-<a class="sourceLine" id="cb3-25" data-line-number="25"><span class="kw">SELECT</span> <span class="dv">2</span> <span class="kw">AS</span> cohort_definition_id,</a>
-<a class="sourceLine" id="cb3-26" data-line-number="26">    <span class="fu">MIN</span>(condition_start_date) <span class="kw">AS</span> cohort_start_date,</a>
-<a class="sourceLine" id="cb3-27" data-line-number="27">    <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/NULL">NULL</a></span> <span class="kw">AS</span> cohort_end_date,</a>
-<a class="sourceLine" id="cb3-28" data-line-number="28">    person_id <span class="kw">AS</span> subject_id</a>
-<a class="sourceLine" id="cb3-29" data-line-number="29"><span class="kw">FROM</span> @cdmDatabaseSchema.condition_occurrence</a>
-<a class="sourceLine" id="cb3-30" data-line-number="30"><span class="kw">WHERE</span> condition_concept_id <span class="kw">IN</span> (</a>
-<a class="sourceLine" id="cb3-31" data-line-number="31">        <span class="kw">SELECT</span> descendant_concept_id</a>
-<a class="sourceLine" id="cb3-32" data-line-number="32">        <span class="kw">FROM</span> @cdmDatabaseSchema.concept_ancestor</a>
-<a class="sourceLine" id="cb3-33" data-line-number="33">        <span class="kw">WHERE</span> ancestor_concept_id = <span class="dv">80809</span> <span class="co">-- rheumatoid arthritis</span></a>
-<a class="sourceLine" id="cb3-34" data-line-number="34">        )</a>
-<a class="sourceLine" id="cb3-35" data-line-number="35"><span class="kw">GROUP</span> <span class="kw">BY</span> person_id;</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1"></a><span class="co">/***********************************</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="co">File vignette.sql </span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="co">***********************************/</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="cf">IF</span> OBJECT_ID(<span class="st">'@cohortDatabaseSchema.@cohortTable'</span>, <span class="st">'U'</span>) <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw"><a href="https://rdrr.io/r/base/NULL.html">NULL</a></span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>  <span class="kw">DROP</span> <span class="kw">TABLE</span> @cohortDatabaseSchema.@cohortTable;</span>
+<span id="cb3-7"><a href="#cb3-7"></a></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="kw">SELECT</span> <span class="dv">1</span> <span class="kw">AS</span> cohort_definition_id,</span>
+<span id="cb3-9"><a href="#cb3-9"></a>    condition_start_date <span class="kw">AS</span> cohort_start_date,</span>
+<span id="cb3-10"><a href="#cb3-10"></a>    condition_end_date <span class="kw">AS</span> cohort_end_date,</span>
+<span id="cb3-11"><a href="#cb3-11"></a>    condition_occurrence.person_id <span class="kw">AS</span> subject_id</span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="kw">INTO</span> @cohortDatabaseSchema.@cohortTable</span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="kw">FROM</span> @cdmDatabaseSchema.condition_occurrence</span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="kw">INNER</span> <span class="kw">JOIN</span> @cdmDatabaseSchema.visit_occurrence</span>
+<span id="cb3-15"><a href="#cb3-15"></a>    <span class="kw">ON</span> condition_occurrence.visit_occurrence_id <span class="op">=</span> visit_occurrence.visit_occurrence_id</span>
+<span id="cb3-16"><a href="#cb3-16"></a><span class="kw">WHERE</span> condition_concept_id <span class="kw">IN</span> (</span>
+<span id="cb3-17"><a href="#cb3-17"></a>        <span class="kw">SELECT</span> descendant_concept_id</span>
+<span id="cb3-18"><a href="#cb3-18"></a>        <span class="kw">FROM</span> @cdmDatabaseSchema.concept_ancestor</span>
+<span id="cb3-19"><a href="#cb3-19"></a>        <span class="kw">WHERE</span> ancestor_concept_id <span class="op">=</span> <span class="dv">192671</span> <span class="co">-- GI - Gastrointestinal haemorrhage</span></span>
+<span id="cb3-20"><a href="#cb3-20"></a>        )</span>
+<span id="cb3-21"><a href="#cb3-21"></a>    <span class="kw">AND</span> visit_occurrence.visit_concept_id <span class="kw">IN</span> (<span class="dv">9201</span>, <span class="dv">9203</span>);</span>
+<span id="cb3-22"><a href="#cb3-22"></a>    </span>
+<span id="cb3-23"><a href="#cb3-23"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> @cohortDatabaseSchema.@cohortTable </span>
+<span id="cb3-24"><a href="#cb3-24"></a>(cohort_definition_id, cohort_start_date, cohort_end_date, subject_id)</span>
+<span id="cb3-25"><a href="#cb3-25"></a><span class="kw">SELECT</span> <span class="dv">2</span> <span class="kw">AS</span> cohort_definition_id,</span>
+<span id="cb3-26"><a href="#cb3-26"></a>    <span class="fu">MIN</span>(condition_start_date) <span class="kw">AS</span> cohort_start_date,</span>
+<span id="cb3-27"><a href="#cb3-27"></a>    <span class="kw"><a href="https://rdrr.io/r/base/NULL.html">NULL</a></span> <span class="kw">AS</span> cohort_end_date,</span>
+<span id="cb3-28"><a href="#cb3-28"></a>    person_id <span class="kw">AS</span> subject_id</span>
+<span id="cb3-29"><a href="#cb3-29"></a><span class="kw">FROM</span> @cdmDatabaseSchema.condition_occurrence</span>
+<span id="cb3-30"><a href="#cb3-30"></a><span class="kw">WHERE</span> condition_concept_id <span class="kw">IN</span> (</span>
+<span id="cb3-31"><a href="#cb3-31"></a>        <span class="kw">SELECT</span> descendant_concept_id</span>
+<span id="cb3-32"><a href="#cb3-32"></a>        <span class="kw">FROM</span> @cdmDatabaseSchema.concept_ancestor</span>
+<span id="cb3-33"><a href="#cb3-33"></a>        <span class="kw">WHERE</span> ancestor_concept_id <span class="op">=</span> <span class="dv">80809</span> <span class="co">-- rheumatoid arthritis</span></span>
+<span id="cb3-34"><a href="#cb3-34"></a>        )</span>
+<span id="cb3-35"><a href="#cb3-35"></a><span class="kw">GROUP</span> <span class="kw">BY</span> person_id;</span></code></pre></div>
 <p>This is parameterized SQL which can be used by the <code>SqlRender</code> package. We use parameterized SQL so we do not have to pre-specify the names of the CDM and cohort schemas. That way, if we want to run the SQL on a different schema, we only need to change the parameter values; we do not have to change the SQL code. By also making use of translation functionality in <code>SqlRender</code>, we can make sure the SQL code can be run in many different environments.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(SqlRender)</a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">sql &lt;-<span class="st"> </span><span class="kw">readSql</span>(<span class="st">"vignette.sql"</span>)</a>
-<a class="sourceLine" id="cb4-3" data-line-number="3">sql &lt;-<span class="st"> </span><span class="kw">render</span>(sql,</a>
-<a class="sourceLine" id="cb4-4" data-line-number="4">              <span class="dt">cdmDatabaseSchema =</span> cdmDatabaseSchema, </a>
-<a class="sourceLine" id="cb4-5" data-line-number="5">              <span class="dt">cohortDatabaseSchema =</span> cohortDatabaseSchema</a>
-<a class="sourceLine" id="cb4-6" data-line-number="6">              <span class="dt">cohortTable =</span> cohortTable)</a>
-<a class="sourceLine" id="cb4-7" data-line-number="7">sql &lt;-<span class="st"> </span><span class="kw">translate</span>(sql, <span class="dt">targetDialect =</span> connectionDetails<span class="op">$</span>dbms)</a>
-<a class="sourceLine" id="cb4-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb4-9" data-line-number="9">connection &lt;-<span class="st"> </span><span class="kw">connect</span>(connectionDetails)</a>
-<a class="sourceLine" id="cb4-10" data-line-number="10"><span class="kw">executeSql</span>(connection, sql)</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(SqlRender)</span>
+<span id="cb4-2"><a href="#cb4-2"></a>sql &lt;-<span class="st"> </span><span class="kw">readSql</span>(<span class="st">"vignette.sql"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3"></a>sql &lt;-<span class="st"> </span><span class="kw">render</span>(sql,</span>
+<span id="cb4-4"><a href="#cb4-4"></a>              <span class="dt">cdmDatabaseSchema =</span> cdmDatabaseSchema, </span>
+<span id="cb4-5"><a href="#cb4-5"></a>              <span class="dt">cohortDatabaseSchema =</span> cohortDatabaseSchema</span>
+<span id="cb4-6"><a href="#cb4-6"></a>              <span class="dt">cohortTable =</span> cohortTable)</span>
+<span id="cb4-7"><a href="#cb4-7"></a>sql &lt;-<span class="st"> </span><span class="kw">translate</span>(sql, <span class="dt">targetDialect =</span> connectionDetails<span class="op">$</span>dbms)</span>
+<span id="cb4-8"><a href="#cb4-8"></a></span>
+<span id="cb4-9"><a href="#cb4-9"></a>connection &lt;-<span class="st"> </span><span class="kw">connect</span>(connectionDetails)</span>
+<span id="cb4-10"><a href="#cb4-10"></a><span class="kw">executeSql</span>(connection, sql)</span></code></pre></div>
 <p>In this code, we first read the SQL from the file into memory. In the next line, we replace the three parameter names with the actual values. We then translate the SQL into the dialect appropriate for the DBMS we already specified in the <code>connectionDetails</code>. Next, we connect to the server, and submit the rendered and translated SQL.</p>
 <p>If all went well, we now have a table with the outcome of interest and the nesting cohort. We can see how many events:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">sql &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="st">"SELECT cohort_definition_id, COUNT(*) AS count"</span>,</a>
-<a class="sourceLine" id="cb5-2" data-line-number="2">             <span class="st">"FROM @cohortDatabaseSchema.@cohortTable"</span>,</a>
-<a class="sourceLine" id="cb5-3" data-line-number="3">             <span class="st">"GROUP BY cohort_definition_id"</span>)</a>
-<a class="sourceLine" id="cb5-4" data-line-number="4">sql &lt;-<span class="st"> </span><span class="kw">render</span>(sql, </a>
-<a class="sourceLine" id="cb5-5" data-line-number="5">              <span class="dt">cohortDatabaseSchema =</span> cohortDatabaseSchema, </a>
-<a class="sourceLine" id="cb5-6" data-line-number="6">              <span class="dt">cohortTable =</span> cohortTable)</a>
-<a class="sourceLine" id="cb5-7" data-line-number="7">sql &lt;-<span class="st"> </span><span class="kw">translate</span>(sql, <span class="dt">targetDialect =</span> connectionDetails<span class="op">$</span>dbms)</a>
-<a class="sourceLine" id="cb5-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb5-9" data-line-number="9"><span class="kw">querySql</span>(connection, sql)</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>sql &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste</a></span>(<span class="st">"SELECT cohort_definition_id, COUNT(*) AS count"</span>,</span>
+<span id="cb5-2"><a href="#cb5-2"></a>             <span class="st">"FROM @cohortDatabaseSchema.@cohortTable"</span>,</span>
+<span id="cb5-3"><a href="#cb5-3"></a>             <span class="st">"GROUP BY cohort_definition_id"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4"></a>sql &lt;-<span class="st"> </span><span class="kw">render</span>(sql, </span>
+<span id="cb5-5"><a href="#cb5-5"></a>              <span class="dt">cohortDatabaseSchema =</span> cohortDatabaseSchema, </span>
+<span id="cb5-6"><a href="#cb5-6"></a>              <span class="dt">cohortTable =</span> cohortTable)</span>
+<span id="cb5-7"><a href="#cb5-7"></a>sql &lt;-<span class="st"> </span><span class="kw">translate</span>(sql, <span class="dt">targetDialect =</span> connectionDetails<span class="op">$</span>dbms)</span>
+<span id="cb5-8"><a href="#cb5-8"></a></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="kw">querySql</span>(connection, sql)</span></code></pre></div>
 <pre><code>#&gt;   cohort_definition_id  count
 #&gt; 1                    1 422274
 #&gt; 2                    2 118430</code></pre>
@@ -208,27 +210,27 @@
 <h1 class="hasAnchor">
 <a href="#extracting-the-data-from-the-server" class="anchor"></a>Extracting the data from the server</h1>
 <p>Now we can tell <code>CaseControl</code> to extract the necessary data on cases and potential controls:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">caseData &lt;-<span class="st"> </span><span class="kw"><a href="../reference/getDbCaseData.html">getDbCaseData</a></span>(<span class="dt">connectionDetails =</span> connectionDetails,</a>
-<a class="sourceLine" id="cb7-2" data-line-number="2">                          <span class="dt">cdmDatabaseSchema =</span> cdmDatabaseSchema,</a>
-<a class="sourceLine" id="cb7-3" data-line-number="3">                          <span class="dt">oracleTempSchema =</span> oracleTempSchema,</a>
-<a class="sourceLine" id="cb7-4" data-line-number="4">                          <span class="dt">outcomeDatabaseSchema =</span> cohortDatabaseSchema,</a>
-<a class="sourceLine" id="cb7-5" data-line-number="5">                          <span class="dt">cohortTable =</span> cohortTable,</a>
-<a class="sourceLine" id="cb7-6" data-line-number="6">                          <span class="dt">outcomeIds =</span> <span class="dv">1</span>,</a>
-<a class="sourceLine" id="cb7-7" data-line-number="7">                          <span class="dt">useNestingCohort =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb7-8" data-line-number="8">                          <span class="dt">nestingCohortDatabaseSchema =</span> cohortDatabaseSchema,</a>
-<a class="sourceLine" id="cb7-9" data-line-number="9">                          <span class="dt">nestingCohortTable =</span> cohortTable,</a>
-<a class="sourceLine" id="cb7-10" data-line-number="10">                          <span class="dt">nestingCohortId =</span> <span class="dv">2</span>,</a>
-<a class="sourceLine" id="cb7-11" data-line-number="11">                          <span class="dt">useObservationEndAsNestingEndDate =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb7-12" data-line-number="12">                          <span class="dt">getVisits =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb7-13" data-line-number="13">caseData</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>caseData &lt;-<span class="st"> </span><span class="kw"><a href="../reference/getDbCaseData.html">getDbCaseData</a></span>(<span class="dt">connectionDetails =</span> connectionDetails,</span>
+<span id="cb7-2"><a href="#cb7-2"></a>                          <span class="dt">cdmDatabaseSchema =</span> cdmDatabaseSchema,</span>
+<span id="cb7-3"><a href="#cb7-3"></a>                          <span class="dt">oracleTempSchema =</span> oracleTempSchema,</span>
+<span id="cb7-4"><a href="#cb7-4"></a>                          <span class="dt">outcomeDatabaseSchema =</span> cohortDatabaseSchema,</span>
+<span id="cb7-5"><a href="#cb7-5"></a>                          <span class="dt">cohortTable =</span> cohortTable,</span>
+<span id="cb7-6"><a href="#cb7-6"></a>                          <span class="dt">outcomeIds =</span> <span class="dv">1</span>,</span>
+<span id="cb7-7"><a href="#cb7-7"></a>                          <span class="dt">useNestingCohort =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb7-8"><a href="#cb7-8"></a>                          <span class="dt">nestingCohortDatabaseSchema =</span> cohortDatabaseSchema,</span>
+<span id="cb7-9"><a href="#cb7-9"></a>                          <span class="dt">nestingCohortTable =</span> cohortTable,</span>
+<span id="cb7-10"><a href="#cb7-10"></a>                          <span class="dt">nestingCohortId =</span> <span class="dv">2</span>,</span>
+<span id="cb7-11"><a href="#cb7-11"></a>                          <span class="dt">useObservationEndAsNestingEndDate =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb7-12"><a href="#cb7-12"></a>                          <span class="dt">getVisits =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb7-13"><a href="#cb7-13"></a>caseData</span></code></pre></div>
 <pre><code>#&gt; Case data object
 #&gt; 
 #&gt; Outcome concept ID(s): 1
 #&gt; Nesting cohort ID: 2</code></pre>
 <p>There are many parameters, but they are all documented in the <code>CaseControl</code> manual. In short, we are pointing the function to the table created earlier and indicating which concept ID in that table identifies the outcome. Note that it is possible to fetch the data for multiple outcomes at once for efficiency. We furthermore specify a nesting cohort in the same table, meaning that people will be eligible to be cases or controls if and when they fall inside the specified cohort. In this case, the nesting cohort starts when people have their first diagnosis of rheumatoid arthritis. We use the <code>useObservationEndAsNestingEndDate</code> argument to indicate people will stay eligible until the end of their observation period. We furthermore specify we want to retrieve data on patient visits, which will be used later on for matching.</p>
 <p>Data about the cases and potential controls are extracted from the server and stored in the <code>caseData</code> object. This object uses the package <code>ff</code> to store information in a way that ensures R does not run out of memory, even when the data are large.</p>
-<p>We can use the generic <code><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary()</a></code> function to view some more information of the data we extracted:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(caseData)</a></code></pre></div>
+<p>We can use the generic <code><a href="https://rdrr.io/r/base/summary.html">summary()</a></code> function to view some more information of the data we extracted:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(caseData)</span></code></pre></div>
 <pre><code>#&gt; caseData object summary
 #&gt; 
 #&gt; Outcome concept ID(s): 1
@@ -244,29 +246,30 @@
 <h2 class="hasAnchor">
 <a href="#saving-the-data-to-file" class="anchor"></a>Saving the data to file</h2>
 <p>Creating the <code>caseData</code> object can take considerable computing time, and it is probably a good idea to save it for future sessions. Because <code>caseData</code> uses <code>ff</code>, we cannot use R’s regular save function. Instead, we’ll have to use the <code><a href="../reference/saveCaseData.html">saveCaseData()</a></code> function:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw"><a href="../reference/saveCaseData.html">saveCaseData</a></span>(caseData, <span class="st">"GiBleed"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw"><a href="../reference/saveCaseData.html">saveCaseData</a></span>(caseData, <span class="st">"GiBleed"</span>)</span></code></pre></div>
 <p>We can use the <code><a href="../reference/loadCaseData.html">loadCaseData()</a></code> function to load the data in a future session.</p>
 </div>
 </div>
 <div id="selecting-controls" class="section level1">
 <h1 class="hasAnchor">
 <a href="#selecting-controls" class="anchor"></a>Selecting controls</h1>
-<p>Next, we can use the data to select matched controls per case:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">caseControls &lt;-<span class="st"> </span><span class="kw"><a href="../reference/selectControls.html">selectControls</a></span>(<span class="dt">caseData =</span> caseData,</a>
-<a class="sourceLine" id="cb12-2" data-line-number="2">                               <span class="dt">outcomeId =</span> <span class="dv">1</span>,</a>
-<a class="sourceLine" id="cb12-3" data-line-number="3">                               <span class="dt">firstOutcomeOnly =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb12-4" data-line-number="4">                               <span class="dt">washoutPeriod =</span> <span class="dv">180</span>,</a>
-<a class="sourceLine" id="cb12-5" data-line-number="5">                               <span class="dt">controlsPerCase =</span> <span class="dv">2</span>,</a>
-<a class="sourceLine" id="cb12-6" data-line-number="6">                               <span class="dt">matchOnAge =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb12-7" data-line-number="7">                               <span class="dt">ageCaliper =</span> <span class="dv">2</span>,</a>
-<a class="sourceLine" id="cb12-8" data-line-number="8">                               <span class="dt">matchOnGender =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb12-9" data-line-number="9">                               <span class="dt">matchOnProvider =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb12-10" data-line-number="10">                               <span class="dt">matchOnVisitDate =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb12-11" data-line-number="11">                               <span class="dt">visitDateCaliper =</span> <span class="dv">30</span>,</a>
-<a class="sourceLine" id="cb12-12" data-line-number="12">                               <span class="dt">removedUnmatchedCases =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<p>Next, we can use the data to select controls. In this example we’ll selected matched controls, meaning that for every case we’ll find individually matched controls:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>matchingCriteria &lt;-<span class="st"> </span><span class="kw"><a href="../reference/createMatchingCriteria.html">createMatchingCriteria</a></span>(<span class="dt">controlsPerCase =</span> <span class="dv">2</span>,</span>
+<span id="cb12-2"><a href="#cb12-2"></a>                                           <span class="dt">matchOnAge =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb12-3"><a href="#cb12-3"></a>                                           <span class="dt">ageCaliper =</span> <span class="dv">2</span>,</span>
+<span id="cb12-4"><a href="#cb12-4"></a>                                           <span class="dt">matchOnGender =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb12-5"><a href="#cb12-5"></a>                                           <span class="dt">matchOnProvider =</span> <span class="ot">FALSE</span>,</span>
+<span id="cb12-6"><a href="#cb12-6"></a>                                           <span class="dt">matchOnVisitDate =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb12-7"><a href="#cb12-7"></a>                                           <span class="dt">visitDateCaliper =</span> <span class="dv">30</span>)</span>
+<span id="cb12-8"><a href="#cb12-8"></a></span>
+<span id="cb12-9"><a href="#cb12-9"></a>caseControls &lt;-<span class="st"> </span><span class="kw"><a href="../reference/selectControls.html">selectControls</a></span>(<span class="dt">caseData =</span> caseData,</span>
+<span id="cb12-10"><a href="#cb12-10"></a>                               <span class="dt">outcomeId =</span> <span class="dv">1</span>,</span>
+<span id="cb12-11"><a href="#cb12-11"></a>                               <span class="dt">firstOutcomeOnly =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb12-12"><a href="#cb12-12"></a>                               <span class="dt">washoutPeriod =</span> <span class="dv">180</span>,</span>
+<span id="cb12-13"><a href="#cb12-13"></a>                               <span class="dt">controlSelectionCriteria =</span> matchingCriteria)</span></code></pre></div>
 <p>In this example, we specify a washout period of 180 days, meaning that both cases and controls are required to have a minimum of 180 days of observation prior to the index date. We also specify we will only consider the first outcome per person. If a person’s first outcome is within the washout period, that person will be removed from the analysis. We match on calendar time (implicit), age, gender, and visit date, and randomly sample up to two controls per case. Matching on visit date implies that the control should have a visit within n days from the index date of the case (n = 30 in this example), and the index date for the control will be set to the visit date. The purpose of this is to make the index dates more similar between cases and control, because almost by definition we would expect the case to have a visit on the index date. Finally, we ask that cases for which no matching control was found be removed from the analysis.</p>
 <p>The <code>caseControls</code> object is a data frame with four columns:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(caseControls)</a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(caseControls)</span></code></pre></div>
 <pre><code>#&gt;   personId  indexDate isCase stratumId
 #&gt; 1        3 2009-10-10   TRUE         1
 #&gt; 2      123 2009-10-11  FALSE         1
@@ -275,43 +278,51 @@
 #&gt; 5      234 2010-05-04  FALSE         2
 #&gt; 6      567 2010-05-05  FALSE         2</code></pre>
 <p>We can show the attrition to see why cases and events were filtered:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw"><a href="../reference/getAttritionTable.html">getAttritionTable</a></span>(caseControls)</a></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw"><a href="../reference/getAttritionTable.html">getAttritionTable</a></span>(caseControls)</span></code></pre></div>
 <pre><code>#&gt;                      description eventCount caseCount
 #&gt; 1                Original counts      20306     12819
 #&gt; 2               First event only      12819     12819
 #&gt; 3 Require 180 days of prior obs.       7569      7569
 #&gt; 4      Remove unmatched controls       7569      7569</code></pre>
+<p>An alternative to selecting invidually matched controls is to create a sample controls, controls that are not individually linked to cases. This can be done using the <code>createSamplingCriteria</code> instead of the <code>createMatchingCriteria</code> function. For example:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>samplingCriteria &lt;-<span class="st"> </span><span class="kw"><a href="../reference/createSamplingCriteria.html">createSamplingCriteria</a></span>(<span class="dt">controlsPerCase =</span> <span class="dv">1</span>)</span>
+<span id="cb17-2"><a href="#cb17-2"></a></span>
+<span id="cb17-3"><a href="#cb17-3"></a>caseControls2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/selectControls.html">selectControls</a></span>(<span class="dt">caseData =</span> caseData,</span>
+<span id="cb17-4"><a href="#cb17-4"></a>                                <span class="dt">outcomeId =</span> <span class="dv">1</span>,</span>
+<span id="cb17-5"><a href="#cb17-5"></a>                                <span class="dt">firstOutcomeOnly =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb17-6"><a href="#cb17-6"></a>                                <span class="dt">washoutPeriod =</span> <span class="dv">180</span>,</span>
+<span id="cb17-7"><a href="#cb17-7"></a>                                <span class="dt">controlSelectionCriteria =</span> samplingCriteria)</span></code></pre></div>
 </div>
 <div id="loading-exposure-data-and-covariates" class="section level1">
 <h1 class="hasAnchor">
 <a href="#loading-exposure-data-and-covariates" class="anchor"></a>Loading exposure data and covariates</h1>
 <p>Next, we load information on the exposures of the cases and controls, as well as covariates.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1">covarSettings &lt;-<span class="st"> </span><span class="kw">createCovariateSettings</span>(<span class="dt">useCharlsonIndex =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb17-2" data-line-number="2">                                         <span class="dt">useChads2 =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb17-3" data-line-number="3">                                         <span class="dt">useDcsi =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb17-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb17-5" data-line-number="5">caseControlsExposure &lt;-<span class="st"> </span><span class="kw"><a href="../reference/getDbExposureData.html">getDbExposureData</a></span>(<span class="dt">connectionDetails =</span> connectionDetails,</a>
-<a class="sourceLine" id="cb17-6" data-line-number="6">                                          <span class="dt">caseControls =</span> caseControls,</a>
-<a class="sourceLine" id="cb17-7" data-line-number="7">                                          <span class="dt">oracleTempSchema =</span> oracleTempSchema,</a>
-<a class="sourceLine" id="cb17-8" data-line-number="8">                                          <span class="dt">exposureDatabaseSchema =</span> cdmDatabaseSchema,</a>
-<a class="sourceLine" id="cb17-9" data-line-number="9">                                          <span class="dt">exposureTable =</span> <span class="st">"drug_era"</span>,</a>
-<a class="sourceLine" id="cb17-10" data-line-number="10">                                          <span class="dt">exposureIds =</span> <span class="dv">1124300</span>,</a>
-<a class="sourceLine" id="cb17-11" data-line-number="11">                                          <span class="dt">covariateSettings =</span> covarSettings)</a></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>covarSettings &lt;-<span class="st"> </span><span class="kw">createCovariateSettings</span>(<span class="dt">useCharlsonIndex =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb18-2"><a href="#cb18-2"></a>                                         <span class="dt">useChads2 =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb18-3"><a href="#cb18-3"></a>                                         <span class="dt">useDcsi =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb18-4"><a href="#cb18-4"></a></span>
+<span id="cb18-5"><a href="#cb18-5"></a>caseControlsExposure &lt;-<span class="st"> </span><span class="kw"><a href="../reference/getDbExposureData.html">getDbExposureData</a></span>(<span class="dt">connectionDetails =</span> connectionDetails,</span>
+<span id="cb18-6"><a href="#cb18-6"></a>                                          <span class="dt">caseControls =</span> caseControls,</span>
+<span id="cb18-7"><a href="#cb18-7"></a>                                          <span class="dt">oracleTempSchema =</span> oracleTempSchema,</span>
+<span id="cb18-8"><a href="#cb18-8"></a>                                          <span class="dt">exposureDatabaseSchema =</span> cdmDatabaseSchema,</span>
+<span id="cb18-9"><a href="#cb18-9"></a>                                          <span class="dt">exposureTable =</span> <span class="st">"drug_era"</span>,</span>
+<span id="cb18-10"><a href="#cb18-10"></a>                                          <span class="dt">exposureIds =</span> <span class="dv">1124300</span>,</span>
+<span id="cb18-11"><a href="#cb18-11"></a>                                          <span class="dt">covariateSettings =</span> covarSettings)</span></code></pre></div>
 <p>Here we specify that we will use the <code>drug_era</code> table to identify exposures, and will only retrieve data on exposure to Diclofenac (concept ID 1124300). We use the <code>covariateSettings</code> function of the FeatureExtraction package to specify which covariates to construct. In this example the only coviariates are the Charlson comorbidity index, Diabetes Complications Severity Index (DCSI), and CHADS2 score.</p>
 <p>When including covariates, the <code>caseControlsExposure</code> object uses <code>ff</code> to store large objects and therefore cannot be stored using standard functions. Please use <code>saveCaseControlsExposure</code> to save:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw"><a href="../reference/saveCaseControlsExposure.html">saveCaseControlsExposure</a></span>(caseControlsExposure, <span class="st">"caseControlsExposure"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="kw"><a href="../reference/saveCaseControlsExposure.html">saveCaseControlsExposure</a></span>(caseControlsExposure, <span class="st">"caseControlsExposure"</span>)</span></code></pre></div>
 </div>
 <div id="creating-case-control-data" class="section level1">
 <h1 class="hasAnchor">
 <a href="#creating-case-control-data" class="anchor"></a>Creating case-control data</h1>
 <p>We can now use the exposure data to determine exposure status for the cases and controls. (The reason why fetching exposure data and determining exposure status is split up is that this is more efficient when we want to evaluate several risk window definitions.)</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1">caseControlData &lt;-<span class="st"> </span><span class="kw"><a href="../reference/createCaseControlData.html">createCaseControlData</a></span>(<span class="dt">caseControlsExposure =</span> caseControlsExposure,</a>
-<a class="sourceLine" id="cb19-2" data-line-number="2">                                         <span class="dt">exposureId =</span> <span class="dv">1124300</span>,</a>
-<a class="sourceLine" id="cb19-3" data-line-number="3">                                         <span class="dt">firstExposureOnly =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb19-4" data-line-number="4">                                         <span class="dt">riskWindowStart =</span> <span class="dv">0</span>,</a>
-<a class="sourceLine" id="cb19-5" data-line-number="5">                                         <span class="dt">riskWindowEnd =</span> <span class="dv">0</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>caseControlData &lt;-<span class="st"> </span><span class="kw"><a href="../reference/createCaseControlData.html">createCaseControlData</a></span>(<span class="dt">caseControlsExposure =</span> caseControlsExposure,</span>
+<span id="cb20-2"><a href="#cb20-2"></a>                                         <span class="dt">exposureId =</span> <span class="dv">1124300</span>,</span>
+<span id="cb20-3"><a href="#cb20-3"></a>                                         <span class="dt">firstExposureOnly =</span> <span class="ot">FALSE</span>,</span>
+<span id="cb20-4"><a href="#cb20-4"></a>                                         <span class="dt">riskWindowStart =</span> <span class="dv">0</span>,</span>
+<span id="cb20-5"><a href="#cb20-5"></a>                                         <span class="dt">riskWindowEnd =</span> <span class="dv">0</span>)</span></code></pre></div>
 <p>Here we specify we are intested in all exposures, not just the first one, and that the exposure should overlap with the index date (the risk window starts and ends on day 0, the index date). The <code>caseControlData</code> object is a data frame with five columns:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(caseControlData)</a></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(caseControlData)</span></code></pre></div>
 <pre><code>#&gt;   personId  indexDate isCase stratumId rowId exposed
 #&gt; 1        3 2009-10-10   TRUE         1     1       1
 #&gt; 2      123 2009-10-11  FALSE         1     2       0
@@ -323,20 +334,20 @@
 <div id="fitting-the-model" class="section level1">
 <h1 class="hasAnchor">
 <a href="#fitting-the-model" class="anchor"></a>Fitting the model</h1>
-<p>We can now fit the model, which is a logistic regression conditioned on the matched sets:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1">fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/fitCaseControlModel.html">fitCaseControlModel</a></span>(caseControlData,</a>
-<a class="sourceLine" id="cb22-2" data-line-number="2">                           <span class="dt">useCovariates =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb22-3" data-line-number="3">                           <span class="dt">caseControlsExposure =</span> caseControlsExposure,</a>
-<a class="sourceLine" id="cb22-4" data-line-number="4">                           <span class="dt">prior =</span> <span class="kw">createPrior</span>(<span class="st">"none"</span>))</a>
-<a class="sourceLine" id="cb22-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb22-6" data-line-number="6">fit</a></code></pre></div>
+<p>We can now fit the model. In case we used matchign to select controls this will be a logistic regression conditioned on the matched sets. Else it will be an unconditioned logistic regression.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/fitCaseControlModel.html">fitCaseControlModel</a></span>(caseControlData,</span>
+<span id="cb23-2"><a href="#cb23-2"></a>                           <span class="dt">useCovariates =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb23-3"><a href="#cb23-3"></a>                           <span class="dt">caseControlsExposure =</span> caseControlsExposure,</span>
+<span id="cb23-4"><a href="#cb23-4"></a>                           <span class="dt">prior =</span> <span class="kw">createPrior</span>(<span class="st">"none"</span>))</span>
+<span id="cb23-5"><a href="#cb23-5"></a></span>
+<span id="cb23-6"><a href="#cb23-6"></a>fit</span></code></pre></div>
 <pre><code>#&gt; Case-Control fitted model
 #&gt; Status: OK
 #&gt; 
 #&gt;           Estimate lower .95 upper .95   logRr seLogRr
 #&gt; treatment  1.05357   0.82739   1.33405 0.05218  0.1219</code></pre>
 <p>The generic functions <code>summary</code>, <code>coef</code>, and <code>confint</code> are implemented for the <code>fit</code> object:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(fit)</a></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="kw"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(fit)</span></code></pre></div>
 <pre><code>#&gt; Case-Control fitted model
 #&gt; Status: OK
 #&gt; 
@@ -346,21 +357,21 @@
 #&gt; Counts
 #&gt;       Cases Controls Exposed cases Exposed controls
 #&gt; Count  7569    15138           110              225</code></pre>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/coef">coef</a></span>(fit)</a></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="kw"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span>(fit)</span></code></pre></div>
 <pre><code>#&gt; [1] 0.05217973</code></pre>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/confint">confint</a></span>(fit)</a></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="kw"><a href="https://rdrr.io/r/stats/confint.html">confint</a></span>(fit)</span></code></pre></div>
 <pre><code>#&gt; [1] -0.1894850  0.2882181</code></pre>
 </div>
 <div id="acknowledgments" class="section level1">
 <h1 class="hasAnchor">
 <a href="#acknowledgments" class="anchor"></a>Acknowledgments</h1>
 <p>Considerable work has been dedicated to provide the <code>CaseControl</code> package.</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/citation">citation</a></span>(<span class="st">"CaseControl"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a><span class="kw"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span>(<span class="st">"CaseControl"</span>)</span></code></pre></div>
 <pre><code>#&gt; 
 #&gt; To cite package 'CaseControl' in publications use:
 #&gt; 
 #&gt;   Martijn Schuemie (2019). CaseControl: Case-Control. R package
-#&gt;   version 1.6.0. https://github.com/OHDSI/CaseControl
+#&gt;   version 2.0.0. https://github.com/OHDSI/CaseControl
 #&gt; 
 #&gt; A BibTeX entry for LaTeX users is
 #&gt; 
@@ -368,11 +379,11 @@
 #&gt;     title = {CaseControl: Case-Control},
 #&gt;     author = {Martijn Schuemie},
 #&gt;     year = {2019},
-#&gt;     note = {R package version 1.6.0},
+#&gt;     note = {R package version 2.0.0},
 #&gt;     url = {https://github.com/OHDSI/CaseControl},
 #&gt;   }</code></pre>
 <p>Furthermore, <code>CaseControl</code> makes extensive use of the <code>Cyclops</code> package.</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/citation">citation</a></span>(<span class="st">"Cyclops"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a><span class="kw"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span>(<span class="st">"Cyclops"</span>)</span></code></pre></div>
 <pre><code>#&gt; 
 #&gt; To cite Cyclops in publications use:
 #&gt; 
@@ -423,17 +434,20 @@
 </div>
 
 
+
       <footer><div class="copyright">
   <p>Developed by Martijn Schuemie.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.9100.</p>
 </div>
+
       </footer>
 </div>
 
   
+
 
   </body>
 </html>

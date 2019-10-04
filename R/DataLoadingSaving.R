@@ -106,7 +106,7 @@ getDbCaseData <- function(connectionDetails,
                           nestingCohortTable = "cohort",
                           nestingCohortId = NULL,
                           useObservationEndAsNestingEndDate = TRUE,
-                          getVisits = TRUE,
+                          getVisits = FALSE,
                           getExposures = FALSE,
                           exposureDatabaseSchema = cdmDatabaseSchema,
                           exposureTable = "drug_era",
@@ -131,7 +131,7 @@ getDbCaseData <- function(connectionDetails,
     nestingCohortId <- -1
     useObservationEndAsNestingEndDate <- FALSE
   }
-  # Usign attr to implement hidden function argument:
+  # Using attr to implement hidden function argument:
   caseCrossover <- !is.null(attr(useNestingCohort, "caseCrossover"))
 
   conn <- connect(connectionDetails)

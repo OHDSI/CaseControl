@@ -22,7 +22,7 @@ either case or control.}
 
 \item{controlSelectionCriteria}{Either a \code{matchingCriteria} object as generated using the \code{
 \link{createMatchingCriteria}} function, or a \code{samplingCriteria}
-object as generated using the \code{link{createSamplingCriteria}}
+object as generated using the \code{\link{createSamplingCriteria}}
 function.}
 
 \item{minAge}{Minimum age at which patient time will be included in the analysis.

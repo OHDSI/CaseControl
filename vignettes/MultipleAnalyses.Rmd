@@ -574,7 +574,8 @@ if (file.exists("s:/temp/vignetteCaseControl2/outcomeModelReference.rds")) {
                         null)
 }
 ```
-## Acknowledgments
+
+# Acknowledgments
 
 Considerable work has been dedicated to provide the `CaseControl` package.
 

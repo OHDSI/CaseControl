@@ -111,7 +111,7 @@ createSamplingCriteria <- function(controlsPerCase = 1,
 #'                                 either case or control.
 #' @param controlSelectionCriteria Either a \code{matchingCriteria} object as generated using the \code{
 #'                                 \link{createMatchingCriteria}} function, or a \code{samplingCriteria}
-#'                                 object as generated using the \code{link{createSamplingCriteria}}
+#'                                 object as generated using the \code{\link{createSamplingCriteria}}
 #'                                 function.
 #' @param minAge                   Minimum age at which patient time will be included in the analysis.
 #'                                 Note that information prior to the min age is still used to determine

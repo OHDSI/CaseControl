@@ -60,7 +60,7 @@ If additional exposure data or covariate data is required, this function will se
 on the cases and controls back to the server.
 
 Note: For PDW and RedShift, where uploading data can be excrutiatingly slow, you can use bulk loading
-by preparing the environment as described in the \code{\link[DatabaseConnection]{insertTable}} function
+by preparing the environment as described in the \code{\link[DatabaseConnector]{insertTable}} function
 in the DatabaseConnection package, and setting \code{oracleTempSchema} to a schema where you have write
 privileges (bulk import can only upload to permanent tables).
 }

@@ -22,13 +22,8 @@ OhdsiRTools::checkUsagePackage("CaseControl")
 OhdsiRTools::updateCopyrightYearFolder()
 
 # Create manual and vignette
-if (.Platform$OS.type == "unix") {
-  system("rm extras/CaseControl.pdf")
-  system("R CMD Rd2pdf ./ --output=extras/CaseControl.pdf")
-} else {
-  shell("rm extras/CaseControl.pdf")
-  shell("R CMD Rd2pdf ./ --output=extras/CaseControl.pdf")
-}
+unlink("extras/CaseControl.pdf")
+shell("R CMD Rd2pdf ./ --output=extras/CaseControl.pdf")
 
 rmarkdown::render("vignettes/SingleStudies.Rmd",
                   output_file = "../inst/doc/SingleStudies.pdf",

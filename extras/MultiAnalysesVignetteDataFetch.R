@@ -203,15 +203,14 @@ saveExposureOutcomeNestingCohortList(exposureOutcomeNcList,
                                      "s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt")
 saveCcAnalysisList(ccAnalysisList, "s:/temp/vignetteCaseControl2/ccAnalysisList.txt")
 
-# exposureOutcomeNcList <-
-# loadExposureOutcomeNestingCohortList('s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt')
+# exposureOutcomeNcList <- loadExposureOutcomeNestingCohortList('s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt')
 # ccAnalysisList <- loadCcAnalysisList('s:/temp/vignetteCaseControl2/ccAnalysisList.txt')
 
 ParallelLogger::addDefaultFileLogger(file.path(outputFolder, "log.txt"))
 
 result <- runCcAnalyses(connectionDetails = connectionDetails,
                         cdmDatabaseSchema = cdmDatabaseSchema,
-                        oracleTempSchema = cdmDatabaseSchema,
+                        oracleTempSchema = cohortDatabaseSchema,
                         exposureDatabaseSchema = cdmDatabaseSchema,
                         exposureTable = "drug_era",
                         outcomeDatabaseSchema = cohortDatabaseSchema,
@@ -224,7 +223,7 @@ result <- runCcAnalyses(connectionDetails = connectionDetails,
                         compressCaseDataFiles = TRUE,
                         getDbCaseDataThreads = 1,
                         selectControlsThreads = 4,
-                        getDbExposureDataThreads = 3,
+                        getDbExposureDataThreads = 1,
                         createCaseControlDataThreads = 4,
                         fitCaseControlModelThreads = 4,
                         cvThreads = 10)
@@ -232,7 +231,7 @@ result <- runCcAnalyses(connectionDetails = connectionDetails,
 # result <- readRDS('s:/temp/sccsVignette2/outcomeModelReference.rds')
 
 analysisSum <- summarizeCcAnalyses(result, outputFolder)
-saveRDS(analysisSum, "s:/temp/sccsVignette2/analysisSummary.rds")
+saveRDS(analysisSum, "s:/temp/vignetteCaseControl2/analysisSummary.rds")
 
 x <- readRDS(result$modelFile[1])
 summary(x)
