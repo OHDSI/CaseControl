@@ -205,21 +205,22 @@ We can use the `loadCaseData()` function to load the data in a future session.
 
 # Selecting controls
 
-Next, we can use the data to select matched controls per case:
+Next, we can use the data to select controls. In this example we'll selected matched controls, meaning that for every case we'll find individually matched controls:
 
 ```{r tidy=FALSE,eval=FALSE}
+matchingCriteria <- createMatchingCriteria(controlsPerCase = 2,
+                                           matchOnAge = TRUE,
+                                           ageCaliper = 2,
+                                           matchOnGender = TRUE,
+                                           matchOnProvider = FALSE,
+                                           matchOnVisitDate = TRUE,
+                                           visitDateCaliper = 30)
+
 caseControls <- selectControls(caseData = caseData,
                                outcomeId = 1,
                                firstOutcomeOnly = TRUE,
                                washoutPeriod = 180,
-                               controlsPerCase = 2,
-                               matchOnAge = TRUE,
-                               ageCaliper = 2,
-                               matchOnGender = TRUE,
-                               matchOnProvider = FALSE,
-                               matchOnVisitDate = TRUE,
-                               visitDateCaliper = 30,
-                               removedUnmatchedCases = TRUE)
+                               controlSelectionCriteria = matchingCriteria)
 ```
 
 In this example, we specify a washout period of 180 days, meaning that both cases and controls are required to have a minimum of 180 days of observation prior to the index date. We also specify we will only consider the first outcome per person. If a person's first outcome is within the washout period, that person will be removed from the analysis. We match on calendar time (implicit), age, gender, and visit date, and randomly sample up to two controls per case. Matching on visit date implies that the control should have a visit within n days from the index date of the case (n = 30 in this example), and the index date for the control will be set to the visit date. The purpose of this is to make the index dates more similar between cases and control, because almost by definition we would expect the case to have a visit on the index date. Finally, we ask that cases for which no matching control was found be removed from the analysis.
@@ -250,6 +251,18 @@ if (file.exists("s:/temp/vignetteCaseControl")){
 if (file.exists("s:/temp/vignetteCaseControl")){
   getAttritionTable(caseControls)
 }
+```
+
+An alternative to selecting invidually matched controls is to create a sample controls, controls that are not individually linked to cases. This can be done using the `createSamplingCriteria` instead of the `createMatchingCriteria` function. For example:
+
+```{r tidy=FALSE,eval=FALSE}
+samplingCriteria <- createSamplingCriteria(controlsPerCase = 1)
+
+caseControls2 <- selectControls(caseData = caseData,
+                                outcomeId = 1,
+                                firstOutcomeOnly = TRUE,
+                                washoutPeriod = 180,
+                                controlSelectionCriteria = samplingCriteria)
 ```
 
 # Loading exposure data and covariates
@@ -306,7 +319,7 @@ data.frame(personId = c(3,123,345,6,234,567),
 
 # Fitting the model
 
-We can now fit the model, which is a logistic regression conditioned on the matched sets:
+We can now fit the model. In case we used matchign to select controls this will be a logistic regression conditioned on the matched sets. Else it will be an unconditioned logistic regression.
 
 ```{r tidy=FALSE,eval=FALSE}
 fit <- fitCaseControlModel(caseControlData,
@@ -317,7 +330,7 @@ fit <- fitCaseControlModel(caseControlData,
 fit
 ```
 ```{r echo=FALSE,message=FALSE}
-if (file.exists("s:/temp/vignetteCaseControl")){
+if (file.exists("s:/temp/vignetteCaseControl")) {
   fit <- readRDS("s:/temp/vignetteCaseControl/fit.rds")
   fit
 }

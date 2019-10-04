@@ -1,8 +1,8 @@
 Package: CaseControl
 Type: Package
 Title: Case-Control
-Version: 1.6.0
-Date: 2019-04-17
+Version: 2.0.0
+Date: 2019-10-01
 Authors@R: c(
     person("Martijn", "Schuemie", , "schuemie@ohdsi.org", role = c("aut", "cre"))
     )

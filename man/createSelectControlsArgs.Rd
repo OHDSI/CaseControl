@@ -5,12 +5,8 @@
 \title{Create a parameter object for the function selectControls}
 \usage{
 createSelectControlsArgs(firstOutcomeOnly = TRUE, washoutPeriod = 180,
-  controlsPerCase = 2, matchOnAge = TRUE, ageCaliper = 2,
-  matchOnGender = TRUE, matchOnProvider = FALSE,
-  matchOnCareSite = FALSE, matchOnVisitDate = FALSE,
-  visitDateCaliper = 30, matchOnTimeInCohort = FALSE,
-  daysInCohortCaliper = 30, minAge = NULL, maxAge = NULL,
-  removedUnmatchedCases = TRUE, seed = NULL)
+  controlSelectionCriteria = createMatchingCriteria(), minAge = NULL,
+  maxAge = NULL)
 }
 \arguments{
 \item{firstOutcomeOnly}{Use the first outcome per person?}
@@ -18,45 +14,22 @@ createSelectControlsArgs(firstOutcomeOnly = TRUE, washoutPeriod = 180,
 \item{washoutPeriod}{Minimum required numbers of days of observation for inclusion
 aseither case or control.}
 
-\item{controlsPerCase}{Maximum number of controls to select per case.}
-
-\item{matchOnAge}{Match on age?}
-
-\item{ageCaliper}{Maximum difference (in years) in age when matching on age.}
-
-\item{matchOnGender}{Match on gender?}
-
-\item{matchOnProvider}{Match on provider (as specified in the person table)?}
-
-\item{matchOnCareSite}{Match on care site (as specified in the person table)?}
-
-\item{matchOnVisitDate}{Should the index date of the control be changed to the nearest
-visitdate?}
-
-\item{visitDateCaliper}{Maximum difference (in days) between the index date and the visitdate
-when matching on visit date.}
-
-\item{matchOnTimeInCohort}{Match on time in nesting cohort? When not using nesting, this
-isinterpreted as time observed prior to index.}
-
-\item{daysInCohortCaliper}{Maximum difference (in days) in time in cohort.}
+\item{controlSelectionCriteria}{Either a matchingCriteria object as generated using the
+createMatchingCriteria function, or a samplingCriteriaobject as
+generated using the link{createSamplingCriteria}function.}
 
 \item{minAge}{Minimum age at which patient time will be included in the
-analysis.Note that information prior to the min age is still used to
-determineexposure status after the minimum age (e.g. when a
+analysis.Note that information prior to the min age is still used
+to determineexposure status after the minimum age (e.g. when a
 prescription wasstarted just prior to reaching the minimum age).
 Also, outcomesoccurring before the minimum age is reached will be
 considered asprior outcomes when using first outcomes only. Age
-should be specifiedin years, but non-integer values are allowed. If
-not specified, no agerestriction will be applied.}
+should be specifiedin years, but non-integer values are allowed.
+If not specified, no agerestriction will be applied.}
 
-\item{maxAge}{Maximum age at which patient time will be included in the analysis.
-Ageshould be specified in years, but non-integer values are allowed.
-If notspecified, no age restriction will be applied.}
-
-\item{removedUnmatchedCases}{Should cases with no matched controls be removed?}
-
-\item{seed}{The number generator seed. A null value sets seed via Sys.time.}
+\item{maxAge}{Maximum age at which patient time will be included in the
+analysis. Ageshould be specified in years, but non-integer values
+are allowed. If notspecified, no age restriction will be applied.}
 }
 \description{
 Create a parameter object for the function selectControls

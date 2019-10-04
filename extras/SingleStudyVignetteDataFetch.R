@@ -20,7 +20,7 @@
 library(SqlRender)
 library(DatabaseConnector)
 library(CaseControl)
-options(fftempdir = "s:/fftemp")
+options(fftempdir = "c:/fftemp")
 
 pw <- NULL
 dbms <- "pdw"
@@ -91,23 +91,33 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
 
 saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseData")
 
-caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
+caseData <- loadCaseData("c:/temp/vignetteCaseControl/caseData")
 
 caseData
 
 summary(caseData)
 
+matchingCriteria <- createMatchingCriteria(controlsPerCase = 2,
+                                           matchOnAge = TRUE,
+                                           ageCaliper = 2,
+                                           matchOnGender = TRUE,
+                                           matchOnProvider = FALSE,
+                                           matchOnVisitDate = TRUE,
+                                           visitDateCaliper = 30)
+
 caseControls <- selectControls(caseData = caseData,
                                outcomeId = 1,
                                firstOutcomeOnly = TRUE,
                                washoutPeriod = 180,
-                               controlsPerCase = 2,
-                               matchOnAge = TRUE,
-                               ageCaliper = 2,
-                               matchOnGender = TRUE,
-                               matchOnProvider = FALSE,
-                               matchOnVisitDate = TRUE,
-                               visitDateCaliper = 30)
+                               controlSelectionCriteria = matchingCriteria)
+
+samplingCriteria <- createSamplingCriteria(controlsPerCase = 1)
+
+caseControls2 <- selectControls(caseData = caseData,
+                               outcomeId = 1,
+                               firstOutcomeOnly = TRUE,
+                               washoutPeriod = 180,
+                               controlSelectionCriteria = samplingCriteria)
 
 saveRDS(caseControls, "s:/temp/vignetteCaseControl/caseControls.rds")
 
@@ -120,7 +130,7 @@ covariateSettings <- createCovariateSettings(useCharlsonIndex = TRUE,
 
 caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
                                           caseControls = caseControls,
-                                          oracleTempSchema = oracleTempSchema,
+                                          oracleTempSchema = cohortDatabaseSchema,
                                           exposureDatabaseSchema = cdmDatabaseSchema,
                                           exposureTable = "drug_era",
                                           exposureIds = 1124300,

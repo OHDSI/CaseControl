@@ -61,7 +61,9 @@ fitCaseControlModel <- function(caseControlData,
     status <- "NO EXPOSED SUBJECTS"
   } else {
     if (useCovariates) {
-      outcomes <- caseControlData[, c("rowId", "stratumId", "isCase")]
+      columns <- colnames(caseControlData)
+      columns <- columns[columns %in% c("rowId", "stratumId", "isCase")]
+      outcomes <- caseControlData[, columns]
       colnames(outcomes)[colnames(outcomes) == "isCase"] <- "y"
       outcomes <- ff::as.ffdf(outcomes)
 
@@ -88,16 +90,29 @@ fitCaseControlModel <- function(caseControlData,
                                                                 vmode = "double"))
       covariates <- ffbase::ffdfappend(treatmentCovariate, covariates)
       covariates <- ffbase::merge.ffdf(covariates, outcomes)
+      if (is.null(outcomes$stratumId)) {
+        modelType <- "lr"
+        addIntercept <- TRUE
+      } else {
+        modelType <- "clr"
+        addIntercept <- FALSE
+      }
       cyclopsData <- Cyclops::convertToCyclopsData(outcomes,
                                                    covariates,
-                                                   modelType = "clr",
-                                                   addIntercept = FALSE)
+                                                   modelType = modelType,
+                                                   addIntercept = addIntercept)
     } else {
       prior <- createPrior("none")  # Only one variable, which we're not going to regularize, so effectively no prior
       treatmentVarId <- "exposed"
-      cyclopsData <- Cyclops::createCyclopsData(isCase ~ exposed + strata(stratumId),
-                                                data = caseControlData,
-                                                modelType = "clr")
+      if (is.null(caseControlData$stratumId)) {
+        cyclopsData <- Cyclops::createCyclopsData(isCase ~ exposed,
+                                                  data = caseControlData,
+                                                  modelType = "lr")
+      } else {
+        cyclopsData <- Cyclops::createCyclopsData(isCase ~ exposed + strata(stratumId),
+                                                  data = caseControlData,
+                                                  modelType = "clr")
+      }
     }
     fit <- tryCatch({
       Cyclops::fitCyclopsModel(cyclopsData, prior = prior, control = control)

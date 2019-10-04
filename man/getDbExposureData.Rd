@@ -56,5 +56,11 @@ no connection to the database is used to create the exposure data. This may be
 much more efficient in some situations.}
 }
 \description{
-Get exposure data for cases and controls from a database
+If additional exposure data or covariate data is required, this function will send the information
+on the cases and controls back to the server.
+
+Note: For PDW and RedShift, where uploading data can be excrutiatingly slow, you can use bulk loading
+by preparing the environment as described in the \code{\link[DatabaseConnection]{insertTable}} function
+in the DatabaseConnection package, and setting \code{oracleTempSchema} to a schema where you have write
+privileges (bulk import can only upload to permanent tables).
 }

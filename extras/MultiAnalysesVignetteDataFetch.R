@@ -97,20 +97,23 @@ for (exposureId in c(diclofenac, negativeControls)) {
 
 getDbCaseDataArgs1 <- createGetDbCaseDataArgs(useNestingCohort = FALSE, getVisits = FALSE)
 
+matchingCriteria1 <- createMatchingCriteria(controlsPerCase = 2,
+                                           matchOnAge = TRUE,
+                                           ageCaliper = 2,
+                                           matchOnGender = TRUE,
+                                           matchOnProvider = FALSE,
+                                           matchOnVisitDate = FALSE)
+
 selectControlsArgs1 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 washoutPeriod = 180,
-                                                controlsPerCase = 2,
-                                                matchOnAge = TRUE,
-                                                ageCaliper = 2,
-                                                matchOnGender = TRUE,
-                                                matchOnProvider = FALSE,
-                                                matchOnVisitDate = FALSE)
+                                                controlSelectionCriteria = matchingCriteria1)
 
 getDbExposureDataArgs1 <- createGetDbExposureDataArgs()
 
 createCaseControlDataArgs1 <- createCreateCaseControlDataArgs(firstExposureOnly = FALSE,
                                                               riskWindowStart = 0,
                                                               riskWindowEnd = 0)
+
 fitCaseControlModelArgs1 <- createFitCaseControlModelArgs()
 
 ccAnalysis1 <- createCcAnalysis(analysisId = 1,
@@ -147,15 +150,17 @@ ccAnalysis3 <- createCcAnalysis(analysisId = 3,
                                 createCaseControlDataArgs = createCaseControlDataArgs1,
                                 fitCaseControlModelArgs = fitCaseControlModelArgs2)
 
+matchingCriteria2 <- createMatchingCriteria(controlsPerCase = 2,
+                                            matchOnAge = TRUE,
+                                            ageCaliper = 2,
+                                            matchOnGender = TRUE,
+                                            matchOnProvider = FALSE,
+                                            matchOnVisitDate = TRUE,
+                                            visitDateCaliper = 30)
+
 selectControlsArgs2 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 washoutPeriod = 180,
-                                                controlsPerCase = 2,
-                                                matchOnAge = TRUE,
-                                                ageCaliper = 2,
-                                                matchOnGender = TRUE,
-                                                matchOnProvider = FALSE,
-                                                matchOnVisitDate = TRUE,
-                                                visitDateCaliper = 30)
+                                                controlSelectionCriteria = matchingCriteria2)
 
 ccAnalysis4 <- createCcAnalysis(analysisId = 4,
                                 description = "Matching on age, gender and visit, nesting in indication, using covars",
@@ -165,7 +170,34 @@ ccAnalysis4 <- createCcAnalysis(analysisId = 4,
                                 createCaseControlDataArgs = createCaseControlDataArgs1,
                                 fitCaseControlModelArgs = fitCaseControlModelArgs2)
 
-ccAnalysisList <- list(ccAnalysis1, ccAnalysis2, ccAnalysis3, ccAnalysis4)
+samplingCriteria <- createSamplingCriteria(controlsPerCase = 2)
+
+selectControlsArgs3 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
+                                                washoutPeriod = 180,
+                                                controlSelectionCriteria = samplingCriteria)
+
+covariateSettings <- createCovariateSettings(useDemographicsAgeGroup = TRUE,
+                                             useDemographicsGender = TRUE)
+
+getDbExposureDataArgs3 <- createGetDbExposureDataArgs(covariateSettings = covariateSettings)
+
+ccAnalysis5 <- createCcAnalysis(analysisId = 5,
+                                description = "Sampling controls, adjusting for age and gender",
+                                getDbCaseDataArgs = getDbCaseDataArgs1,
+                                selectControlsArgs = selectControlsArgs3,
+                                getDbExposureDataArgs = getDbExposureDataArgs3,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs2)
+
+ccAnalysis6 <- createCcAnalysis(analysisId = 6,
+                                description = "Sampling controls, adjusting for age and gender, nesting in indication",
+                                getDbCaseDataArgs = getDbCaseDataArgs2,
+                                selectControlsArgs = selectControlsArgs3,
+                                getDbExposureDataArgs = getDbExposureDataArgs3,
+                                createCaseControlDataArgs = createCaseControlDataArgs1,
+                                fitCaseControlModelArgs = fitCaseControlModelArgs2)
+
+ccAnalysisList <- list(ccAnalysis1, ccAnalysis2, ccAnalysis3, ccAnalysis4, ccAnalysis5, ccAnalysis6)
 
 saveExposureOutcomeNestingCohortList(exposureOutcomeNcList,
                                      "s:/temp/vignetteCaseControl2/exposureOutcomeNestingCohortList.txt")

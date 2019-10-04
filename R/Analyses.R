@@ -55,7 +55,8 @@ createCcAnalysis <- function(analysisId = 1,
                              getDbExposureDataArgs,
                              createCaseControlDataArgs,
                              fitCaseControlModelArgs) {
-  if (selectControlsArgs$matchOnVisitDate && !getDbCaseDataArgs$getVisits)
+  matching <- (class(selectControlsArgs$controlSelectionCriteria) == "matchingCriteria")
+  if (matching && selectControlsArgs$controlSelectionCriteria$matchOnVisitDate && !getDbCaseDataArgs$getVisits)
     stop("Requested matching on visit date, but getVisits argument for getDbCaseData is FALSE")
   if (fitCaseControlModelArgs$useCovariates && is.null(getDbExposureDataArgs$covariateSettings))
     stop("Requested using covariates in fitCaseControlModelArgs, but no covariates are loaded in getDbExposureDataArgs")

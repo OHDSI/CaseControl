@@ -2,15 +2,12 @@
 % Please edit documentation in R/SelectControls.R
 \name{selectControls}
 \alias{selectControls}
-\title{Select matched controls per case}
+\title{Select controls}
 \usage{
 selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
-  washoutPeriod = 180, controlsPerCase = 2, matchOnAge = TRUE,
-  ageCaliper = 2, matchOnGender = TRUE, matchOnProvider = FALSE,
-  matchOnCareSite = FALSE, matchOnVisitDate = FALSE,
-  visitDateCaliper = 30, matchOnTimeInCohort = FALSE,
-  daysInCohortCaliper = 30, minAge = NULL, maxAge = NULL,
-  removedUnmatchedCases = TRUE, seed = NULL)
+  washoutPeriod = 180,
+  controlSelectionCriteria = createMatchingCriteria(), minAge = NULL,
+  maxAge = NULL)
 }
 \arguments{
 \item{caseData}{An object of type \code{caseData} as generated using the
@@ -23,28 +20,10 @@ selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
 \item{washoutPeriod}{Minimum required numbers of days of observation for inclusion as
 either case or control.}
 
-\item{controlsPerCase}{Maximum number of controls to select per case.}
-
-\item{matchOnAge}{Match on age?}
-
-\item{ageCaliper}{Maximum difference (in years) in age when matching on age.}
-
-\item{matchOnGender}{Match on gender?}
-
-\item{matchOnProvider}{Match on provider (as specified in the person table)?}
-
-\item{matchOnCareSite}{Match on care site (as specified in the person table)?}
-
-\item{matchOnVisitDate}{Should the index date of the control be changed to the nearest visit
-date?}
-
-\item{visitDateCaliper}{Maximum difference (in days) between the index date and the visit
-date when matching on visit date.}
-
-\item{matchOnTimeInCohort}{Match on time in nesting cohort? When not using nesting, this is
-interpreted as time observed prior to index.}
-
-\item{daysInCohortCaliper}{Maximum difference (in days) in time in cohort.}
+\item{controlSelectionCriteria}{Either a \code{matchingCriteria} object as generated using the \code{
+\link{createMatchingCriteria}} function, or a \code{samplingCriteria}
+object as generated using the \code{link{createSamplingCriteria}}
+function.}
 
 \item{minAge}{Minimum age at which patient time will be included in the analysis.
 Note that information prior to the min age is still used to determine
@@ -58,20 +37,16 @@ restriction will be applied.}
 \item{maxAge}{Maximum age at which patient time will be included in the analysis. Age
 should be specified in years, but non-integer values are allowed. If not
 specified, no age restriction will be applied.}
-
-\item{removedUnmatchedCases}{Should cases with no matched controls be removed?}
-
-\item{seed}{The number generator seed. A null value sets seed via \code{\link{Sys.time}}.}
 }
 \value{
 A data frame with these columns: \describe{ \item{personId}{The person ID} \item{indexDate}{The
 index date} \item{isCase}{Is the person a case or a control?} \item{stratumId}{The ID linking cases
-and controls in a matched set} }
+and controls in a matched set (only available when matching)} }
 }
 \description{
-Select matched controls per case
+Select controls
 }
 \details{
-Select controls per case. Controls are matched on calendar time and the criteria defined in the
-arguments. Controls are randomly sampled to the required number.
+Select controls either by individually matching controls to each case, or by random sampling controls from the
+(nested) population.
 }

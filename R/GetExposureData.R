@@ -18,6 +18,15 @@
 
 #' Get exposure data for cases and controls from a database
 #'
+#' @description
+#' If additional exposure data or covariate data is required, this function will send the information
+#' on the cases and controls back to the server.
+#'
+#' Note: For PDW and RedShift, where uploading data can be excrutiatingly slow, you can use bulk loading
+#' by preparing the environment as described in the \code{\link[DatabaseConnection]{insertTable}} function
+#' in the DatabaseConnection package, and setting \code{oracleTempSchema} to a schema where you have write
+#' privileges (bulk import can only upload to permanent tables).
+#'
 #' @param connectionDetails        An R object of type\cr\code{connectionDetails} created using the
 #'                                 function \code{createConnectionDetails} in the
 #'                                 \code{DatabaseConnector} package.
@@ -113,14 +122,37 @@ getDbExposureData <- function(caseControls,
     data <- caseControls[, c("rowId", "personId", "indexDate")]
     colnames(data)[colnames(data) == "personId"] <- "subjectId"
     colnames(data)[colnames(data) == "indexDate"] <- "cohortStartDate"
-    colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-    DatabaseConnector::insertTable(connection = connection,
-                                   tableName = "#case_controls",
-                                   data = data,
-                                   dropTableIfExists = TRUE,
-                                   createTable = TRUE,
-                                   tempTable = TRUE,
-                                   oracleTempSchema = oracleTempSchema)
+    if (connection@dbms %in% c("pdw", "redshift") && !is.null(oracleTempSchema)) {
+      ParallelLogger::logInfo("Attempting to use bulk load for MPP platform.")
+      tableName <- paste(oracleTempSchema, paste(sample(letters, 20), collapse = ""), sep = ".")
+      DatabaseConnector::insertTable(connection = connection,
+                                     tableName = tableName,
+                                     data = data,
+                                     dropTableIfExists = TRUE,
+                                     createTable = TRUE,
+                                     tempTable = FALSE,
+                                     useMppBulkLoad = TRUE,
+                                     camelCaseToSnakeCase = TRUE)
+      sql <- "
+      IF OBJECT_ID('tempdb..#case_controls', 'U') IS NOT NULL
+        DROP TABLE #case_controls;
+
+      SELECT * INTO #case_controls FROM @table_name;
+
+      TRUNCATE TABLE @table_name;
+
+      DROP TABLE @table_name;"
+      DatabaseConnector::renderTranslateExecuteSql(connection, sql, table_name = tableName, progressBar = FALSE, reportOverallTime = FALSE)
+    } else {
+      DatabaseConnector::insertTable(connection = connection,
+                                     tableName = "#case_controls",
+                                     data = data,
+                                     dropTableIfExists = TRUE,
+                                     createTable = TRUE,
+                                     tempTable = TRUE,
+                                     oracleTempSchema = oracleTempSchema,
+                                     camelCaseToSnakeCase = TRUE)
+    }
     delta <- Sys.time() - start
     ParallelLogger::logInfo(paste("Uploading took", signif(delta, 3), attr(delta, "units")))
 
