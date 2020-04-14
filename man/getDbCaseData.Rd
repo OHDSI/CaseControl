@@ -4,18 +4,28 @@
 \alias{getDbCaseData}
 \title{Load case data from the database}
 \usage{
-getDbCaseData(connectionDetails, cdmDatabaseSchema,
+getDbCaseData(
+  connectionDetails,
+  cdmDatabaseSchema,
   oracleTempSchema = cdmDatabaseSchema,
   outcomeDatabaseSchema = cdmDatabaseSchema,
-  outcomeTable = "condition_era", outcomeIds = c(),
+  outcomeTable = "condition_era",
+  outcomeIds = c(),
   useNestingCohort = FALSE,
   nestingCohortDatabaseSchema = cdmDatabaseSchema,
-  nestingCohortTable = "cohort", nestingCohortId = NULL,
-  useObservationEndAsNestingEndDate = TRUE, getVisits = FALSE,
-  getExposures = FALSE, exposureDatabaseSchema = cdmDatabaseSchema,
-  exposureTable = "drug_era", exposureIds = c(), studyStartDate = "",
-  studyEndDate = "", maxNestingCohortSize = 1e+07,
-  maxCasesPerOutcome = 5e+05)
+  nestingCohortTable = "cohort",
+  nestingCohortId = NULL,
+  useObservationEndAsNestingEndDate = TRUE,
+  getVisits = FALSE,
+  getExposures = FALSE,
+  exposureDatabaseSchema = cdmDatabaseSchema,
+  exposureTable = "drug_era",
+  exposureIds = c(),
+  studyStartDate = "",
+  studyEndDate = "",
+  maxNestingCohortSize = 1e+07,
+  maxCasesPerOutcome = 5e+05
+)
 }
 \arguments{
 \item{connectionDetails}{An R object of type \code{ConnectionDetails} created

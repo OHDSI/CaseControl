@@ -4,9 +4,13 @@
 \alias{createSelectControlsArgs}
 \title{Create a parameter object for the function selectControls}
 \usage{
-createSelectControlsArgs(firstOutcomeOnly = TRUE, washoutPeriod = 180,
-  controlSelectionCriteria = createMatchingCriteria(), minAge = NULL,
-  maxAge = NULL)
+createSelectControlsArgs(
+  firstOutcomeOnly = TRUE,
+  washoutPeriod = 180,
+  controlSelectionCriteria = createMatchingCriteria(),
+  minAge = NULL,
+  maxAge = NULL
+)
 }
 \arguments{
 \item{firstOutcomeOnly}{Use the first outcome per person?}

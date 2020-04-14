@@ -24,14 +24,12 @@ CaseControl is an R package, with some functions implemented in C++.
 
 System Requirements
 ===================
-Requires R (version 3.2.2 or higher). Installation on Windows requires [RTools](http://cran.r-project.org/bin/windows/Rtools/). Libraries used in CaseControl require Java.
+Requires R. Installation on Windows requires [RTools](http://cran.r-project.org/bin/windows/Rtools/). Libraries used in CaseControl require Java.
 
 Installation
 ============
-1. On Windows, make sure [RTools](http://cran.r-project.org/bin/windows/Rtools/) is installed.
-2. The DatabaseConnector and SqlRender packages require Java. Java can be downloaded from
-<a href="http://www.java.com" target="_blank">http://www.java.com</a>.
-3. In R, use the following commands to download and install CaseControl:
+1. Make sure your R environment is properly configured. This means that Java must be installed, and on Windows RTools must be installed. See [these instructions](https://ohdsi.github.io/MethodsLibrary/rSetup.html) for how to configure your R environment.
+2. In R, use the following commands to download and install CaseControl:
 
   ```r
   install.packages("drat")
@@ -41,6 +39,9 @@ Installation
 
 User Documentation
 ==================
+Documentation can be found on the [package website](https://ohdsi.github.io/CaseControl).
+
+PDF versions of the documentation is also available:
 * Vignette: [Single studies using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/SingleStudies.pdf)
 * Vignette: [Running multiple analyses at once using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/MultipleAnalyses.pdf)
 * Package manual: [CaseControl.pdf](https://raw.githubusercontent.com/OHDSI/CaseControl/master/extras/CaseControl.pdf)
@@ -49,6 +50,10 @@ Support
 =======
 * Developer questions/comments/feedback: <a href="http://forums.ohdsi.org/c/developers">OHDSI Forum</a>
 * We use the <a href="https://github.com/OHDSI/CaseControl/issues">GitHub issue tracker</a> for all bugs/issues/enhancements
+
+Contributing
+============
+Read [here](https://ohdsi.github.io/MethodsLibrary/contribute.html) how you can contribute to this package.
 
 License
 =======

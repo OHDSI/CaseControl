@@ -4,9 +4,14 @@
 \alias{createCaseControlData}
 \title{Create case-control data}
 \usage{
-createCaseControlData(caseControlsExposure, exposureId,
-  firstExposureOnly = FALSE, riskWindowStart = 0, riskWindowEnd = 0,
-  exposureWashoutPeriod = 0)
+createCaseControlData(
+  caseControlsExposure,
+  exposureId,
+  firstExposureOnly = FALSE,
+  riskWindowStart = 0,
+  riskWindowEnd = 0,
+  exposureWashoutPeriod = 0
+)
 }
 \arguments{
 \item{caseControlsExposure}{An object of type \code{caseControlsExposure} as created using the

@@ -4,19 +4,28 @@
 \alias{runCcAnalyses}
 \title{Run a list of analyses}
 \usage{
-runCcAnalyses(connectionDetails, cdmDatabaseSchema,
+runCcAnalyses(
+  connectionDetails,
+  cdmDatabaseSchema,
   oracleTempSchema = cdmDatabaseSchema,
   exposureDatabaseSchema = cdmDatabaseSchema,
   exposureTable = "drug_era",
   outcomeDatabaseSchema = cdmDatabaseSchema,
   outcomeTable = "condition_era",
   nestingCohortDatabaseSchema = cdmDatabaseSchema,
-  nestingCohortTable = "condition_era", outputFolder = "./CcOutput",
-  ccAnalysisList, exposureOutcomeNestingCohortList,
-  prefetchExposureData = FALSE, compressCaseDataFiles = FALSE,
-  getDbCaseDataThreads = 1, selectControlsThreads = 1,
-  getDbExposureDataThreads = 1, createCaseControlDataThreads = 1,
-  fitCaseControlModelThreads = 1, cvThreads = 1)
+  nestingCohortTable = "condition_era",
+  outputFolder = "./CcOutput",
+  ccAnalysisList,
+  exposureOutcomeNestingCohortList,
+  prefetchExposureData = FALSE,
+  compressCaseDataFiles = FALSE,
+  getDbCaseDataThreads = 1,
+  selectControlsThreads = 1,
+  getDbExposureDataThreads = 1,
+  createCaseControlDataThreads = 1,
+  fitCaseControlModelThreads = 1,
+  cvThreads = 1
+)
 }
 \arguments{
 \item{connectionDetails}{An R object of type \code{ConnectionDetails} created using

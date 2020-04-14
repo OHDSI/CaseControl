@@ -1,6 +1,6 @@
 # @file CaseControl.R
 #
-# Copyright 2019 Observational Health Data Sciences and Informatics
+# Copyright 2020 Observational Health Data Sciences and Informatics
 #
 # This file is part of CaseControl
 #
@@ -16,14 +16,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' CaseControl
-#'
-#' @docType package
-#' @name CaseControl
+#' @keywords internal
+"_PACKAGE"
+
 #' @importFrom Rcpp evalCpp
 #' @importFrom SqlRender loadRenderTranslateSql translateSql
 #' @importFrom survival strata
-#' @importFrom stats coef confint pnorm printCoefmat qnorm
+#' @importFrom stats coef confint pnorm printCoefmat qnorm aggregate
 #' @import bit
 #' @import Cyclops
 #' @import DatabaseConnector

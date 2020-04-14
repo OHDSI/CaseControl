@@ -1,7 +1,7 @@
 /**********************************************************************
 @file queryExposure.sql
 
-Copyright 2019 Observational Health Data Sciences and Informatics
+Copyright 2020 Observational Health Data Sciences and Informatics
 
 This file is part of CaseControl
  
@@ -17,6 +17,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ***********************************************************************/
+{DEFAULT @cdm_database_schema = 'cdm4_sim.dbo'} 
 {DEFAULT @exposure_database_schema = 'cdm4_sim.dbo'} 
 {DEFAULT @exposure_table = 'drug_era'} 
 {DEFAULT @exposure_ids = 1} 
@@ -50,7 +51,7 @@ SELECT subject_id AS person_id,
 	) exposure
 	ON case_controls.subject_id = exposure.person_id
 		AND  exposure.exposure_start_date <= cohort_start_date
-INNER JOIN @exposure_database_schema.observation_period
+INNER JOIN @cdm_database_schema.observation_period
 	ON case_controls.subject_id = observation_period.person_id
 		AND observation_period_start_date <= cohort_start_date
 		AND observation_period_end_date >= cohort_start_date;

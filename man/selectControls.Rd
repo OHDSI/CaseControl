@@ -4,10 +4,15 @@
 \alias{selectControls}
 \title{Select controls}
 \usage{
-selectControls(caseData, outcomeId, firstOutcomeOnly = TRUE,
+selectControls(
+  caseData,
+  outcomeId,
+  firstOutcomeOnly = TRUE,
   washoutPeriod = 180,
-  controlSelectionCriteria = createMatchingCriteria(), minAge = NULL,
-  maxAge = NULL)
+  controlSelectionCriteria = createMatchingCriteria(),
+  minAge = NULL,
+  maxAge = NULL
+)
 }
 \arguments{
 \item{caseData}{An object of type \code{caseData} as generated using the

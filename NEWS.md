@@ -1,3 +1,16 @@
+CaseControl 2.0.0
+==================
+
+Changes:
+
+1. Added option to select controls using sampling instead of matching.
+
+2. The selectControls function now expects a controlSelectionCriteria argument, which can be created using either the createMatchingCriteria or the createSamplingCriteria function.
+
+Bugfixes:
+
+1. Fixed error when not pre-fetching exposure data, and the cohort database schema is not the CDM database schema.
+
 CaseControl 1.6.0
 ==================
 

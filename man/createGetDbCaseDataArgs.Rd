@@ -4,10 +4,15 @@
 \alias{createGetDbCaseDataArgs}
 \title{Create a parameter object for the function getDbCaseData}
 \usage{
-createGetDbCaseDataArgs(useNestingCohort = FALSE,
-  useObservationEndAsNestingEndDate = TRUE, getVisits = FALSE,
-  studyStartDate = "", studyEndDate = "",
-  maxNestingCohortSize = 1e+07, maxCasesPerOutcome = 5e+05)
+createGetDbCaseDataArgs(
+  useNestingCohort = FALSE,
+  useObservationEndAsNestingEndDate = TRUE,
+  getVisits = FALSE,
+  studyStartDate = "",
+  studyEndDate = "",
+  maxNestingCohortSize = 1e+07,
+  maxCasesPerOutcome = 5e+05
+)
 }
 \arguments{
 \item{useNestingCohort}{Should the study be nested in a cohort (e.g. people witha
