@@ -4,8 +4,12 @@
 \alias{createCreateCaseControlDataArgs}
 \title{Create a parameter object for the function createCaseControlData}
 \usage{
-createCreateCaseControlDataArgs(firstExposureOnly = FALSE,
-  riskWindowStart = 0, riskWindowEnd = 0, exposureWashoutPeriod = 0)
+createCreateCaseControlDataArgs(
+  firstExposureOnly = FALSE,
+  riskWindowStart = 0,
+  riskWindowEnd = 0,
+  exposureWashoutPeriod = 0
+)
 }
 \arguments{
 \item{firstExposureOnly}{Should only the first exposure per subject be included?}

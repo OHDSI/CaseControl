@@ -1,6 +1,6 @@
 # @file GetExposureData.R
 #
-# Copyright 2019 Observational Health Data Sciences and Informatics
+# Copyright 2020 Observational Health Data Sciences and Informatics
 #
 # This file is part of CaseControl
 #
@@ -162,6 +162,7 @@ getDbExposureData <- function(caseControls,
                                                      packageName = "CaseControl",
                                                      dbms = connectionDetails$dbms,
                                                      oracleTempSchema = oracleTempSchema,
+                                                     cdm_database_schema = cdmDatabaseSchema,
                                                      exposure_database_schema = exposureDatabaseSchema,
                                                      exposure_table = exposureTable,
                                                      exposure_ids = exposureIds)
