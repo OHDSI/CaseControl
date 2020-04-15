@@ -41,7 +41,7 @@ User Documentation
 ==================
 Documentation can be found on the [package website](https://ohdsi.github.io/CaseControl).
 
-PDF versions of the documentation is also available:
+PDF versions of the documentation are also available:
 * Vignette: [Single studies using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/SingleStudies.pdf)
 * Vignette: [Running multiple analyses at once using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/MultipleAnalyses.pdf)
 * Package manual: [CaseControl.pdf](https://raw.githubusercontent.com/OHDSI/CaseControl/master/extras/CaseControl.pdf)
