@@ -4,7 +4,7 @@ CaseControl
 [![Build Status](https://travis-ci.org/OHDSI/CaseControl.svg?branch=master)](https://travis-ci.org/OHDSI/CaseControl)
 [![codecov.io](https://codecov.io/github/OHDSI/CaseControl/coverage.svg?branch=master)](https://codecov.io/github/OHDSI/CaseControl?branch=master)
 
-CaseControl is part of the [OHDSI Methods Library](https://ohdsi.github.io/MethodsLibrary).
+CaseControl is part of [HADES](https://ohdsi.github.io/Hades).
 
 Introduction
 ============
@@ -28,7 +28,8 @@ Requires R. Installation on Windows requires [RTools](http://cran.r-project.org/
 
 Installation
 ============
-1. Make sure your R environment is properly configured. This means that Java must be installed, and on Windows RTools must be installed. See [these instructions](https://ohdsi.github.io/MethodsLibrary/rSetup.html) for how to configure your R environment.
+1. See the instructions [here](https://ohdsi.github.io/Hades/rSetup.html) for configuring your R environment, including RTools and Java.
+
 2. In R, use the following commands to download and install CaseControl:
 
   ```r
@@ -53,7 +54,7 @@ Support
 
 Contributing
 ============
-Read [here](https://ohdsi.github.io/MethodsLibrary/contribute.html) how you can contribute to this package.
+Read [here](https://ohdsi.github.io/Hades/contribute.html) how you can contribute to this package.
 
 License
 =======

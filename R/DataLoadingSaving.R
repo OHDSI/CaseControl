@@ -177,15 +177,18 @@ getDbCaseData <- function(connectionDetails,
       sampleNestingCohorts <- FALSE
     }
   }
+  caseData <- Andromeda::andromeda()
   ParallelLogger::logInfo("- Fetching nesting cohorts")
   renderedSql <- SqlRender::loadRenderTranslateSql("queryNestingCohort.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
                                                    oracleTempSchema = oracleTempSchema,
                                                    sample_nesting_cohorts = sampleNestingCohorts)
-  nestingCohorts <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
-  colnames(nestingCohorts) <- SqlRender::snakeCaseToCamelCase(colnames(nestingCohorts))
-  nestingCohorts <- addDummyRowIfEmpty(nestingCohorts)
+  DatabaseConnector::querySqlToAndromeda(connection = conn,
+                                         sql = renderedSql,
+                                         andromeda = caseData,
+                                         andromedaTableName = "nestingCohorts",
+                                         snakeCaseToCamelCase = TRUE)
 
   if (maxCasesPerOutcome == 0) {
     sampleCases <- FALSE
@@ -195,8 +198,7 @@ getDbCaseData <- function(connectionDetails,
                                              dbms = connectionDetails$dbms,
                                              oracleTempSchema = oracleTempSchema,
                                              sample_nesting_cohorts = sampleNestingCohorts)
-    caseCounts <- DatabaseConnector::querySql(conn, sql)
-    colnames(caseCounts) <- SqlRender::snakeCaseToCamelCase(colnames(caseCounts))
+    caseCounts <- DatabaseConnector::querySql(conn, sql, snakeCaseToCamelCase = TRUE)
     sampleCases <- FALSE
     if (nrow(caseCounts) > 0) {
       for (i in 1:nrow(caseCounts)) {
@@ -215,9 +217,11 @@ getDbCaseData <- function(connectionDetails,
                                                    sample_nesting_cohorts = sampleNestingCohorts,
                                                    sample_cases = sampleCases,
                                                    max_cases_per_outcome = maxCasesPerOutcome)
-  cases <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
-  colnames(cases) <- SqlRender::snakeCaseToCamelCase(colnames(cases))
-  cases <- addDummyRowIfEmpty(cases)
+  DatabaseConnector::querySqlToAndromeda(connection = conn,
+                                         sql = renderedSql,
+                                         andromeda = caseData,
+                                         andromedaTableName = "cases",
+                                         snakeCaseToCamelCase = TRUE)
 
   if (getVisits) {
     ParallelLogger::logInfo("- Fetching visits")
@@ -227,13 +231,11 @@ getDbCaseData <- function(connectionDetails,
                                                      oracleTempSchema = oracleTempSchema,
                                                      cdm_database_schema = cdmDatabaseSchema,
                                                      sample_nesting_cohorts = sampleNestingCohorts)
-    visits <- DatabaseConnector::querySql.ffdf(conn, renderedSql)
-    colnames(visits) <- SqlRender::snakeCaseToCamelCase(colnames(visits))
-    visits <- addDummyRowIfEmpty(visits)
-
-    # Quicker to sort in ff than in the database (at least for PDW)
-    rownames(visits) <- NULL  #Needs to be null or the ordering of ffdf will fail
-    visits <- visits[ff::ffdforder(visits[c("nestingCohortId", "visitStartDate")]), ]
+    DatabaseConnector::querySqlToAndromeda(connection = conn,
+                                           sql = renderedSql,
+                                           andromeda = caseData,
+                                           andromedaTableName = "visits",
+                                           snakeCaseToCamelCase = TRUE)
   }
 
   if (getExposures) {
@@ -246,9 +248,11 @@ getDbCaseData <- function(connectionDetails,
                                                      exposure_table = exposureTable,
                                                      exposure_ids = exposureIds,
                                                      sample_nesting_cohorts = sampleNestingCohorts)
-    exposures <- querySql.ffdf(conn, renderedSql)
-    colnames(exposures) <- SqlRender::snakeCaseToCamelCase(colnames(exposures))
-    exposures <- addDummyRowIfEmpty(exposures)
+    DatabaseConnector::querySqlToAndromeda(connection = conn,
+                                           sql = renderedSql,
+                                           andromeda = caseData,
+                                           andromedaTableName = "exposures",
+                                           snakeCaseToCamelCase = TRUE)
   }
 
   delta <- Sys.time() - start
@@ -263,220 +267,17 @@ getDbCaseData <- function(connectionDetails,
   DatabaseConnector::disconnect(conn)
 
   metaData <- list(outcomeIds = outcomeIds,
-                   call = match.call(),
                    hasVisits = getVisits,
                    hasExposures = getExposures,
                    nestingCohortId = nestingCohortId)
-  result <- list(nestingCohorts = nestingCohorts, cases = cases, metaData = metaData)
-  open(result$nestingCohorts)
-  open(result$cases)
-  if (getVisits) {
-    result$visits <- visits
-    open(result$visits)
-  }
-  if (getExposures) {
-    result$exposures <- exposures
-    open(result$exposures)
-  }
-  class(result) <- "caseData"
-  return(result)
-}
+  attr(caseData, "metaData") <- metaData
 
-addDummyRowIfEmpty <- function(object) {
-  if (nrow(object) == 0) {
-    result <- ff::as.ffdf(as.data.frame(t(rep(NA, ncol(object)))))
-    colnames(result) <- colnames(object)
-    return(result)
-  } else {
-    return(object)
-  }
-}
-
-#' Save the case data to folder
-#'
-#' @description
-#' \code{saveCaseData} saves an object of type caseData to folder.
-#'
-#' @param caseData   An object of type \code{caseData} as generated using \code{\link{getDbCaseData}}.
-#' @param folder     The name of the folder where the data will be written. The folder should not yet
-#'                   exist.
-#' @param compress   Should compression be used when saving?
-#'
-#' @details
-#' The data will be written to a set of files in the specified folder.
-#'
-#' @export
-saveCaseData <- function(caseData, folder, compress = FALSE) {
-  if (missing(caseData))
-    stop("Must specify caseData")
-  if (missing(folder))
-    stop("Must specify folder")
-  if (class(caseData) != "caseData")
-    stop("Data not of class caseData")
-  ParallelLogger::logTrace("Saving case data to ", folder)
-  nestingCohorts <- caseData$nestingCohorts
-  cases <- caseData$cases
-  if (caseData$metaData$hasVisits) {
-    visits <- caseData$visits
-    if (caseData$metaData$hasExposures) {
-      exposures <- caseData$exposures
-      if (compress) {
-        saveCompressedFfdf(nestingCohorts, file.path(folder, "nestingCohorts"))
-        saveCompressedFfdf(cases, file.path(folder, "cases"))
-        saveCompressedFfdf(visits, file.path(folder, "visits"))
-        saveCompressedFfdf(exposures, file.path(folder, "exposures"))
-      } else {
-        ffbase::save.ffdf(nestingCohorts, cases, visits, exposures, dir = folder)
-      }
-      open(caseData$exposures)
-    } else {
-      if (compress) {
-        saveCompressedFfdf(nestingCohorts, file.path(folder, "nestingCohorts"))
-        saveCompressedFfdf(cases, file.path(folder, "cases"))
-        saveCompressedFfdf(visits, file.path(folder, "visits"))
-      } else {
-        ffbase::save.ffdf(nestingCohorts, cases, visits, dir = folder)
-      }
-    }
-    open(caseData$visits)
-  } else {
-    if (caseData$metaData$hasExposures) {
-      exposures <- caseData$exposures
-      if (compress) {
-        saveCompressedFfdf(nestingCohorts, file.path(folder, "nestingCohorts"))
-        saveCompressedFfdf(cases, file.path(folder, "cases"))
-        saveCompressedFfdf(exposures, file.path(folder, "exposures"))
-      } else {
-        ffbase::save.ffdf(nestingCohorts, cases, exposures, dir = folder)
-      }
-      open(caseData$exposures)
-    } else {
-      if (compress) {
-        saveCompressedFfdf(nestingCohorts, file.path(folder, "nestingCohorts"))
-        saveCompressedFfdf(cases, file.path(folder, "cases"))
-      } else {
-        ffbase::save.ffdf(nestingCohorts, cases, dir = folder)
-      }
-    }
-  }
-  open(caseData$nestingCohorts)
-  open(caseData$cases)
-  saveRDS(caseData$metaData, file = file.path(folder, "metaData.rds"))
-  invisible(TRUE)
-}
-
-#' Load the case data from a folder
-#'
-#' @description
-#' \code{loadCaseData} loads an object of type caseData from a folder in the file system.
-#'
-#' @param folder     The name of the folder containing the data.
-#' @param readOnly   If true, the data is opened read only.
-#'
-#' @details
-#' The data will be written to a set of files in the folder specified by the user.
-#'
-#' @return
-#' An object of class \code{caseData}.
-#'
-#' @export
-loadCaseData <- function(folder, readOnly = TRUE) {
-  if (!file.exists(folder))
-    stop(paste("Cannot find folder", folder))
-  if (!file.info(folder)$isdir)
-    stop(paste("Not a folder:", folder))
-  ParallelLogger::logTrace("Loading case data from ", folder)
-
-  metaData <- readRDS(file.path(folder, "metaData.rds"))
-  caseData <- list(metaData = metaData)
-
-  temp <- setwd(folder)
-  absolutePath <- setwd(temp)
-  if (file.exists(file.path(absolutePath, "nestingCohorts.zip"))) {
-    caseData$nestingCohorts <- loadCompressedFfdf(file.path(absolutePath, "nestingCohorts"))
-    caseData$cases <- loadCompressedFfdf(file.path(absolutePath, "cases"))
-    if (caseData$metaData$hasVisits) {
-      caseData$visits <- loadCompressedFfdf(file.path(absolutePath, "visits"))
-    }
-    if (caseData$metaData$hasExposures) {
-      caseData$exposures <- loadCompressedFfdf(file.path(absolutePath, "exposures"))
-    }
-  } else {
-    e <- new.env()
-    ffbase::load.ffdf(absolutePath, e)
-    caseData$nestingCohorts <- get("nestingCohorts", envir = e)
-    caseData$cases <- get("cases", envir = e)
-    open(caseData$nestingCohorts, readonly = readOnly)
-    open(caseData$cases, readonly = readOnly)
-    if (caseData$metaData$hasVisits) {
-      caseData$visits <- get("visits", envir = e)
-      open(caseData$visits, readonly = readOnly)
-    }
-    if (caseData$metaData$hasExposures) {
-      caseData$exposures <- get("exposures", envir = e)
-      open(caseData$exposures, readonly = readOnly)
-    }
-    rm(e)
-  }
-  ParallelLogger::logDebug("Case data object has ", nrow(caseData$nestingCohorts), " nesting cohorts")
-  class(caseData) <- "caseData"
+  class(caseData) <- "CaseData"
+  attr(class(caseData), "package") <- "CaseControl"
   return(caseData)
 }
 
-#' @export
-print.caseData <- function(x, ...) {
-  writeLines("Case data object")
-  writeLines("")
-  writeLines(paste("Outcome concept ID(s):", paste(x$metaData$outcomeIds, collapse = ",")))
-  if (x$metaData$nestingCohortId != -1) {
-    writeLines(paste("Nesting cohort ID:", x$metaData$nestingCohortId))
-  }
-}
 
-#' @export
-summary.caseData <- function(object, ...) {
-  populationCount <- length(ffbase::unique.ff(object$nestingCohorts$personId))
-  populationWindowCount <- nrow(object$nestingCohorts)
-  outcomeCounts <- data.frame(outcomeConceptId = object$metaData$outcomeIds,
-                              eventCount = 0,
-                              caseCount = 0)
-  for (i in 1:nrow(outcomeCounts)) {
-    cases <- object$cases[object$cases$outcomeId == object$metaData$outcomeIds[i], "nestingCohortId"]
-    outcomeCounts$eventCount[i] <- length(cases)
-    if (outcomeCounts$eventCount[i] == 0) {
-      outcomeCounts$caseCount[i] <- 0
-    } else {
-      idx <- ffbase::`%in%`(object$nestingCohorts$nestingCohortId, cases)
-      outcomeCounts$caseCount[i] <- length(ffbase::unique.ff(object$nestingCohorts$personId[idx]))
-    }
-  }
-  result <- list(metaData = object$metaData,
-                 populationCount = populationCount,
-                 populationWindowCount = populationWindowCount,
-                 outcomeCounts = outcomeCounts)
-  class(result) <- "summary.caseData"
-  return(result)
-}
-
-#' @export
-print.summary.caseData <- function(x, ...) {
-  writeLines("caseData object summary")
-  writeLines("")
-  writeLines(paste("Outcome concept ID(s):", paste(x$metaData$outcomeIds, collapse = ",")))
-  if (x$metaData$nestingCohortId != -1) {
-    writeLines(paste("Nesting cohort ID:", x$metaData$nestingCohortId))
-  }
-  writeLines("")
-  writeLines(paste("Population count:", paste(x$populationCount)))
-  writeLines(paste("Population window count:", paste(x$populationWindowCount)))
-  writeLines("")
-  writeLines("Outcome counts:")
-  outcomeCounts <- x$outcomeCounts
-  rownames(outcomeCounts) <- outcomeCounts$outcomeConceptId
-  outcomeCounts$outcomeConceptId <- NULL
-  colnames(outcomeCounts) <- c("Event count", "Case count")
-  printCoefmat(outcomeCounts)
-}
 
 #' Insert cases and controls into a database
 #'
@@ -545,33 +346,4 @@ insertDbPopulation <- function(caseControls,
   delta <- Sys.time() - start
   ParallelLogger::logInfo(paste("Inserting rows took", signif(delta, 3), attr(delta, "units")))
   invisible(TRUE)
-}
-
-saveCompressedFfdf <- function(ffdf, fileName) {
-  dir.create(dirname(fileName), showWarnings = FALSE, recursive = TRUE)
-  saveRDS(ffdf, paste0(fileName, ".rds"))
-  fileNames <- sapply(bit::physical(ffdf), function(x) bit::physical(x)$filename)
-  sourceDir <- dirname(fileNames[1])
-  oldWd <- setwd(sourceDir)
-  on.exit(setwd(oldWd))
-  sourceNames <- basename(fileNames)
-  ff::close.ffdf(ffdf)
-  DatabaseConnector::createZipFile(zipFile = paste0(fileName, ".zip"), files = sourceNames)
-  ff::open.ffdf(ffdf)
-}
-
-loadCompressedFfdf <- function(fileName) {
-  ffdf <- readRDS(paste0(fileName, ".rds"))
-  tempRoot <- ff::fftempfile("temp")
-  utils::unzip(zipfile = paste0(fileName, ".zip"), exdir = tempRoot)
-  for (ff in bit::physical(ffdf)) {
-    newFileName <- ff::fftempfile("")
-    file.rename(file.path(tempRoot, basename(bit::physical(ff)$filename)), newFileName)
-    bit::physical(ff)$filename <- newFileName
-    bit::physical(ff)$finalizer <- "delete"
-    ff::open.ff(ff)
-    reg.finalizer(attr(ff,"physical"), ff::finalize.ff_pointer, onexit = bit::physical(ff)$finonexit)
-  }
-  unlink(tempRoot, recursive = TRUE)
-  return(ffdf)
 }

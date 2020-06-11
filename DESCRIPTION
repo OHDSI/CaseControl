@@ -1,35 +1,37 @@
 Package: CaseControl
 Type: Package
 Title: Case-Control
-Version: 2.0.0
-Date: 2019-10-01
+Version: 3.0.0
+Date: 2020-06-10
 Authors@R: c(
     person("Martijn", "Schuemie", , "schuemie@ohdsi.org", role = c("aut", "cre"))
     )
 Maintainer: Martijn Schuemie <schuemie@ohdsi.org>
 Description: CaseControl is an R package for performing (nested) matched case-control analyses in an observational database in the OMOP Common Data Model.
 VignetteBuilder: knitr
-URL: https://github.com/OHDSI/CaseControl
+URL: http://ohdsi.github.io/CaseControl, https://github.com/OHDSI/CaseControl
 BugReports: https://github.com/OHDSI/CaseControl/issues
 Depends:
   R (>= 3.2.2),
-  Cyclops (>= 1.3.0),
-  DatabaseConnector (>= 2.2.0),
+  Cyclops (>= 3.0.0),
+  DatabaseConnector (>= 3.0.0),
+  Andromeda,
   survival,
-  FeatureExtraction  (>= 2.0.0)
+  FeatureExtraction  (>= 3.0.0)
 Imports:
   SqlRender (>= 1.6.0),
-  bit,
-  ff,
-  ffbase (>= 0.12.1),
+  rlang,
+  dplyr,
   Rcpp (>= 0.11.2),
-  ParallelLogger,
+  ParallelLogger (>= 2.0.0),
   plyr
 Suggests:
   testthat,
   knitr,
   rmarkdown,
   EmpiricalCalibration
+Remotes:
+	ohdsi/FeatureExtraction
 License: Apache License 2.0
 LinkingTo: Rcpp
 NeedsCompilation: yes

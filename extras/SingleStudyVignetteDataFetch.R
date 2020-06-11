@@ -20,12 +20,12 @@
 library(SqlRender)
 library(DatabaseConnector)
 library(CaseControl)
-options(fftempdir = "s:/fftemp")
+options(andromedaTempFolder = "s:/andromedaTemp")
 
 pw <- NULL
 dbms <- "pdw"
 user <- NULL
-cdmDatabaseSchema <- "CDM_Truven_MDCD_V780.dbo"
+cdmDatabaseSchema <- "CDM_IBM_MDCR_V1192.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 oracleTempSchema <- NULL
 cohortTable <- "mschuemi_cc_vignette"
@@ -84,14 +84,16 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
 #                           nestingCohortId = 2,
 #                           useObservationEndAsNestingEndDate = TRUE,
 #                           getVisits = TRUE,
-#                           getExposures = FALSE,
+#                           getExposures = TRUE,
 #                           exposureDatabaseSchema = cdmDatabaseSchema,
 #                           exposureTable = "drug_era",
 #                           exposureIds = 1124300)
+# saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseExposureData.zip")
+# caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseExposureData.zip")
 
-saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseData")
+saveCaseData(caseData, "s:/temp/vignetteCaseControl/caseData.zip")
 
-caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
+caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData.zip")
 
 caseData
 
@@ -111,13 +113,13 @@ caseControls <- selectControls(caseData = caseData,
                                washoutPeriod = 180,
                                controlSelectionCriteria = matchingCriteria)
 
-samplingCriteria <- createSamplingCriteria(controlsPerCase = 1)
-
-caseControls2 <- selectControls(caseData = caseData,
-                               outcomeId = 1,
-                               firstOutcomeOnly = TRUE,
-                               washoutPeriod = 180,
-                               controlSelectionCriteria = samplingCriteria)
+# samplingCriteria <- createSamplingCriteria(controlsPerCase = 1)
+#
+# caseControls2 <- selectControls(caseData = caseData,
+#                                 outcomeId = 1,
+#                                 firstOutcomeOnly = TRUE,
+#                                 washoutPeriod = 180,
+#                                 controlSelectionCriteria = samplingCriteria)
 
 saveRDS(caseControls, "s:/temp/vignetteCaseControl/caseControls.rds")
 

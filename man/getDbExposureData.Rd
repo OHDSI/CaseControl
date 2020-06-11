@@ -8,7 +8,7 @@ getDbExposureData(
   caseControls,
   connectionDetails,
   oracleTempSchema = NULL,
-  exposureDatabaseSchema,
+  exposureDatabaseSchema = NULL,
   exposureTable = "drug_era",
   exposureIds = c(),
   cdmDatabaseSchema = exposureDatabaseSchema,

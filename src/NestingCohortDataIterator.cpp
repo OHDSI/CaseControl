@@ -23,7 +23,7 @@
 
 #include <Rcpp.h>
 #include "NestingCohortDataIterator.h"
-#include "FfdfIterator.h"
+#include "AndromedaTableIterator.h"
 
 using namespace Rcpp;
 
@@ -39,7 +39,7 @@ nestingCohortsIterator(_nestingCohorts, false), casesIterator(_cases, false), vi
 
 
 void NestingCohortDataIterator::loadNextNestingCohorts() {
-  List nestingCohorts = nestingCohortsIterator.next();
+  DataFrame nestingCohorts = nestingCohortsIterator.next();
   nestingCohortsNestingCohortId = nestingCohorts["nestingCohortId"];
   nestingCohortsPersonId = nestingCohorts["personId"];
   nestingCohortsStartDate = nestingCohorts["startDate"];
@@ -52,13 +52,13 @@ void NestingCohortDataIterator::loadNextNestingCohorts() {
 }
 
 void NestingCohortDataIterator::loadNextCases() {
-  List cases = casesIterator.next();
+  DataFrame cases = casesIterator.next();
   casesNestingCohortId = cases["nestingCohortId"];
   casesIndexDate = cases["indexDate"];
 }
 
 void NestingCohortDataIterator::loadNextVisits() {
-  List visits = visitsIterator.next();
+  DataFrame visits = visitsIterator.next();
   visitsNestingCohortId = visits["nestingCohortId"];
   visitsVisitStartDate = visits["visitStartDate"];
 }

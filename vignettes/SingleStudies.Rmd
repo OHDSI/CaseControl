@@ -15,13 +15,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}      
 ---
 
-```{r, echo = FALSE, message = FALSE, warning = FALSE}
+```{r echo = FALSE, message = FALSE, warning = FALSE}
 library(CaseControl)
-knitr::opts_chunk$set(
-  cache=FALSE,
-  comment = "#>",
-  error = FALSE,
-  tidy = FALSE)
 ```
 # Introduction
 
@@ -29,11 +24,11 @@ This vignette describes how you can use the `CaseControl` package to perform a s
 
 # Installation instructions
 
-Before installing the `CaseControl` package make sure you have Java available.  Java can be downloaded from [www.java.com](http://www.java.com). For Windows users, RTools is also necessary.  RTools can be downloaded from [CRAN](http://cran.r-project.org/bin/windows/Rtools/).
+Before installing the `CaseControl` package make sure you have Java available.  Java can be downloaded from [www.java.com](http://www.java.com). For Windows users, RTools is also necessary.  RTools can be downloaded from [CRAN](http://cran.r-project.org/bin/windows/Rtools/). See [these instructions](https://ohdsi.github.io/Hades/rSetup.html) for properly configuring your R environment.
 
 The `CaseControl` package is currently maintained in a [Github repository](https://github.com/OHDSI/CaseControl), and has dependencies on other packages in Github. All of these packages can be downloaded and installed from within R using the `drat` package:
 
-```{r tidy=TRUE,eval=FALSE}
+```{r eval=FALSE}
 install.packages("drat")
 drat::addRepo("OHDSI")
 install.packages("CaseControl")
@@ -57,7 +52,7 @@ In the following sections these steps will be demonstrated.
 
 We need to tell R how to connect to the server where the data are. `CaseControl` uses the `DatabaseConnector` package, which provides the `createConnectionDetails` function. Type `?createConnectionDetails` for the specific settings required for the various database management systems (DBMS). For example, one might connect to a PostgreSQL database using this code:
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 connectionDetails <- createConnectionDetails(dbms = "postgresql", 
                                              server = "localhost/ohdsi", 
                                              user = "joe", 
@@ -116,7 +111,7 @@ GROUP BY person_id;
 ```
 This is parameterized SQL which can be used by the `SqlRender` package. We use parameterized SQL so we do not have to pre-specify the names of the CDM and cohort schemas. That way, if we want to run the SQL on a different schema, we only need to change the parameter values; we do not have to change the SQL code. By also making use of translation functionality in `SqlRender`, we can make sure the SQL code can be run in many different environments.
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 library(SqlRender)
 sql <- readSql("vignette.sql")
 sql <- render(sql,
@@ -133,7 +128,7 @@ In this code, we first read the SQL from the file into memory. In the next line,
 
 If all went well, we now have a table with the outcome of interest and the nesting cohort. We can see how many events:
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 sql <- paste("SELECT cohort_definition_id, COUNT(*) AS count",
              "FROM @cohortDatabaseSchema.@cohortTable",
              "GROUP BY cohort_definition_id")
@@ -145,14 +140,14 @@ sql <- translate(sql, targetDialect = connectionDetails$dbms)
 querySql(connection, sql)
 ```
 ```{r echo=FALSE,message=FALSE}
-data.frame(cohort_definition_id = c(1,2),count=c(422274, 118430))
+data.frame(cohort_definition_id = c(1,2),count = c(1225890, 285459))
 ```
 
 # Extracting the data from the server
 
 Now we can tell `CaseControl` to extract the necessary data on cases and potential controls:
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 caseData <- getDbCaseData(connectionDetails = connectionDetails,
                           cdmDatabaseSchema = cdmDatabaseSchema,
                           oracleTempSchema = oracleTempSchema,
@@ -168,37 +163,37 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
 caseData
 ```
 ```{r echo=FALSE,message=FALSE,eval=TRUE}
-if (file.exists("s:/temp/vignetteCaseControl")){
-  caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData")
+if (file.exists("s:/temp/vignetteCaseControl")) {
+  caseData <- loadCaseData("s:/temp/vignetteCaseControl/caseData.zip")
 } 
 ```
 ```{r echo=FALSE,message=FALSE}
-if (file.exists("s:/temp/vignetteCaseControl")){
+if (file.exists("s:/temp/vignetteCaseControl")) {
   caseData
 }
 ```
 
 There are many parameters, but they are all documented in the `CaseControl` manual. In short, we are pointing the function to the table created earlier and indicating which concept ID in that table identifies the outcome. Note that it is possible to fetch the data for multiple outcomes at once for efficiency. We furthermore specify a nesting cohort in the same table, meaning that people will be eligible to be cases or controls if and when they fall inside the specified cohort. In this case, the nesting cohort starts when people have their first diagnosis of rheumatoid arthritis. We use the `useObservationEndAsNestingEndDate` argument to indicate people will stay eligible until the end of their observation period. We furthermore specify we want to retrieve data on patient visits, which will be used later on for matching.
 
-Data about the cases and potential controls are extracted from the server and stored in the `caseData` object. This object uses the package `ff` to store information in a way that ensures R does not run out of memory, even when the data are large. 
+Data about the cases and potential controls are extracted from the server and stored in the `caseData` object. This object uses the package `Andromeda` to store information in a way that ensures R does not run out of memory, even when the data are large. 
 
 We can use the generic `summary()` function to view some more information of the data we extracted:
 
-```{r tidy=TRUE,eval=FALSE}
+```{r eval=FALSE}
 summary(caseData)
 ```
 ```{r echo=FALSE,message=FALSE}
-if (file.exists("s:/temp/vignetteCaseControl")){
+if (file.exists("s:/temp/vignetteCaseControl")) {
   summary(caseData)
 }
 ```
 
 ## Saving the data to file
 
-Creating the `caseData` object can take considerable computing time, and it is probably a good idea to save it for future sessions. Because `caseData` uses `ff`, we cannot use R's regular save function. Instead, we'll have to use the `saveCaseData()` function:
+Creating the `caseData` object can take considerable computing time, and it is probably a good idea to save it for future sessions. Because `caseData` uses `Andromeda`, we cannot use R's regular save function. Instead, we'll have to use the `saveCaseData()` function:
 
-```{r tidy=TRUE,eval=FALSE}
-saveCaseData(caseData, "GiBleed")
+```{r eval=FALSE}
+saveCaseData(caseData, "GiBleed.zip")
 ```
 
 We can use the `loadCaseData()` function to load the data in a future session.
@@ -207,7 +202,7 @@ We can use the `loadCaseData()` function to load the data in a future session.
 
 Next, we can use the data to select controls. In this example we'll selected matched controls, meaning that for every case we'll find individually matched controls:
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 matchingCriteria <- createMatchingCriteria(controlsPerCase = 2,
                                            matchOnAge = TRUE,
                                            ageCaliper = 2,
@@ -239,23 +234,23 @@ data.frame(personId = c(3,123,345,6,234,567),
 
 We can show the attrition to see why cases and events were filtered:
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 getAttritionTable(caseControls)
 ```
 ```{r echo=FALSE,message=FALSE,eval=TRUE}
-if (file.exists("s:/temp/vignetteCaseControl")){
+if (file.exists("s:/temp/vignetteCaseControl")) {
   caseControls <- readRDS("s:/temp/vignetteCaseControl/caseControls.rds")
 } 
 ```
 ```{r echo=FALSE,message=FALSE}
-if (file.exists("s:/temp/vignetteCaseControl")){
+if (file.exists("s:/temp/vignetteCaseControl")) {
   getAttritionTable(caseControls)
 }
 ```
 
 An alternative to selecting invidually matched controls is to create a sample controls, controls that are not individually linked to cases. This can be done using the `createSamplingCriteria` instead of the `createMatchingCriteria` function. For example:
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 samplingCriteria <- createSamplingCriteria(controlsPerCase = 1)
 
 caseControls2 <- selectControls(caseData = caseData,
@@ -269,7 +264,7 @@ caseControls2 <- selectControls(caseData = caseData,
 
 Next, we load information on the exposures of the cases and controls, as well as covariates.
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 covarSettings <- createCovariateSettings(useCharlsonIndex = TRUE,
                                          useChads2 = TRUE,
                                          useDcsi = TRUE)
@@ -285,9 +280,9 @@ caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
 
 Here we specify that we will use the `drug_era` table to identify exposures, and will only retrieve data on exposure to Diclofenac (concept ID 1124300). We use the `covariateSettings` function of the FeatureExtraction package to specify which covariates to construct. In this example the only coviariates are the Charlson comorbidity index, Diabetes Complications Severity Index (DCSI), and CHADS2 score.
 
-When including covariates, the `caseControlsExposure` object uses `ff` to store large objects and therefore cannot be stored using standard functions. Please use `saveCaseControlsExposure` to save:
+When including covariates, the `caseControlsExposure` object uses `Andromeda` to store large objects and therefore cannot be stored using standard functions. Please use `saveCaseControlsExposure` to save:
 
-```{r tidy=TRUE,eval=FALSE}
+```{r eval=FALSE}
 saveCaseControlsExposure(caseControlsExposure, "caseControlsExposure")
 ```
 
@@ -295,7 +290,7 @@ saveCaseControlsExposure(caseControlsExposure, "caseControlsExposure")
 
 We can now use the exposure data to determine exposure status for the cases and controls. (The reason why fetching exposure data and determining exposure status is split up is that this is more efficient when we want to evaluate several risk window definitions.)
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExposure,
                                          exposureId = 1124300,
                                          firstExposureOnly = FALSE,
@@ -321,7 +316,7 @@ data.frame(personId = c(3,123,345,6,234,567),
 
 We can now fit the model. In case we used matchign to select controls this will be a logistic regression conditioned on the matched sets. Else it will be an unconditioned logistic regression.
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 fit <- fitCaseControlModel(caseControlData,
                            useCovariates = TRUE,
                            caseControlsExposure = caseControlsExposure,
@@ -338,7 +333,7 @@ if (file.exists("s:/temp/vignetteCaseControl")) {
 
 The generic functions `summary`, `coef`, and `confint` are implemented for the `fit` object:
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 summary(fit)
 ```
 ```{r echo=FALSE,message=FALSE}
@@ -347,7 +342,7 @@ if (file.exists("s:/temp/vignetteCaseControl")){
 }
 ```
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 coef(fit)
 ```
 ```{r echo=FALSE,message=FALSE}
@@ -356,7 +351,7 @@ if (file.exists("s:/temp/vignetteCaseControl")){
 }
 ```
 
-```{r tidy=FALSE,eval=FALSE}
+```{r eval=FALSE}
 confint(fit)
 ```
 ```{r echo=FALSE,message=FALSE}
@@ -369,12 +364,12 @@ if (file.exists("s:/temp/vignetteCaseControl")){
 
 Considerable work has been dedicated to provide the `CaseControl` package.
 
-```{r tidy=TRUE,eval=TRUE}
+```{r eval=TRUE}
 citation("CaseControl")
 ```
 
 Furthermore, `CaseControl` makes extensive use of the `Cyclops` package.
 
-```{r tidy=TRUE,eval=TRUE}
+```{r eval=TRUE}
 citation("Cyclops")
 ```

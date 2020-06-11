@@ -20,6 +20,7 @@
 OhdsiRTools::formatRFolder()
 OhdsiRTools::checkUsagePackage("CaseControl")
 OhdsiRTools::updateCopyrightYearFolder()
+devtools::spell_check()
 
 # Create manual and vignette
 unlink("extras/CaseControl.pdf")
@@ -40,6 +41,7 @@ rmarkdown::render("vignettes/MultipleAnalyses.Rmd",
 unlink("inst/doc/MultipleAnalyses.tex")
 
 pkgdown::build_site()
+OhdsiRTools::fixHadesLogo()
 
 # Create arg functions:
 library(CaseControl)

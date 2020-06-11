@@ -61,43 +61,54 @@ fitCaseControlModel <- function(caseControlData,
     status <- "NO EXPOSED SUBJECTS"
   } else {
     if (useCovariates) {
-      columns <- colnames(caseControlData)
-      columns <- columns[columns %in% c("rowId", "stratumId", "isCase")]
-      outcomes <- caseControlData[, columns]
-      colnames(outcomes)[colnames(outcomes) == "isCase"] <- "y"
-      outcomes <- ff::as.ffdf(outcomes)
+      andromeda <- Andromeda::andromeda()
+      on.exit(close(andromeda))
 
-      covariates <- caseControlsExposure$covariates
-      covariates <- covariates[ffbase::`%in%`(covariates$rowId, outcomes$rowId), ]
+      covariates <- caseControlsExposure$covariateData$covariates
+      covariates <- covariates %>%
+        filter(.data$rowId %in% local(caseControlData$rowId))
+
       if (length(includeCovariateIds) != 0) {
-        idx <- !is.na(ffbase::ffmatch(covariates$covariateId, ff::as.ff(includeCovariateIds)))
-        covariates <- covariates[ffbase::ffwhich(idx, idx == TRUE), ]
+        covariates <- covariates %>%
+          filter(.data$covariateId %in% includeCovariateIds)
       }
       if (length(excludeCovariateIds) != 0) {
-        idx <- is.na(ffbase::ffmatch(covariates$covariateId, ff::as.ff(excludeCovariateIds)))
-        covariates <- covariates[ffbase::ffwhich(idx, idx == TRUE), ]
+        covariates <- covariates %>%
+          filter(!.data$covariateId %in% excludeCovariateIds)
       }
-      covariates <- FeatureExtraction::tidyCovariateData(covariates = covariates,
-                                                         covariateRef = caseControlsExposure$covariateRef,
-                                                         populationSize = nrow(outcomes))$covariates
-      treatmentVarId <- ffbase::max.ff(caseControlsExposure$covariates$covariateId) + 1
+      andromeda$covariates <- covariates
+      andromeda$covariateRef <- caseControlsExposure$covariateData$covariateRef
+      andromeda$analysisRef <- caseControlsExposure$covariateData$analysisRef
+      class(andromeda) <- "CovariateData"
+      attr(andromeda, "metaData") <- list(populationSize = nrow(caseControlData),
+                                          cohortId = -1)
+      tidyCovariates <- FeatureExtraction::tidyCovariateData(andromeda)
+      on.exit(close(tidyCovariates), add = TRUE)
+
+      tidyCovariates$outcomes <- caseControlData %>%
+        select(.data$rowId, .data$stratumId, y = .data$isCase)
+
+      treatmentVarId <- 1 + tidyCovariates$covariateRef %>%
+        summarise(max(.data$covariateId, na.rm = TRUE)) %>%
+        pull()
+
       prior$exclude <- treatmentVarId  # Exclude treatment variable from regularization
-      treatmentCovariate <- ff::ffdf(rowId = ff::as.ff(as.numeric(caseControlData$rowId)),
-                                     covariateId = ff::ff(treatmentVarId,
-                                                          length = nrow(caseControlData),
-                                                          vmode = "double"),
-                                     covariateValue = ff::as.ff(caseControlData$exposed,
-                                                                vmode = "double"))
-      covariates <- ffbase::ffdfappend(treatmentCovariate, covariates)
-      covariates <- ffbase::merge.ffdf(covariates, outcomes)
-      if (is.null(outcomes$stratumId)) {
+
+      treatmentCovariate <- tibble(rowId = as.numeric(caseControlData$rowId),
+                                   covariateId = rep(treatmentVarId, nrow(caseControlData)),
+                                   covariateValue = caseControlData$exposed)
+      Andromeda::appendToTable(tidyCovariates$covariates, treatmentCovariate)
+      if (is.null(caseControlData$stratumId)) {
         modelType <- "lr"
         addIntercept <- TRUE
+        covariates <- tidyCovariates$covariates
       } else {
         modelType <- "clr"
         addIntercept <- FALSE
+        covariates <- tidyCovariates$covariates %>%
+          inner_join(select(tidyCovariates$outcomes, .data$rowId, .data$stratumId), by = "rowId")
       }
-      cyclopsData <- Cyclops::convertToCyclopsData(outcomes,
+      cyclopsData <- Cyclops::convertToCyclopsData(tidyCovariates$outcomes,
                                                    covariates,
                                                    modelType = modelType,
                                                    addIntercept = addIntercept)

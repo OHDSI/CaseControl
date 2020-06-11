@@ -1,3 +1,11 @@
+CaseControl 3.0.0
+==================
+
+Changes:
+
+1. Using Andromeda instead of ff to store large data objects.
+
+
 CaseControl 2.0.0
 ==================
 

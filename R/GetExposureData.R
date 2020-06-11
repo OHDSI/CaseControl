@@ -67,48 +67,69 @@
 getDbExposureData <- function(caseControls,
                               connectionDetails,
                               oracleTempSchema = NULL,
-                              exposureDatabaseSchema,
+                              exposureDatabaseSchema = NULL,
                               exposureTable = "drug_era",
                               exposureIds = c(),
                               cdmDatabaseSchema = exposureDatabaseSchema,
                               covariateSettings = NULL,
                               caseData = NULL) {
-  exposure <- data.frame(rowId = c(),
-                          exposureId = c(),
-                          daysPriorObservation = c(),
-                          daysSinceExposureStart = c(),
-                          daysSinceExposureEnd = c())
+  exposure <- tibble(rowId = c(),
+                     exposureId = c(),
+                     daysPriorObservation = c(),
+                     daysSinceExposureStart = c(),
+                     daysSinceExposureEnd = c())
   if (nrow(caseControls) == 0) {
     result <- list(caseControls = caseControls,
                    exposure = data.frame(),
                    metaData = attr(caseControls, "metaData"))
     attr(result$caseControls, "metaData") <- NULL
     result$metaData$hasCovariates <- FALSE
-  } else if (is.null(covariateSettings) && !is.null(caseData) && caseData$metaData$hasExposures) {
+  } else if (is.null(covariateSettings) && !is.null(caseData) && attr(caseData, "metaData")$hasExposures) {
     ParallelLogger::logInfo("Using pre-fetched exposures in caseData object")
-    caseControls$rowId <- 1:nrow(caseControls)
-    idx <- ffbase::`%in%`(caseData$exposures$exposureId, exposureIds)
-    if (ffbase::any.ff(idx)) {
-      selectExposures <- caseData$exposures[idx, ]
-      idx <- ffbase::`%in%`(selectExposures$personId, caseControls$personId)
-      if (ffbase::any.ff(idx)) {
-        # Need to find observation period start date per rowId:
-        nestingCohorts <- caseData$nestingCohorts[ffbase::`%in%`(caseData$nestingCohorts$personId, caseControls$personId), c("personId", "observationPeriodStartDate")]
-        nestingCohorts <- merge(ff::as.ram(nestingCohorts), caseControls[, c("personId", "indexDate", "rowId")])
-        nestingCohorts <- nestingCohorts[nestingCohorts$indexDate >= nestingCohorts$observationPeriodStartDate, ]
-        nestingCohorts <- aggregate(observationPeriodStartDate ~ rowId, nestingCohorts, max)
 
-        # Construct exposure object:
-        exposure <- selectExposures[idx, ]
-        exposure <- merge(ff::as.ram(exposure), caseControls[, c("personId", "indexDate", "rowId")])
-        exposure <- merge(exposure, nestingCohorts)
-        exposure$daysPriorObservation <- exposure$exposureStartDate - exposure$observationPeriodStartDate
-        exposure$daysSinceExposureStart <- exposure$indexDate - exposure$exposureStartDate
-        exposure$daysSinceExposureEnd <- exposure$indexDate - exposure$exposureEndDate
-        exposure <- exposure[exposure$daysSinceExposureStart >= 0, ]
-        exposure <- exposure[, c("rowId", "exposureId", "daysPriorObservation", "daysSinceExposureStart", "daysSinceExposureEnd")]
-      }
-    }
+    caseControls <- caseControls %>%
+      mutate(rowId = row_number())
+
+    exposure <- caseData$exposures %>%
+      filter(.data$exposureId %in% exposureIds & .data$personId %in% local(caseControls$personId)) %>%
+      collect()
+
+    nestingCohorts <- caseData$nestingCohorts %>%
+      filter(.data$personId %in% local(caseControls$personId)) %>%
+      collect()
+
+    # Need to find observation period start date per rowId:
+    opStartDates <- caseControls %>%
+      select(.data$personId, .data$indexDate, .data$rowId) %>%
+      inner_join(nestingCohorts, by = "personId") %>%
+      filter(.data$indexDate >= .data$observationPeriodStartDate) %>%
+      group_by(.data$rowId, .data$personId) %>%
+      summarise(observationPeriodStartDate = max(.data$observationPeriodStartDate, na.rm = TRUE), .groups = "drop_last")
+
+    exposure <- exposure %>%
+      inner_join(select(caseControls, .data$personId, .data$indexDate), by = "personId") %>%
+      inner_join(opStartDates, by = "personId") %>%
+      mutate(daysPriorObservation = .data$exposureStartDate - .data$observationPeriodStartDate,
+             daysSinceExposureStart = .data$indexDate - .data$exposureStartDate,
+             daysSinceExposureEnd = .data$indexDate - .data$exposureEndDate) %>%
+      filter(.data$daysSinceExposureStart >= 0) %>%
+      select(.data$rowId, .data$exposureId, .data$daysPriorObservation, .data$daysSinceExposureStart, .data$daysSinceExposureEnd)
+
+    # # Need to find observation period start date per rowId:
+    #     nestingCohorts <- merge(ff::as.ram(nestingCohorts), caseControls[, c("personId", "indexDate", "rowId")])
+    #     nestingCohorts <- nestingCohorts[nestingCohorts$indexDate >= nestingCohorts$observationPeriodStartDate, ]
+    #     nestingCohorts <- aggregate(observationPeriodStartDate ~ rowId, nestingCohorts, max)
+#
+#         # Construct exposure object:
+#         exposure <- selectExposures[idx, ]
+#         exposure <- merge(ff::as.ram(exposure), caseControls[, c("personId", "indexDate", "rowId")])
+#         exposure <- merge(exposure, nestingCohorts)
+#         exposure$daysPriorObservation <- exposure$exposureStartDate - exposure$observationPeriodStartDate
+#         exposure$daysSinceExposureStart <- exposure$indexDate - exposure$exposureStartDate
+#         exposure$daysSinceExposureEnd <- exposure$indexDate - exposure$exposureEndDate
+#         exposure <- exposure[exposure$daysSinceExposureStart >= 0, ]
+#         exposure <- exposure[, c("rowId", "exposureId", "daysPriorObservation", "daysSinceExposureStart", "daysSinceExposureEnd")]
+
     result <- list(caseControls = caseControls,
                    exposure = exposure,
                    metaData = attr(caseControls, "metaData"))
@@ -127,7 +148,7 @@ getDbExposureData <- function(caseControls,
       tableName <- paste(oracleTempSchema, paste(sample(letters, 20), collapse = ""), sep = ".")
       DatabaseConnector::insertTable(connection = connection,
                                      tableName = tableName,
-                                     data = data,
+                                     data = as.data.frame(data),
                                      dropTableIfExists = TRUE,
                                      createTable = TRUE,
                                      tempTable = FALSE,
@@ -166,13 +187,12 @@ getDbExposureData <- function(caseControls,
                                                      exposure_database_schema = exposureDatabaseSchema,
                                                      exposure_table = exposureTable,
                                                      exposure_ids = exposureIds)
-    exposure <- DatabaseConnector::querySql(connection, renderedSql)
-    colnames(exposure) <- SqlRender::snakeCaseToCamelCase(colnames(exposure))
+    exposure <- DatabaseConnector::querySql(connection, renderedSql, snakeCaseToCamelCase = TRUE)
     delta <- Sys.time() - start
     ParallelLogger::logInfo(paste("Loading took", signif(delta, 3), attr(delta, "units")))
 
     if (!is.null(covariateSettings)) {
-      covariates <- FeatureExtraction::getDbCovariateData(connection = connection,
+      covariateData <- FeatureExtraction::getDbCovariateData(connection = connection,
                                                           oracleTempSchema = oracleTempSchema,
                                                           cdmDatabaseSchema = cdmDatabaseSchema,
                                                           cdmVersion = 5,
@@ -192,10 +212,9 @@ getDbExposureData <- function(caseControls,
                                                                                      "metaData"))
     attr(result$caseControls, "metaData") <- NULL
     if (!is.null(covariateSettings)) {
-      result$covariates <- covariates$covariates
-      result$covariateRef <- covariates$covariateRef
+      result$covariateData <- covariateData
       result$metaData$hasCovariates <- TRUE
-      result$metaData$covariateMetaData <- covariates$metaData
+      result$metaData$covariateMetaData <- attr(covariateData, "metaData")
     } else {
       result$metaData$hasCovariates <- FALSE
     }
@@ -228,16 +247,13 @@ saveCaseControlsExposure <- function(caseControlsExposure, folder) {
   if (class(caseControlsExposure) != "caseControlsExposure")
     stop("Data not of class caseControlsExposure")
 
-  if (caseControlsExposure$metaData$hasCovariates) {
-    covariates <- caseControlsExposure$covariates
-    covariateRef <- caseControlsExposure$covariateRef
-    ffbase::save.ffdf(covariates, covariateRef, dir = folder, clone = TRUE)
-  } else {
-    dir.create(folder)
-  }
+  dir.create(folder)
   saveRDS(caseControlsExposure$caseControls, file = file.path(folder, "caseControls.rds"))
   saveRDS(caseControlsExposure$exposure, file = file.path(folder, "exposure.rds"))
   saveRDS(caseControlsExposure$metaData, file = file.path(folder, "metaData.rds"))
+  if (caseControlsExposure$metaData$hasCovariates) {
+    FeatureExtraction::saveCovariateData(caseControlsExposure$covariateData, file.path(folder, "covariateData.zip"))
+  }
   invisible(TRUE)
 }
 
@@ -268,15 +284,7 @@ loadCaseControlsExposure <- function(folder, readOnly = TRUE) {
   metaData <- readRDS(file.path(folder, "metaData.rds"))
   result <- list(caseControls = caseControls, exposure = exposure, metaData = metaData)
   if (result$metaData$hasCovariates) {
-    temp <- setwd(folder)
-    absolutePath <- setwd(temp)
-    e <- new.env()
-    ffbase::load.ffdf(absolutePath, e)
-    result$covariates <- get("covariates", envir = e)
-    result$covariateRef <- get("covariateRef", envir = e)
-    open(result$covariates, readonly = readOnly)
-    open(result$covariateRef, readonly = readOnly)
-    rm(e)
+    result$covariateData <- FeatureExtraction::loadCovariateData(file.path(folder, "covariateData.zip"))
   }
   class(result) <- "caseControlsExposure"
   return(result)

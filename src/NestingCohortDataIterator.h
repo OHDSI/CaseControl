@@ -22,7 +22,7 @@
 #define NESTINGCOHORTDATAITERATOR_H_
 
 #include <Rcpp.h>
-#include "FfdfIterator.h"
+#include "AndromedaTableIterator.h"
 
 using namespace Rcpp;
 
@@ -59,9 +59,9 @@ public:
   NestingCohortData next();
 private:
   void check(const List& list, const char* name);
-  FfdfIterator nestingCohortsIterator;
-  FfdfIterator casesIterator;
-  FfdfIterator visitsIterator;
+  AndromedaTableIterator nestingCohortsIterator;
+  AndromedaTableIterator casesIterator;
+  AndromedaTableIterator visitsIterator;
   NumericVector nestingCohortsNestingCohortId;
   NumericVector nestingCohortsPersonId;
   NumericVector nestingCohortsStartDate;

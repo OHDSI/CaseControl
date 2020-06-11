@@ -142,8 +142,9 @@ selectControls <- function(caseData,
     stop("The controlSelectionCriteria argument must be either a matchingCriteria or a samplingCriteria object.")
 
   matching <- (class(controlSelectionCriteria) == "matchingCriteria")
+  metaData <- attr(caseData, "metaData")
   if (matching) {
-    if (controlSelectionCriteria$matchOnVisitDate && !caseData$metaData$hasVisits)
+    if (controlSelectionCriteria$matchOnVisitDate && !metaData$hasVisits)
       stop("Cannot match on visits because no visit data was loaded. Please rerun getDbCaseData with getVisits = TRUE")
     if (controlSelectionCriteria$matchOnProvider && controlSelectionCriteria$matchOnCareSite)
       stop("Cannot match on both provider and care site")
@@ -155,28 +156,45 @@ selectControls <- function(caseData,
 
   start <- Sys.time()
   ParallelLogger::logInfo("Selecting up to ", controlSelectionCriteria$controlsPerCase, " controls per case for outcome ", outcomeId)
-  ParallelLogger::logDebug("Case data object has ", ffbase::sum.ff(caseData$cases$outcomeId == outcomeId), " cases with outcomeId ", outcomeId)
-  idx <- caseData$cases$outcomeId == outcomeId
-  if (ffbase::any.ff(idx, na.rm = TRUE)) {
-    cases <- ff::as.ram(caseData$cases[idx, c("nestingCohortId", "indexDate")])
-    cases <- cases[order(cases$nestingCohortId), ]
-    cases <- ff::as.ffdf(cases)
+  cases <- caseData$cases %>%
+    filter(.data$outcomeId == !!outcomeId) %>%
+    arrange(.data$nestingCohortId) %>%
+    select(.data$nestingCohortId, .data$indexDate)
 
-    nestingCohorts <- caseData$nestingCohorts
-    rownames(nestingCohorts) <- NULL  #Needs to be null or the ordering of ffdf will fail
-    nestingCohorts <- nestingCohorts[ff::ffdforder(nestingCohorts[c("nestingCohortId")]), ]
+  eventCount <- cases %>%
+    count() %>%
+    pull()
+  caseCount <- cases %>%
+    summarise(n_distinct(.data$nestingCohortId)) %>%
+    pull()
+  ParallelLogger::logDebug("Case data object has ", eventCount, " events with outcomeId ", outcomeId)
+  if (eventCount > 0) {
+    nestingCohorts <- caseData$nestingCohorts %>%
+      arrange(.data$nestingCohortId)
 
     if (matching) {
-      if (controlSelectionCriteria$matchOnVisitDate && caseData$metaData$hasVisits) {
-        visits <- caseData$visits
-        if (!Cyclops::isSorted(visits, c("nestingCohortId", "visitStartDate"))) {
-          ParallelLogger::logInfo("- Sorting visits")
-          rownames(visits) <- NULL  #Needs to be null or the ordering of ffdf will fail
-          visits <- visits[ff::ffdforder(visits[c("nestingCohortId", "visitStartDate")]), ]
-        }
+      # Cannot iterate over multiple Andromeda tables simultaneously, so move smaller tables to
+      # their own temp Andromeda.
+      casesAndromeda <- Andromeda::andromeda()
+      casesAndromeda$cases <- cases
+      cases <- casesAndromeda$cases
+      on.exit(close(casesAndromeda))
+
+      if (controlSelectionCriteria$matchOnVisitDate && metaData$hasVisits) {
+        visits <- caseData$visits %>%
+          arrange(.data$nestingCohortId, .data$visitStartDate)
+
+        nestingCohortAndromeda <- Andromeda::andromeda()
+        nestingCohortAndromeda$nestingCohorts <- nestingCohorts
+        nestingCohorts <- nestingCohortAndromeda$nestingCohorts
+
+        on.exit(close(nestingCohortAndromeda), add = TRUE)
       } else {
-        # Use one dummy visit so code won't break:
-        visits <- ff::as.ffdf(data.frame(nestingCohortId = -1, visitStartDate = "1900-01-01"))
+        # Create a visits table with 1 dummy row:
+        visitAndromeda <- Andromeda::andromeda()
+        visitAndromeda$visits <- tibble(nestingCohortId = -1, visitStartDate = "1900-01-01")
+        visits <- visitAndromeda$visits
+        on.exit(close(visitAndromeda), add = TRUE)
       }
     }
     if (missing(minAge) || is.null(minAge)) {
@@ -213,51 +231,34 @@ selectControls <- function(caseData,
                                              maxAgeDays,
                                              controlSelectionCriteria$seed)
       caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
+      caseControls <- as_tibble(caseControls)
     } else {
       # Sampling
-      caseControls <- data.frame()
-      controls <- nestingCohorts
-      controls$indexDate <- ff::as.ff(sample(cases$indexDate, size = nrow(nestingCohorts), replace = TRUE))
-      idx <- controls$indexDate >= controls$startDate + washoutPeriod &
-        controls$indexDate <= controls$endDate
-      if (ffbase::any.ff(idx)) {
-        controls <- controls[idx, ]
-        cases <- ff::as.ram(merge(cases, nestingCohorts))
-        controls <- merge(controls, ff::as.ffdf(data.frame(personId = cases$personId,
-                                                           caseIndexDate = cases$indexDate)), all.x = TRUE)
-        idx <- ffbase::is.na.ff(controls$caseIndexDate) | (controls$caseIndexDate > controls$indexDate)
-        if (ffbase::any.ff(idx)) {
-          controls <- controls[idx, ]
-          maxSampleSize <- controlSelectionCriteria$controlsPerCase * nrow(cases)
-          if (maxSampleSize < nrow(controls)) {
-            controls <- controls[sample.int(nrow(controls), maxSampleSize, replace = FALSE), ]
-          }
-          controls <- ff::as.ram(controls)
-          controls$isCase <- FALSE
-          cases$isCase <- TRUE
-          caseControls <- rbind(controls[, c("personId", "indexDate", "isCase")],
-                                cases[, c("personId", "indexDate", "isCase")])
+      cases <- cases %>%
+        inner_join(select(caseData$nestingCohorts, .data$nestingCohortId, .data$personId), by = "nestingCohortId") %>%
+        collect()
+      controls <- caseData$nestingCohorts %>%
+        collect()
+      controls$indexDate <- sample(cases$indexDate, size = nrow(controls), replace = TRUE)
+      controls <- controls %>%
+        filter(.data$indexDate >= .data$startDate + washoutPeriod &
+                 .data$indexDate <= .data$endDate)
 
-        } else {
-          warning("No controls left after removing cases.")
-        }
-      } else {
-        warning("No controls have (random) index date in their observation time.")
+      controls <- controls %>%
+        left_join(select(cases, .data$personId, caseIndexDate = .data$indexDate), by = "personId") %>%
+        filter(is.na(.data$caseIndexDate) | .data$caseIndexDate > .data$indexDate)
+
+      maxSampleSize <- controlSelectionCriteria$controlsPerCase * nrow(cases)
+      if (maxSampleSize < nrow(controls)) {
+        controls <- controls[sample.int(nrow(controls), maxSampleSize, replace = FALSE), ]
       }
+      controls$isCase <- FALSE
+      cases$isCase <- TRUE
+      caseControls <- bind_rows(controls[, c("personId", "indexDate", "isCase")],
+                                cases[, c("personId", "indexDate", "isCase")])
     }
     delta <- Sys.time() - start
     ParallelLogger::logInfo(paste("Selection took", signif(delta, 3), attr(delta, "units")))
-
-    # Create counts
-    cases <- caseData$cases[caseData$cases$outcomeId == outcomeId, "nestingCohortId"]
-    eventCount <- length(cases)
-    if (eventCount == 0) {
-      caseCount <- 0
-    } else {
-      t <- is.na(ffbase::ffmatch(caseData$nestingCohorts$nestingCohortId, ff::as.ff(cases)))
-      caseCount <- length(ffbase::unique.ff(caseData$nestingCohorts[ffbase::ffwhich(t, t == FALSE),
-                                                                    "personId"]))
-    }
   } else {
     caseCount <- 0
     eventCount <- 0

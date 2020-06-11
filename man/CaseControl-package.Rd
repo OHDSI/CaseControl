@@ -11,6 +11,7 @@ CaseControl is an R package for performing (nested) matched case-control analyse
 \seealso{
 Useful links:
 \itemize{
+  \item \url{http://ohdsi.github.io/CaseControl}
   \item \url{https://github.com/OHDSI/CaseControl}
   \item Report bugs at \url{https://github.com/OHDSI/CaseControl/issues}
 }
