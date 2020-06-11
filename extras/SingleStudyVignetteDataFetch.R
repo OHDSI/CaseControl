@@ -158,7 +158,7 @@ caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExpo
 
 
 
-head(caseControlData)
+caseControlData
 
 fit <- fitCaseControlModel(caseControlData,
                            useCovariates = TRUE,

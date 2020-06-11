@@ -1,10 +1,10 @@
 library("testthat")
 
 test_that("Washout period for cases", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1),
-                                      outcomeId = c(1),
-                                      indexDate = as.Date(c("2000-07-01"))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1),
+                                                  outcomeId = c(1),
+                                                  indexDate = as.Date(c("2000-07-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1),
                                                            personId = c(1),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01")),
@@ -12,7 +12,7 @@ test_that("Washout period for cases", {
                                                            dateOfBirth = as.Date(c("2000-01-01")),
                                                            genderConceptId = c(8532),
                                                            careSiteId = c(1),
-                                                           providerId = c(1))))
+                                                           providerId = c(1)))
 
   # Case after washout period:
   cc <- selectControls(caseData = caseData,
@@ -27,13 +27,14 @@ test_that("Washout period for cases", {
                        washoutPeriod = 365,
                        controlSelectionCriteria = createMatchingCriteria(removedUnmatchedCases = FALSE))
   expect_equal(nrow(cc), 0)
+  close(caseData)
 })
 
 test_that("Washout period for controls", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1),
-                                      outcomeId = c(1),
-                                      indexDate = as.Date(c("2001-01-01"))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1),
+                                                  outcomeId = c(1),
+                                                  indexDate = as.Date(c("2001-01-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-11-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-11-01")),
@@ -41,7 +42,7 @@ test_that("Washout period for controls", {
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
                                                            careSiteId = c(1, 1, 1),
-                                                           providerId = c(1, 1, 1))))
+                                                           providerId = c(1, 1, 1)))
 
   # One control after washout period:
   cc <- selectControls(caseData = caseData,
@@ -57,13 +58,14 @@ test_that("Washout period for controls", {
                        washoutPeriod = 0,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2))
   expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
+  close(caseData)
 })
 
 test_that("Match on index date", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1),
-                                      outcomeId = c(1),
-                                      indexDate = as.Date(c("2001-01-01"))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1),
+                                                  outcomeId = c(1),
+                                                  indexDate = as.Date(c("2001-01-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2002-01-01", "2000-01-01")),
@@ -71,19 +73,20 @@ test_that("Match on index date", {
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
                                                            careSiteId = c(1, 1, 1),
-                                                           providerId = c(1, 1, 1))))
+                                                           providerId = c(1, 1, 1)))
 
   # One control with overlapping cohort time:
   cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180)
   expect_equal(cc$personId, c(1, 3))
   expect_equal(cc$indexDate, as.Date(c("2001-01-01", "2001-01-01")))
+  close(caseData)
 })
 
 test_that("Match on gender", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1),
-                                      outcomeId = c(1),
-                                      indexDate = as.Date(c("2001-01-01"))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1),
+                                                  outcomeId = c(1),
+                                                  indexDate = as.Date(c("2001-01-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
@@ -91,7 +94,7 @@ test_that("Match on gender", {
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8507),
                                                            careSiteId = c(1, 1, 1),
-                                                           providerId = c(1, 1, 1))))
+                                                           providerId = c(1, 1, 1)))
 
   # Two control without matching on gender:
   cc <- selectControls(caseData = caseData,
@@ -106,13 +109,14 @@ test_that("Match on gender", {
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnGender = TRUE))
   expect_equal(cc$personId, c(1, 2))
+  close(caseData)
 })
 
 test_that("Match on age", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1),
-                                      outcomeId = c(1),
-                                      indexDate = as.Date(c("2001-01-01"))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1),
+                                                  outcomeId = c(1),
+                                                  indexDate = as.Date(c("2001-01-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
@@ -120,7 +124,7 @@ test_that("Match on age", {
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "1990-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
                                                            careSiteId = c(1, 1, 1),
-                                                           providerId = c(1, 1, 1))))
+                                                           providerId = c(1, 1, 1)))
 
   # Two control without matching on age:
   cc <- selectControls(caseData = caseData,
@@ -135,13 +139,14 @@ test_that("Match on age", {
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnAge = TRUE, ageCaliper = 2))
   expect_equal(cc$personId, c(1, 2))
+  close(caseData)
 })
 
 test_that("Match on provider", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1),
-                                      outcomeId = c(1),
-                                      indexDate = as.Date(c("2001-01-01"))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1),
+                                                  outcomeId = c(1),
+                                                  indexDate = as.Date(c("2001-01-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
@@ -149,7 +154,7 @@ test_that("Match on provider", {
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
                                                            careSiteId = c(1, 1, 1),
-                                                           providerId = c(1, 2, 1))))
+                                                           providerId = c(1, 2, 1)))
 
   # Two control without matching on provider:
   cc <- selectControls(caseData = caseData,
@@ -164,13 +169,14 @@ test_that("Match on provider", {
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnProvider = TRUE))
   expect_equal(cc$personId, c(1, 3))
+  close(caseData)
 })
 
 test_that("Match on care site", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1),
-                                      outcomeId = c(1),
-                                      indexDate = as.Date(c("2001-01-01"))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1),
+                                                  outcomeId = c(1),
+                                                  indexDate = as.Date(c("2001-01-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
@@ -178,7 +184,7 @@ test_that("Match on care site", {
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
                                                            careSiteId = c(1, 2, 1),
-                                                           providerId = c(1, 1, 1))))
+                                                           providerId = c(1, 1, 1)))
 
   # Two control without matching on care site:
   cc <- selectControls(caseData = caseData,
@@ -193,13 +199,14 @@ test_that("Match on care site", {
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnCareSite = TRUE))
   expect_equal(cc$personId, c(1, 3))
+  close(caseData)
 })
 
 test_that("Match on visit", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1),
-                                      outcomeId = c(1),
-                                      indexDate = as.Date(c("2001-01-01"))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1),
+                                                  outcomeId = c(1),
+                                                  indexDate = as.Date(c("2001-01-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
@@ -207,10 +214,10 @@ test_that("Match on visit", {
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
                                                            careSiteId = c(1, 1, 1),
-                                                           providerId = c(1, 2, 1))),
-                   visits = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
-                                                   visitStartDate = as.Date(c("2001-01-01", "2001-01-02", "2001-03-01")))),
-                   metaData = list(hasVisits = TRUE))
+                                                           providerId = c(1, 2, 1)),
+                                   visits = tibble(nestingCohortId = c(1, 2, 3),
+                                                   visitStartDate = as.Date(c("2001-01-01", "2001-01-02", "2001-03-01"))))
+  attr(caseData, "metaData") <- list(hasVisits = TRUE)
 
   # Two control without matching on visit:
   cc <- selectControls(caseData = caseData,
@@ -226,13 +233,14 @@ test_that("Match on visit", {
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnVisitDate = TRUE, visitDateCaliper = 30))
   expect_equal(cc$personId, c(1, 2))
   expect_equal(cc$indexDate, as.Date(c("2001-01-01", "2001-01-02")))
+  close(caseData)
 })
 
 test_that("Match on time in cohort", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1),
-                                      outcomeId = c(1),
-                                      indexDate = as.Date(c("2001-01-01"))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1),
+                                                  outcomeId = c(1),
+                                                  indexDate = as.Date(c("2001-01-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("1999-01-01", "1999-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "1999-01-01", "2000-01-01")),
@@ -240,8 +248,8 @@ test_that("Match on time in cohort", {
                                                            dateOfBirth = as.Date(c("2000-01-01", "1999-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
                                                            careSiteId = c(1, 1, 1),
-                                                           providerId = c(1, 2, 1))),
-                   metaData = list(hasVisits = FALSE))
+                                                           providerId = c(1, 2, 1)))
+  attr(caseData, "metaData") <- list(hasVisits = FALSE)
 
   # Two control without matching on time in cohort:
   cc <- selectControls(caseData = caseData,
@@ -263,13 +271,14 @@ test_that("Match on time in cohort", {
                                                                          matchOnTimeInCohort = TRUE,
                                                                          daysInCohortCaliper = 30))
   expect_equal(cc$personId, c(1, 3))
+  close(caseData)
 })
 
 test_that("Restrict on age", {
-  caseData <- list(cases = data.frame(nestingCohortId = c(1),
-                                      outcomeId = c(1),
-                                      indexDate = as.Date(c("2001-01-01"))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1),
+                                                  outcomeId = c(1),
+                                                  indexDate = as.Date(c("2001-01-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
@@ -277,7 +286,7 @@ test_that("Restrict on age", {
                                                            dateOfBirth = as.Date(c("1995-01-01", "1995-01-01", "1990-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
                                                            careSiteId = c(1, 1, 1),
-                                                           providerId = c(1, 1, 1))))
+                                                           providerId = c(1, 1, 1)))
 
   # One case, one control without retricting on age:
   cc <- selectControls(caseData = caseData,
@@ -294,14 +303,15 @@ test_that("Restrict on age", {
                        minAge = 8,
                        maxAge = 12)
   expect_equal(length(cc$personId), 0)
+  close(caseData)
 })
 
 
 test_that("Sampling with replacement", {
-  caseData <- list(cases = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2),
+  caseData <- Andromeda::andromeda(cases = tibble(nestingCohortId = c(1, 2),
                                                   outcomeId = c(1, 1),
-                                                  indexDate = as.Date(c("2001-01-01", "2001-01-01")))),
-                   nestingCohorts = ff::as.ffdf(data.frame(nestingCohortId = c(1, 2, 3),
+                                                  indexDate = as.Date(c("2001-01-01", "2001-01-01"))),
+                                   nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
                                                            personId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
@@ -309,10 +319,11 @@ test_that("Sampling with replacement", {
                                                            dateOfBirth = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            genderConceptId = c(8532, 8532, 8532),
                                                            careSiteId = c(1, 1, 1),
-                                                           providerId = c(1, 1, 1))))
+                                                           providerId = c(1, 1, 1)))
 
   # Control should be used twice:
   cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180)
   expect_equal(cc$personId, c(1, 3, 2, 3))
+  close(caseData)
 })
 

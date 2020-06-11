@@ -148,10 +148,17 @@ selectControls <- function(caseData,
       stop("Cannot match on visits because no visit data was loaded. Please rerun getDbCaseData with getVisits = TRUE")
     if (controlSelectionCriteria$matchOnProvider && controlSelectionCriteria$matchOnCareSite)
       stop("Cannot match on both provider and care site")
-    if (controlSelectionCriteria$matchOnProvider && ffbase::all.ff(ffbase::is.na.ff(caseData$nestingCohorts$providerId)))
-      stop("Cannot match on provider because no providers specified in the person table")
-    if (controlSelectionCriteria$matchOnCareSite && ffbase::all.ff(ffbase::is.na.ff(caseData$nestingCohorts$careSiteId)))
-      stop("Cannot match on care site because no care sites specified in the person table")
+
+    if (controlSelectionCriteria$matchOnProvider) {
+      validProviderIdCount <- caseData$nestingCohorts %>% summarise(sum(!is.na(.data$providerId), na.rm = TRUE)) %>% pull()
+      if (validProviderIdCount == 0)
+        stop("Cannot match on provider because no providers specified in the person table")
+    }
+    if (controlSelectionCriteria$matchOnCareSite) {
+      validCareSiteIdCount <- caseData$nestingCohorts %>% summarise(sum(!is.na(.data$careSiteId), na.rm = TRUE)) %>% pull()
+      if (validCareSiteIdCount == 0)
+        stop("Cannot match on care site because no care sites specified in the person table")
+    }
   }
 
   start <- Sys.time()
@@ -192,9 +199,9 @@ selectControls <- function(caseData,
       } else {
         # Create a visits table with 1 dummy row:
         visitAndromeda <- Andromeda::andromeda()
-        visitAndromeda$visits <- tibble(nestingCohortId = -1, visitStartDate = "1900-01-01")
+        visitAndromeda$visits <- tibble(nestingCohortId = -1, visitStartDate = as.Date("1900-01-01"))
         visits <- visitAndromeda$visits
-        on.exit(close(visitAndromeda), add = TRUE)
+        on.exit(suppressWarnings(close(visitAndromeda)), add = TRUE)
       }
     }
     if (missing(minAge) || is.null(minAge)) {

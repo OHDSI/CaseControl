@@ -1,7 +1,7 @@
 library("testthat")
 
 checkPower <- function(zAlpha, ccRatio, expPrevalence, nCases, or, power) {
-  alpha <- (1-pnorm(zAlpha))*2
+  alpha <- (1 - pnorm(zAlpha))*2
   nControls <- nCases*ccRatio
   exposedControls <- round(expPrevalence*nControls)
   caseControlData <- data.frame(isCase = c(rep(1, nCases), rep(0, nControls)),
@@ -45,3 +45,4 @@ test_that("power calculation", {
 
   checkPower(zAlpha, ccRatio, expPrevalence, nCases, or, power)
 })
+
