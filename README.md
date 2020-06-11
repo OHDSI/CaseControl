@@ -16,7 +16,7 @@ Features
 - Nesting in a cohort of interest (e.g. people with a particular prior condition)
 - Matching on age, gender, provider, time in cohort, and/or visit
 - Sampling of controls per case
-- Fitting outcome models using conditional logisitc regression
+- Fitting outcome models using conditional logistic regression
 
 Technology
 ==========

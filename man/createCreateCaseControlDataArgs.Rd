@@ -14,11 +14,11 @@ createCreateCaseControlDataArgs(
 \arguments{
 \item{firstExposureOnly}{Should only the first exposure per subject be included?}
 
-\item{riskWindowStart}{The start of the risk window (in days) relative to the index
-date.This number should be non-positive.}
+\item{riskWindowStart}{The start of the risk window (in days) relative to the index date.
+This number should be non-positive.}
 
-\item{riskWindowEnd}{The end of the risk window (in days) relative to the index date.
-Thisnumber should be non-positive.}
+\item{riskWindowEnd}{The end of the risk window (in days) relative to the index date. This
+number should be non-positive.}
 
 \item{exposureWashoutPeriod}{Minimum required numbers of days of observation for inclusion of an
 exposure.}

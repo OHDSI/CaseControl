@@ -348,7 +348,7 @@ ccAnalysisList2 <- list(ccAnalysis1A, ccAnalysis1B)
 
 In this example, the first analysis (analysisId = 1) will use cohort definition 1 as outcome, whilst the second analysis analysis (analysisId = 2) will use cohort definition 11 as outcome.
 
-The same mechanism can be used to specifiy types for the exposureId and nestingCohortId.
+The same mechanism can be used to specify types for the exposureId and nestingCohortId.
 
 # Executing multiple analyses
 
@@ -390,7 +390,7 @@ ccModelFile <- result$modelFile[result$exposureId == 1124300 &
                                   result$outcomeId == 1 &
                                   result$analysisId == 1]
 ccModel <- readRDS(file.path(outputFolder, ccModelFile))
-summary(ccModel)
+ccModel
 ```
 ```{r echo=FALSE,message=FALSE}
 if (file.exists("s:/temp/vignetteCaseControl2/outcomeModelReference.rds")) {
@@ -399,7 +399,7 @@ if (file.exists("s:/temp/vignetteCaseControl2/outcomeModelReference.rds")) {
                                     result$outcomeId == 1 &
                                     result$analysisId == 1]
   ccModel <- readRDS(file.path(outputFolder, ccModelFile))
-  summary(ccModel)
+  ccModel
 }
 ```
 

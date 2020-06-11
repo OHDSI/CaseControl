@@ -20,12 +20,12 @@
 library(SqlRender)
 library(DatabaseConnector)
 library(CaseControl)
-options(fftempdir = "s:/fftemp")
+options(andromedaTempFolder = "s:/andromedaTemp")
 
 pw <- NULL
 dbms <- "pdw"
 user <- NULL
-cdmDatabaseSchema <- "CDM_Truven_MDCD_V780.dbo"
+cdmDatabaseSchema <- "CDM_IBM_MDCR_V1192.dbo"
 cohortDatabaseSchema <- "scratch.dbo"
 cohortTable <- "mschuemi_cc_vignette"
 oracleTempSchema <- NULL
@@ -220,7 +220,6 @@ result <- runCcAnalyses(connectionDetails = connectionDetails,
                         outputFolder = outputFolder,
                         exposureOutcomeNestingCohortList = exposureOutcomeNcList,
                         ccAnalysisList = ccAnalysisList,
-                        compressCaseDataFiles = TRUE,
                         getDbCaseDataThreads = 1,
                         selectControlsThreads = 4,
                         getDbExposureDataThreads = 1,

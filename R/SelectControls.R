@@ -71,7 +71,7 @@ createMatchingCriteria <- function(controlsPerCase = 1,
 #' Create sampling criteria
 #'
 #' @description
-#' Criteria to use when controls are simlpy sampled from the (nesting) population.
+#' Criteria to use when controls are simply sampled from the (nesting) population.
 #'
 #' @param controlsPerCase       Maximum number of controls to select per case.
 #' @param seed                    The number generator seed. A null value sets seed via \code{\link{Sys.time}}.
@@ -263,6 +263,7 @@ selectControls <- function(caseData,
       cases$isCase <- TRUE
       caseControls <- bind_rows(controls[, c("personId", "indexDate", "isCase")],
                                 cases[, c("personId", "indexDate", "isCase")])
+      caseControls$indexDate <- Andromeda::restoreDate(caseControls$indexDate)
     }
     delta <- Sys.time() - start
     ParallelLogger::logInfo(paste("Selection took", signif(delta, 3), attr(delta, "units")))

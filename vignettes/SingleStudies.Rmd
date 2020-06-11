@@ -248,7 +248,7 @@ if (file.exists("s:/temp/vignetteCaseControl")) {
 }
 ```
 
-An alternative to selecting invidually matched controls is to create a sample controls, controls that are not individually linked to cases. This can be done using the `createSamplingCriteria` instead of the `createMatchingCriteria` function. For example:
+An alternative to selecting individually matched controls is to create a sample controls, controls that are not individually linked to cases. This can be done using the `createSamplingCriteria` instead of the `createMatchingCriteria` function. For example:
 
 ```{r eval=FALSE}
 samplingCriteria <- createSamplingCriteria(controlsPerCase = 1)
@@ -298,7 +298,7 @@ caseControlData <- createCaseControlData(caseControlsExposure = caseControlsExpo
                                          riskWindowEnd = 0)
 ```
 
-Here we specify we are intested in all exposures, not just the first one, and that the exposure should overlap with the index date (the risk window starts and ends on day 0, the index date). The `caseControlData` object is a data frame with five columns:
+Here we specify we are interested in all exposures, not just the first one, and that the exposure should overlap with the index date (the risk window starts and ends on day 0, the index date). The `caseControlData` object is a data frame with five columns:
 			  
 ```{r echo=TRUE,message=FALSE,eval=FALSE}
 head(caseControlData)
@@ -314,7 +314,7 @@ data.frame(personId = c(3,123,345,6,234,567),
 
 # Fitting the model
 
-We can now fit the model. In case we used matchign to select controls this will be a logistic regression conditioned on the matched sets. Else it will be an unconditioned logistic regression.
+We can now fit the model. In case we used matching to select controls this will be a logistic regression conditioned on the matched sets. Else it will be an unconditioned logistic regression.
 
 ```{r eval=FALSE}
 fit <- fitCaseControlModel(caseControlData,

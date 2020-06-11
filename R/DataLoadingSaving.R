@@ -31,7 +31,7 @@
 #'                                            \code{DatabaseConnector} package.
 #' @param cdmDatabaseSchema                   The name of the database schema that contains the OMOP
 #'                                            CDM instance.  Requires read permissions to this
-#'                                            database. On SQL Server, this should specifiy both the
+#'                                            database. On SQL Server, this should specify both the
 #'                                            database and the schema, so for example
 #'                                            'cdm_instance.dbo'.
 #' @param oracleTempSchema                    A schema where temp tables can be created in Oracle.
@@ -294,7 +294,7 @@ getDbCaseData <- function(connectionDetails,
 #'                               \code{DatabaseConnector} package.
 #' @param cohortDatabaseSchema   The name of the database schema where the data will be written.
 #'                               Requires write permissions to this database. On SQL Server, this
-#'                               should specifiy both the database and the schema, so for example
+#'                               should specify both the database and the schema, so for example
 #'                               'cdm_instance.dbo'.
 #' @param cohortTable            The name of the table in the database schema where the data will be
 #'                               written.

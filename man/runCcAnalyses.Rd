@@ -18,7 +18,6 @@ runCcAnalyses(
   ccAnalysisList,
   exposureOutcomeNestingCohortList,
   prefetchExposureData = FALSE,
-  compressCaseDataFiles = FALSE,
   getDbCaseDataThreads = 1,
   selectControlsThreads = 1,
   getDbExposureDataThreads = 1,
@@ -34,7 +33,7 @@ the function \code{createConnectionDetails} in the
 
 \item{cdmDatabaseSchema}{The name of the database schema that contains the OMOP CDM
 instance.  Requires read permissions to this database. On
-SQL Server, this should specifiy both the database and the
+SQL Server, this should specify both the database and the
 schema, so for example 'cdm_instance.dbo'.}
 
 \item{oracleTempSchema}{A schema where temp tables can be created in Oracle.}
@@ -84,15 +83,13 @@ when there are many outcomes but only few exposures. Prefetching
 does not speed up performance when covariates also need to be
 constructed.}
 
-\item{compressCaseDataFiles}{Should compression be used when saving?}
-
 \item{getDbCaseDataThreads}{The number of parallel threads to use for building the
 caseData objects.}
 
 \item{selectControlsThreads}{The number of parallel threads to use for selecting
 controls.}
 
-\item{getDbExposureDataThreads}{The number of parallel threads to use for fetchign data on
+\item{getDbExposureDataThreads}{The number of parallel threads to use for fetching data on
 exposures for cases and controls.}
 
 \item{createCaseControlDataThreads}{The number of parallel threads to use for creating case

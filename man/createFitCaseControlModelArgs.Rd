@@ -20,11 +20,11 @@ createFitCaseControlModelArgs(
 
 \item{includeCovariateIds}{Include only these covariates in the model.}
 
-\item{prior}{The prior used to fit the model. SeecreatePrior for details.}
+\item{prior}{The prior used to fit the model. See createPrior for details.}
 
-\item{control}{The control object used to control the cross-validation used
-todetermine the hyperparameters of the prior (if applicable).
-SeecreateControl for details.}
+\item{control}{The control object used to control the cross-validation used to
+determine the hyperparameters of the prior (if applicable). See
+createControl for details.}
 }
 \description{
 Create a parameter object for the function fitCaseControlModel

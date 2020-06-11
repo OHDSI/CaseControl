@@ -33,7 +33,7 @@
 #'                                           \code{DatabaseConnector} package.
 #' @param cdmDatabaseSchema                  The name of the database schema that contains the OMOP CDM
 #'                                           instance.  Requires read permissions to this database. On
-#'                                           SQL Server, this should specifiy both the database and the
+#'                                           SQL Server, this should specify both the database and the
 #'                                           schema, so for example 'cdm_instance.dbo'.
 #' @param oracleTempSchema                   A schema where temp tables can be created in Oracle.
 #' @param outcomeDatabaseSchema              The name of the database schema that is the location where
@@ -71,12 +71,11 @@
 #'                                           when there are many outcomes but only few exposures. Prefetching
 #'                                           does not speed up performance when covariates also need to be
 #'                                           constructed.
-#' @param compressCaseDataFiles              Should compression be used when saving?
 #' @param getDbCaseDataThreads               The number of parallel threads to use for building the
 #'                                           caseData objects.
 #' @param selectControlsThreads              The number of parallel threads to use for selecting
 #'                                           controls.
-#' @param getDbExposureDataThreads           The number of parallel threads to use for fetchign data on
+#' @param getDbExposureDataThreads           The number of parallel threads to use for fetching data on
 #'                                           exposures for cases and controls.
 #' @param createCaseControlDataThreads       The number of parallel threads to use for creating case
 #'                                           and control data including exposure status indicators
@@ -100,7 +99,6 @@ runCcAnalyses <- function(connectionDetails,
                           ccAnalysisList,
                           exposureOutcomeNestingCohortList,
                           prefetchExposureData = FALSE,
-                          compressCaseDataFiles = FALSE,
                           getDbCaseDataThreads = 1,
                           selectControlsThreads = 1,
                           getDbExposureDataThreads = 1,
@@ -111,9 +109,9 @@ runCcAnalyses <- function(connectionDetails,
                                                                                      "exposureOutcomeNestingCohort")
   for (ccAnalysis in ccAnalysisList) stopifnot(class(ccAnalysis) == "ccAnalysis")
   uniqueExposureOutcomeNcList <- unique(ParallelLogger::selectFromList(exposureOutcomeNestingCohortList,
-                                                                    c("exposureId",
-                                                                      "outcomeId",
-                                                                      "nestingCohortId")))
+                                                                       c("exposureId",
+                                                                         "outcomeId",
+                                                                         "nestingCohortId")))
   if (length(uniqueExposureOutcomeNcList) != length(exposureOutcomeNestingCohortList))
     stop("Duplicate exposure-outcome-nesting cohort combinations are not allowed")
   uniqueAnalysisIds <- unlist(unique(ParallelLogger::selectFromList(ccAnalysisList, "analysisId")))
@@ -145,7 +143,7 @@ runCcAnalyses <- function(connectionDetails,
 
   cdObjectsToCreate <- list()
   getDbCaseDataArgsList <- unique(ParallelLogger::selectFromList(ccAnalysisList,
-                                                              c("getDbCaseDataArgs")))
+                                                                 c("getDbCaseDataArgs")))
   for (d in 1:length(getDbCaseDataArgsList)) {
     getDbCaseDataArgs <- getDbCaseDataArgsList[[d]]
     analyses <- ParallelLogger::matchInList(ccAnalysisList, getDbCaseDataArgs)
@@ -186,7 +184,6 @@ runCcAnalyses <- function(connectionDetails,
             args$useObservationEndAsNestingEndDate <- FALSE
           }
           cdObjectsToCreate[[length(cdObjectsToCreate) + 1]] <- list(args = args,
-                                                                     compressCaseDataFiles = compressCaseDataFiles,
                                                                      cdFileName = file.path(outputFolder, cdFileName))
         }
       }
@@ -214,7 +211,6 @@ runCcAnalyses <- function(connectionDetails,
         }
         args <- append(args, getDbCaseDataArgs$getDbCaseDataArgs)
         cdObjectsToCreate[[length(cdObjectsToCreate) + 1]] <- list(args = args,
-                                                                   compressCaseDataFiles = compressCaseDataFiles,
                                                                    cdFileName = file.path(outputFolder, cdFileName))
       }
     }
@@ -222,7 +218,7 @@ runCcAnalyses <- function(connectionDetails,
 
   ccObjectsToCreate <- list()
   selectControlsArgsList <- unique(ParallelLogger::selectFromList(ccAnalysisList,
-                                                               c("selectControlsArgs")))
+                                                                  c("selectControlsArgs")))
   for (i in 1:length(selectControlsArgsList)) {
     selectControlsArgs <- selectControlsArgsList[[i]]
     analyses <- ParallelLogger::matchInList(ccAnalysisList, selectControlsArgs)
@@ -256,8 +252,8 @@ runCcAnalyses <- function(connectionDetails,
     for (ed in 1:length(edArgsList)) {
       edArgs <- edArgsList[[ed]]
       analysisIds <- unlist(unique(ParallelLogger::selectFromList(ParallelLogger::matchInList(ccAnalysisList,
-                                                                                        list(getDbExposureDataArgs = edArgs)),
-                                                               "analysisId")))
+                                                                                              list(getDbExposureDataArgs = edArgs)),
+                                                                  "analysisId")))
       idx <- outcomeReference$caseControlsFile == ccFilename & outcomeReference$analysisId %in%
         analysisIds
       exposureIds <- unique(outcomeReference$exposureId[idx])
@@ -293,8 +289,8 @@ runCcAnalyses <- function(connectionDetails,
     for (ccd in 1:length(ccdArgsList)) {
       ccdArgs <- ccdArgsList[[ccd]]
       analysisIds <- unlist(unique(ParallelLogger::selectFromList(ParallelLogger::matchInList(ccAnalysisList,
-                                                                                        list(createCaseControlDataArgs = ccdArgs)),
-                                                               "analysisId")))
+                                                                                              list(createCaseControlDataArgs = ccdArgs)),
+                                                                  "analysisId")))
       idx <- outcomeReference$exposureDataFile == edFilename & outcomeReference$analysisId %in%
         analysisIds
       exposureIds <- unique(outcomeReference$exposureId[idx])
@@ -353,7 +349,6 @@ runCcAnalyses <- function(connectionDetails,
   if (length(ccObjectsToCreate) != 0) {
     cluster <- ParallelLogger::makeCluster(selectControlsThreads)
     ParallelLogger::clusterRequire(cluster, "CaseControl")
-    ParallelLogger::clusterRequire(cluster, "ffbase")
     dummy <- ParallelLogger::clusterApply(cluster, ccObjectsToCreate, createCaseControlsObject)
     ParallelLogger::stopCluster(cluster)
   }
@@ -362,7 +357,6 @@ runCcAnalyses <- function(connectionDetails,
   if (length(edObjectsToCreate) != 0) {
     cluster <- ParallelLogger::makeCluster(getDbExposureDataThreads)
     ParallelLogger::clusterRequire(cluster, "CaseControl")
-    ParallelLogger::clusterRequire(cluster, "ffbase")
     dummy <- ParallelLogger::clusterApply(cluster, edObjectsToCreate, createExposureDataObject)
     ParallelLogger::stopCluster(cluster)
   }
@@ -371,7 +365,6 @@ runCcAnalyses <- function(connectionDetails,
   if (length(ccdObjectsToCreate) != 0) {
     cluster <- ParallelLogger::makeCluster(createCaseControlDataThreads)
     ParallelLogger::clusterRequire(cluster, "CaseControl")
-    ParallelLogger::clusterRequire(cluster, "ffbase")
     dummy <- ParallelLogger::clusterApply(cluster, ccdObjectsToCreate, createCaseControlDataObject)
     ParallelLogger::stopCluster(cluster)
   }
@@ -380,7 +373,6 @@ runCcAnalyses <- function(connectionDetails,
   if (length(modelObjectsToCreate) != 0) {
     cluster <- ParallelLogger::makeCluster(fitCaseControlModelThreads)
     ParallelLogger::clusterRequire(cluster, "CaseControl")
-    ParallelLogger::clusterRequire(cluster, "ffbase")
     dummy <- ParallelLogger::clusterApply(cluster, modelObjectsToCreate, createCaseControlModelObject)
     ParallelLogger::stopCluster(cluster)
   }
@@ -393,7 +385,7 @@ getCaseData <- function(caseDataFileName) {
   if (mget("caseDataFileName", envir = globalenv(), ifnotfound = "") == caseDataFileName) {
     caseData <- get("caseData", envir = globalenv())
   } else {
-    caseData <- loadCaseData(caseDataFileName, readOnly = TRUE)
+    caseData <- loadCaseData(caseDataFileName)
     assign("caseData", caseData, envir = globalenv())
     assign("caseDataFileName", caseDataFileName, envir = globalenv())
   }
@@ -402,7 +394,7 @@ getCaseData <- function(caseDataFileName) {
 
 createCaseDataObject <- function(params) {
   caseData <- do.call("getDbCaseData", params$args)
-  saveCaseData(caseData, params$cdFileName, compress = params$compressCaseDataFiles)
+  saveCaseData(caseData, params$cdFileName)
   return(NULL)
 }
 
@@ -422,6 +414,15 @@ createExposureDataObject <- function(params) {
     params$args$caseData <- caseData
   }
   exposureData <- do.call("getDbExposureData", params$args)
+  # exposureData <- getDbExposureData(caseControls = params$args$caseControls,
+  #                                   connectionDetails = params$args$connectionDetails,
+  #                                   oracleTempSchema = params$args$oracleTempSchema,
+  #                                   exposureDatabaseSchema = params$args$exposureDatabaseSchema,
+  #                                   exposureTable = params$args$exposureTable,
+  #                                   exposureIds = params$args$exposureIds,
+  #                                   cdmDatabaseSchema = params$args$cdmDatabaseSchema,
+  #                                   covariateSettings = params$args$covariateSettings,
+  #                                   caseData = params$args$caseData)
   saveCaseControlsExposure(exposureData, params$edFilename)
   return(NULL)
 }

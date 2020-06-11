@@ -38,7 +38,7 @@ setClass("CaseData", contains = "Andromeda")
 #'
 #' @param caseData   An object of type \code{CaseData} as generated using
 #'                        \code{\link{getDbCaseData}}.
-#' @param file            The name of the fle where the data will be written. If the file
+#' @param file            The name of the file where the data will be written. If the file
 #'                        exists it will be overwritten.
 #'
 #' @details

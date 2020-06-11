@@ -173,4 +173,4 @@ confint(fit)
 
 coef(fit)
 
-summary(fit)
+fit

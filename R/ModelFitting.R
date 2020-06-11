@@ -85,9 +85,6 @@ fitCaseControlModel <- function(caseControlData,
       tidyCovariates <- FeatureExtraction::tidyCovariateData(andromeda)
       on.exit(close(tidyCovariates), add = TRUE)
 
-      tidyCovariates$outcomes <- caseControlData %>%
-        select(.data$rowId, .data$stratumId, y = .data$isCase)
-
       treatmentVarId <- 1 + tidyCovariates$covariateRef %>%
         summarise(max(.data$covariateId, na.rm = TRUE)) %>%
         pull()
@@ -98,15 +95,19 @@ fitCaseControlModel <- function(caseControlData,
                                    covariateId = rep(treatmentVarId, nrow(caseControlData)),
                                    covariateValue = caseControlData$exposed)
       Andromeda::appendToTable(tidyCovariates$covariates, treatmentCovariate)
-      if (is.null(caseControlData$stratumId)) {
-        modelType <- "lr"
-        addIntercept <- TRUE
-        covariates <- tidyCovariates$covariates
-      } else {
+      if ("stratumId" %in% names(caseControlData)) {
         modelType <- "clr"
         addIntercept <- FALSE
+        tidyCovariates$outcomes <- caseControlData %>%
+          select(.data$rowId, .data$stratumId, y = .data$isCase)
         covariates <- tidyCovariates$covariates %>%
           inner_join(select(tidyCovariates$outcomes, .data$rowId, .data$stratumId), by = "rowId")
+      } else {
+        modelType <- "lr"
+        addIntercept <- TRUE
+        tidyCovariates$outcomes <- caseControlData %>%
+          select(.data$rowId, y = .data$isCase)
+        covariates <- tidyCovariates$covariates
       }
       cyclopsData <- Cyclops::convertToCyclopsData(tidyCovariates$outcomes,
                                                    covariates,
@@ -179,27 +180,6 @@ fitCaseControlModel <- function(caseControlData,
 }
 
 #' @export
-summary.outcomeModel <- function(object, ...) {
-  class(object) <- "summary.outcomeModel"
-  return(object)
-}
-
-#' @export
-print.summary.outcomeModel <- function(x, ...) {
-  print.outcomeModel(x)
-
-  writeLines("")
-  writeLines("Counts")
-  d <- x$outcomeCounts
-  colnames(d) <- c("Cases", "Controls", "Exposed cases", "Exposed controls")
-  rownames(d) <- "Count"
-
-  printCoefmat(d, P.values = FALSE, has.Pvalue = FALSE)
-
-
-}
-
-#' @export
 coef.outcomeModel <- function(object, ...) {
   return(object$outcomeModelTreatmentEstimate$logRr)
 }
@@ -217,6 +197,12 @@ confint.outcomeModel <- function(object, parm, level = 0.95, ...) {
 print.outcomeModel <- function(x, ...) {
   writeLines("Case-Control fitted model")
   writeLines(paste("Status:", x$outcomeModelStatus))
+  writeLines("")
+  writeLines("Counts")
+  d <- x$outcomeCounts
+  colnames(d) <- c("Cases", "Controls", "Exposed cases", "Exposed controls")
+  rownames(d) <- "Count"
+  printCoefmat(d, P.values = FALSE, has.Pvalue = FALSE)
   writeLines("")
   d <- x$outcomeModelTreatmentEstimate
   output <- data.frame(exp(d$logRr), exp(d$logLb95), exp(d$logUb95), d$logRr, d$seLogRr)

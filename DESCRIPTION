@@ -24,7 +24,9 @@ Imports:
   dplyr,
   Rcpp (>= 0.11.2),
   ParallelLogger (>= 2.0.0),
-  plyr
+  plyr,
+  cli,
+  pillar
 Suggests:
   testthat,
   knitr,

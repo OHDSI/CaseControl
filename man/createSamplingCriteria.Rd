@@ -15,5 +15,5 @@ createSamplingCriteria(controlsPerCase = 1, seed = 1)
 A settings object to be used in the \code{\link{selectControls}} function.
 }
 \description{
-Criteria to use when controls are simlpy sampled from the (nesting) population.
+Criteria to use when controls are simply sampled from the (nesting) population.
 }

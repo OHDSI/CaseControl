@@ -10,7 +10,7 @@ saveCaseData(caseData, file)
 \item{caseData}{An object of type \code{CaseData} as generated using
 \code{\link{getDbCaseData}}.}
 
-\item{file}{The name of the fle where the data will be written. If the file
+\item{file}{The name of the file where the data will be written. If the file
 exists it will be overwritten.}
 }
 \description{

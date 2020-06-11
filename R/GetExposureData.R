@@ -50,7 +50,7 @@
 #'                                 exposures.
 #' @param cdmDatabaseSchema        Needed when constructing covariates: the name of the database schema
 #'                                 that contains the OMOP CDM instance.  Requires read permissions to
-#'                                 this database. On SQL Server, this should specifiy both the database
+#'                                 this database. On SQL Server, this should specify both the database
 #'                                 and the schema, so for example 'cdm_instance.dbo'.
 #' @param covariateSettings        An object of type \code{covariateSettings} as created using the
 #'                                 \code{createCovariateSettings} function in the
@@ -98,7 +98,6 @@ getDbExposureData <- function(caseControls,
       filter(.data$personId %in% local(caseControls$personId)) %>%
       collect()
 
-    # Need to find observation period start date per rowId:
     opStartDates <- caseControls %>%
       select(.data$personId, .data$indexDate, .data$rowId) %>%
       inner_join(nestingCohorts, by = "personId") %>%
@@ -114,21 +113,6 @@ getDbExposureData <- function(caseControls,
              daysSinceExposureEnd = .data$indexDate - .data$exposureEndDate) %>%
       filter(.data$daysSinceExposureStart >= 0) %>%
       select(.data$rowId, .data$exposureId, .data$daysPriorObservation, .data$daysSinceExposureStart, .data$daysSinceExposureEnd)
-
-    # # Need to find observation period start date per rowId:
-    #     nestingCohorts <- merge(ff::as.ram(nestingCohorts), caseControls[, c("personId", "indexDate", "rowId")])
-    #     nestingCohorts <- nestingCohorts[nestingCohorts$indexDate >= nestingCohorts$observationPeriodStartDate, ]
-    #     nestingCohorts <- aggregate(observationPeriodStartDate ~ rowId, nestingCohorts, max)
-#
-#         # Construct exposure object:
-#         exposure <- selectExposures[idx, ]
-#         exposure <- merge(ff::as.ram(exposure), caseControls[, c("personId", "indexDate", "rowId")])
-#         exposure <- merge(exposure, nestingCohorts)
-#         exposure$daysPriorObservation <- exposure$exposureStartDate - exposure$observationPeriodStartDate
-#         exposure$daysSinceExposureStart <- exposure$indexDate - exposure$exposureStartDate
-#         exposure$daysSinceExposureEnd <- exposure$indexDate - exposure$exposureEndDate
-#         exposure <- exposure[exposure$daysSinceExposureStart >= 0, ]
-#         exposure <- exposure[, c("rowId", "exposureId", "daysPriorObservation", "daysSinceExposureStart", "daysSinceExposureEnd")]
 
     result <- list(caseControls = caseControls,
                    exposure = exposure,

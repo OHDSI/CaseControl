@@ -15,25 +15,25 @@ createSelectControlsArgs(
 \arguments{
 \item{firstOutcomeOnly}{Use the first outcome per person?}
 
-\item{washoutPeriod}{Minimum required numbers of days of observation for inclusion
-aseither case or control.}
+\item{washoutPeriod}{Minimum required numbers of days of observation for inclusion as
+either case or control.}
 
 \item{controlSelectionCriteria}{Either a matchingCriteria object as generated using the
-createMatchingCriteria function, or a samplingCriteriaobject as
-generated using the link{createSamplingCriteria}function.}
+createMatchingCriteria function, or a samplingCriteria object as
+generated using the createSamplingCriteria function.}
 
 \item{minAge}{Minimum age at which patient time will be included in the
-analysis.Note that information prior to the min age is still used
-to determineexposure status after the minimum age (e.g. when a
-prescription wasstarted just prior to reaching the minimum age).
-Also, outcomesoccurring before the minimum age is reached will be
-considered asprior outcomes when using first outcomes only. Age
-should be specifiedin years, but non-integer values are allowed.
-If not specified, no agerestriction will be applied.}
+analysis. Note that information prior to the min age is still used
+to determine exposure status after the minimum age (e.g. when a
+prescription was started just prior to reaching the minimum age).
+Also, outcomes occurring before the minimum age is reached will be
+considered as prior outcomes when using first outcomes only. Age
+should be specified in years, but non-integer values are allowed.
+If not specified, no age restriction will be applied.}
 
 \item{maxAge}{Maximum age at which patient time will be included in the
-analysis. Ageshould be specified in years, but non-integer values
-are allowed. If notspecified, no age restriction will be applied.}
+analysis. Age should be specified in years, but non-integer values
+are allowed. If not specified, no age restriction will be applied.}
 }
 \description{
 Create a parameter object for the function selectControls

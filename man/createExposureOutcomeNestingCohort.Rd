@@ -11,20 +11,20 @@ createExposureOutcomeNestingCohort(
 )
 }
 \arguments{
-\item{exposureId}{A concept ID indentifying the target drug in the exposure table. If
+\item{exposureId}{A concept ID identifying the target drug in the exposure table. If
 multiple strategies for picking the exposure will be tested in the
 analysis, a named list of numbers can be provided instead. In the analysis,
 the name of the number to be used can be specified using the #'
 \code{exposureType} parameter in the \code{\link{createCcAnalysis}}
 function.}
 
-\item{outcomeId}{A concept ID indentifying the outcome in the outcome table. If multiple
+\item{outcomeId}{A concept ID identifying the outcome in the outcome table. If multiple
 strategies for picking the outcome will be tested in the analysis, a named
 list of numbers can be provided instead. In the analysis, the name of the
 number to be used can be specified using the \code{outcomeType} parameter
 in the \code{\link{createCcAnalysis}} function.}
 
-\item{nestingCohortId}{A concept ID indentifying the nesting cohort in the nesting cohort table.
+\item{nestingCohortId}{A concept ID identifying the nesting cohort in the nesting cohort table.
 If multiple strategies for picking the nesting cohort will be tested in the
 analysis, a named list of numbers can be provided instead. In the analysis,
 the name of the number to be used can be specified using the
