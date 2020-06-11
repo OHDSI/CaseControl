@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">CaseControl</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">3.0.0</span>
       </span>
     </div>
 
@@ -67,7 +67,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://ohdsi.github.io/MethodsLibrary">Methods Library</a>
+  <a href="https://ohdsi.github.io/Hades"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/CaseControl/">
@@ -92,7 +92,7 @@
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#casecontrol" class="anchor"></a>CaseControl</h1></div>
 
-<p>CaseControl is part of the <a href="https://ohdsi.github.io/MethodsLibrary">OHDSI Methods Library</a>.</p>
+<p>CaseControl is part of <a href="https://ohdsi.github.io/Hades">HADES</a>.</p>
 </div>
 <div id="introduction" class="section level1">
 <h1 class="hasAnchor">
@@ -104,7 +104,7 @@
 <a href="#features" class="anchor"></a>Features</h1>
 <ul>
 <li>Extracts the necessary data from a database in OMOP Common Data Model format</li>
-<li>Nesting in a cohort of interest (e.g.Â people with a particular prior condition)</li>
+<li>Nesting in a cohort of interest (e.g. people with a particular prior condition)</li>
 <li>Matching on age, gender, provider, time in cohort, and/or visit</li>
 <li>Sampling of controls per case</li>
 <li>Fitting outcome models using conditional logistic regression</li>
@@ -124,8 +124,8 @@
 <h1 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h1>
 <ol>
-<li>Make sure your R environment is properly configured. This means that Java must be installed, and on Windows RTools must be installed. See <a href="https://ohdsi.github.io/MethodsLibrary/rSetup.html">these instructions</a> for how to configure your R environment.</li>
-<li>In R, use the following commands to download and install CaseControl:</li>
+<li><p>See the instructions <a href="https://ohdsi.github.io/Hades/rSetup.html">here</a> for configuring your R environment, including RTools and Java.</p></li>
+<li><p>In R, use the following commands to download and install CaseControl:</p></li>
 </ol>
 <div class="sourceCode" id="cb1"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"drat"</span>)
 <span class="kw pkg">drat</span><span class="kw ns">::</span><span class="fu">addRepo</span>(<span class="st">"OHDSI"</span>)
@@ -135,7 +135,7 @@
 <h1 class="hasAnchor">
 <a href="#user-documentation" class="anchor"></a>User Documentation</h1>
 <p>Documentation can be found on the <a href="https://ohdsi.github.io/CaseControl">package website</a>.</p>
-<p>PDF versions of the documentation is also available:</p>
+<p>PDF versions of the documentation are also available:</p>
 <ul>
 <li>Vignette: <a href="https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/SingleStudies.pdf">Single studies using the CaseControl package</a>
 </li>
@@ -157,7 +157,7 @@
 <div id="contributing" class="section level1">
 <h1 class="hasAnchor">
 <a href="#contributing" class="anchor"></a>Contributing</h1>
-<p>Read <a href="https://ohdsi.github.io/MethodsLibrary/contribute.html">here</a> how you can contribute to this package.</p>
+<p>Read <a href="https://ohdsi.github.io/Hades/contribute.html">here</a> how you can contribute to this package.</p>
 </div>
 <div id="license" class="section level1">
 <h1 class="hasAnchor">
@@ -218,7 +218,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Save the case data to folder — saveCaseData • CaseControl</title>
+<title>Save the case data to file — saveCaseData • CaseControl</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Save the case data to folder — saveCaseData" />
-<meta property="og:description" content="saveCaseData saves an object of type caseData to folder." />
+<meta property="og:title" content="Save the case data to file — saveCaseData" />
+<meta property="og:description" content="saveCaseData saves an object of type caseData to file" />
 
 
 
@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CaseControl</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">3.0.0</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://ohdsi.github.io/MethodsLibrary">Methods Library</a>
+  <a href="https://ohdsi.github.io/Hades"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/CaseControl/">
@@ -129,38 +129,35 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Save the case data to folder</h1>
-    <small class="dont-index">Source: <a href='https://github.com/OHDSI/CaseControl/blob/master/R/DataLoadingSaving.R'><code>R/DataLoadingSaving.R</code></a></small>
+    <h1>Save the case data to file</h1>
+    <small class="dont-index">Source: <a href='https://github.com/OHDSI/CaseControl/blob/master/R/CaseData.R'><code>R/CaseData.R</code></a></small>
     <div class="hidden name"><code>saveCaseData.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p><code>saveCaseData</code> saves an object of type caseData to folder.</p>
+    <p><code>saveCaseData</code> saves an object of type caseData to file</p>
     </div>
 
-    <pre class="usage"><span class='fu'>saveCaseData</span>(<span class='no'>caseData</span>, <span class='no'>folder</span>, <span class='kw'>compress</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='fu'>saveCaseData</span>(<span class='no'>caseData</span>, <span class='no'>file</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>caseData</th>
-      <td><p>An object of type <code>caseData</code> as generated using <code><a href='getDbCaseData.html'>getDbCaseData</a></code>.</p></td>
+      <td><p>An object of type <code>CaseData</code> as generated using
+<code><a href='getDbCaseData.html'>getDbCaseData</a></code>.</p></td>
     </tr>
     <tr>
-      <th>folder</th>
-      <td><p>The name of the folder where the data will be written. The folder should not yet
-exist.</p></td>
-    </tr>
-    <tr>
-      <th>compress</th>
-      <td><p>Should compression be used when saving?</p></td>
+      <th>file</th>
+      <td><p>The name of the file where the data will be written. If the file
+exists it will be overwritten.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The data will be written to a set of files in the specified folder.</p>
+    <p>The data will be written to the file specified by the user.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -177,7 +174,7 @@ exist.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CaseControl</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">3.0.0</span>
       </span>
     </div>
 
@@ -67,7 +67,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://ohdsi.github.io/MethodsLibrary">Methods Library</a>
+  <a href="https://ohdsi.github.io/Hades"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/CaseControl/">
@@ -91,7 +91,7 @@
       <h1 data-toc-skip>Single studies using the CaseControl package</h1>
                         <h4 class="author">Martijn J. Schuemie</h4>
             
-            <h4 class="date">2020-04-14</h4>
+            <h4 class="date">2020-06-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/CaseControl/blob/master/vignettes/SingleStudies.Rmd"><code>vignettes/SingleStudies.Rmd</code></a></small>
       <div class="hidden name"><code>SingleStudies.Rmd</code></div>
@@ -108,7 +108,7 @@
 <div id="installation-instructions" class="section level1">
 <h1 class="hasAnchor">
 <a href="#installation-instructions" class="anchor"></a>Installation instructions</h1>
-<p>Before installing the <code>CaseControl</code> package make sure you have Java available. Java can be downloaded from <a href="http://www.java.com">www.java.com</a>. For Windows users, RTools is also necessary. RTools can be downloaded from <a href="http://cran.r-project.org/bin/windows/Rtools/">CRAN</a>.</p>
+<p>Before installing the <code>CaseControl</code> package make sure you have Java available. Java can be downloaded from <a href="http://www.java.com">www.java.com</a>. For Windows users, RTools is also necessary. RTools can be downloaded from <a href="http://cran.r-project.org/bin/windows/Rtools/">CRAN</a>. See <a href="https://ohdsi.github.io/Hades/rSetup.html">these instructions</a> for properly configuring your R environment.</p>
 <p>The <code>CaseControl</code> package is currently maintained in a <a href="https://github.com/OHDSI/CaseControl">Github repository</a>, and has dependencies on other packages in Github. All of these packages can be downloaded and installed from within R using the <code>drat</code> package:</p>
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"drat"</span>)
 <span class="kw pkg">drat</span><span class="kw ns">::</span><span class="fu">addRepo</span>(<span class="st">"OHDSI"</span>)
@@ -205,9 +205,9 @@ executeSql(connection, sql)</pre></body></html></div>
 <span class="no">sql</span> <span class="kw">&lt;-</span> <span class="fu">translate</span>(<span class="no">sql</span>, <span class="kw">targetDialect</span> <span class="kw">=</span> <span class="no">connectionDetails</span>$<span class="no">dbms</span>)
 
 <span class="fu">querySql</span>(<span class="no">connection</span>, <span class="no">sql</span>)</pre></body></html></div>
-<pre><code>#&gt;   cohort_definition_id  count
-#&gt; 1                    1 422274
-#&gt; 2                    2 118430</code></pre>
+<pre><code>##   cohort_definition_id   count
+## 1                    1 1225890
+## 2                    2  285459</code></pre>
 </div>
 <div id="extracting-the-data-from-the-server" class="section level1">
 <h1 class="hasAnchor">
@@ -226,30 +226,40 @@ executeSql(connection, sql)</pre></body></html></div>
                           <span class="kw">useObservationEndAsNestingEndDate</span> <span class="kw">=</span> <span class="fl">TRUE</span>,
                           <span class="kw">getVisits</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
 <span class="no">caseData</span></pre></body></html></div>
-<pre><code>#&gt; Case data object
-#&gt; 
-#&gt; Outcome concept ID(s): 1
-#&gt; Nesting cohort ID: 2</code></pre>
+<pre><code>## # CaseData object
+## 
+## Outcome of interest ID(s): 1
+## 
+## Nesting cohort ID: 2
+## 
+## Inherits from Andromeda:
+## # Andromeda object
+## # Physical location:  C:\Users\mschuemi\AppData\Local\Temp\RtmpkRKduy\file1eac496b6b79.sqlite
+## 
+## Tables:
+## $cases (nestingCohortId, outcomeId, indexDate)
+## $nestingCohorts (nestingCohortId, personId, observationPeriodStartDate, startDate, endDate, dateOfBirth, genderConceptId, providerId, careSiteId)
+## $visits (nestingCohortId, visitStartDate)</code></pre>
 <p>There are many parameters, but they are all documented in the <code>CaseControl</code> manual. In short, we are pointing the function to the table created earlier and indicating which concept ID in that table identifies the outcome. Note that it is possible to fetch the data for multiple outcomes at once for efficiency. We furthermore specify a nesting cohort in the same table, meaning that people will be eligible to be cases or controls if and when they fall inside the specified cohort. In this case, the nesting cohort starts when people have their first diagnosis of rheumatoid arthritis. We use the <code>useObservationEndAsNestingEndDate</code> argument to indicate people will stay eligible until the end of their observation period. We furthermore specify we want to retrieve data on patient visits, which will be used later on for matching.</p>
-<p>Data about the cases and potential controls are extracted from the server and stored in the <code>caseData</code> object. This object uses the package <code>ff</code> to store information in a way that ensures R does not run out of memory, even when the data are large.</p>
+<p>Data about the cases and potential controls are extracted from the server and stored in the <code>caseData</code> object. This object uses the package <code>Andromeda</code> to store information in a way that ensures R does not run out of memory, even when the data are large.</p>
 <p>We can use the generic <code><a href="https://rdrr.io/r/base/summary.html">summary()</a></code> function to view some more information of the data we extracted:</p>
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">caseData</span>)</pre></body></html></div>
-<pre><code>#&gt; caseData object summary
-#&gt; 
-#&gt; Outcome concept ID(s): 1
-#&gt; Nesting cohort ID: 2
-#&gt; 
-#&gt; Population count: 168742
-#&gt; Population window count: 168742
-#&gt; 
-#&gt; Outcome counts:
-#&gt;   Event count Case count
-#&gt; 1       20306      12819</code></pre>
+<pre><code>## CaseData object summary
+## 
+## Outcome concept ID(s): 1
+## Nesting cohort ID: 2
+## 
+## Population count: 285442
+## Population window count: 285442
+## 
+## Outcome counts:
+##   Event count Nesting cohort count Person count
+## 1       46427                26222        26222</code></pre>
 <div id="saving-the-data-to-file" class="section level2">
 <h2 class="hasAnchor">
 <a href="#saving-the-data-to-file" class="anchor"></a>Saving the data to file</h2>
-<p>Creating the <code>caseData</code> object can take considerable computing time, and it is probably a good idea to save it for future sessions. Because <code>caseData</code> uses <code>ff</code>, we cannot use R’s regular save function. Instead, we’ll have to use the <code><a href="../reference/saveCaseData.html">saveCaseData()</a></code> function:</p>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="../reference/saveCaseData.html">saveCaseData</a></span>(<span class="no">caseData</span>, <span class="st">"GiBleed"</span>)</pre></body></html></div>
+<p>Creating the <code>caseData</code> object can take considerable computing time, and it is probably a good idea to save it for future sessions. Because <code>caseData</code> uses <code>Andromeda</code>, we cannot use R’s regular save function. Instead, we’ll have to use the <code><a href="../reference/saveCaseData.html">saveCaseData()</a></code> function:</p>
+<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="../reference/saveCaseData.html">saveCaseData</a></span>(<span class="no">caseData</span>, <span class="st">"GiBleed.zip"</span>)</pre></body></html></div>
 <p>We can use the <code><a href="../reference/loadCaseData.html">loadCaseData()</a></code> function to load the data in a future session.</p>
 </div>
 </div>
@@ -273,20 +283,20 @@ executeSql(connection, sql)</pre></body></html></div>
 <p>In this example, we specify a washout period of 180 days, meaning that both cases and controls are required to have a minimum of 180 days of observation prior to the index date. We also specify we will only consider the first outcome per person. If a person’s first outcome is within the washout period, that person will be removed from the analysis. We match on calendar time (implicit), age, gender, and visit date, and randomly sample up to two controls per case. Matching on visit date implies that the control should have a visit within n days from the index date of the case (n = 30 in this example), and the index date for the control will be set to the visit date. The purpose of this is to make the index dates more similar between cases and control, because almost by definition we would expect the case to have a visit on the index date. Finally, we ask that cases for which no matching control was found be removed from the analysis.</p>
 <p>The <code>caseControls</code> object is a data frame with four columns:</p>
 <div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">caseControls</span>)</pre></body></html></div>
-<pre><code>#&gt;   personId  indexDate isCase stratumId
-#&gt; 1        3 2009-10-10   TRUE         1
-#&gt; 2      123 2009-10-11  FALSE         1
-#&gt; 3      345 2009-10-09  FALSE         1
-#&gt; 4        6 2010-05-04   TRUE         2
-#&gt; 5      234 2010-05-04  FALSE         2
-#&gt; 6      567 2010-05-05  FALSE         2</code></pre>
+<pre><code>##   personId  indexDate isCase stratumId
+## 1        3 2009-10-10   TRUE         1
+## 2      123 2009-10-11  FALSE         1
+## 3      345 2009-10-09  FALSE         1
+## 4        6 2010-05-04   TRUE         2
+## 5      234 2010-05-04  FALSE         2
+## 6      567 2010-05-05  FALSE         2</code></pre>
 <p>We can show the attrition to see why cases and events were filtered:</p>
 <div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="fu"><a href="../reference/getAttritionTable.html">getAttritionTable</a></span>(<span class="no">caseControls</span>)</pre></body></html></div>
-<pre><code>#&gt;                      description eventCount caseCount
-#&gt; 1                Original counts      20306     12819
-#&gt; 2               First event only      12819     12819
-#&gt; 3 Require 180 days of prior obs.       7569      7569
-#&gt; 4      Remove unmatched controls       7569      7569</code></pre>
+<pre><code>##                      description eventCount caseCount
+## 1                Original counts      46427     26222
+## 2               First event only      26222     26222
+## 3 Require 180 days of prior obs.      17249     17249
+## 4      Remove unmatched controls      17249     17249</code></pre>
 <p>An alternative to selecting individually matched controls is to create a sample controls, controls that are not individually linked to cases. This can be done using the <code>createSamplingCriteria</code> instead of the <code>createMatchingCriteria</code> function. For example:</p>
 <div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="no">samplingCriteria</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/createSamplingCriteria.html">createSamplingCriteria</a></span>(<span class="kw">controlsPerCase</span> <span class="kw">=</span> <span class="fl">1</span>)
 
@@ -312,7 +322,7 @@ executeSql(connection, sql)</pre></body></html></div>
                                           <span class="kw">exposureIds</span> <span class="kw">=</span> <span class="fl">1124300</span>,
                                           <span class="kw">covariateSettings</span> <span class="kw">=</span> <span class="no">covarSettings</span>)</pre></body></html></div>
 <p>Here we specify that we will use the <code>drug_era</code> table to identify exposures, and will only retrieve data on exposure to Diclofenac (concept ID 1124300). We use the <code>covariateSettings</code> function of the FeatureExtraction package to specify which covariates to construct. In this example the only coviariates are the Charlson comorbidity index, Diabetes Complications Severity Index (DCSI), and CHADS2 score.</p>
-<p>When including covariates, the <code>caseControlsExposure</code> object uses <code>ff</code> to store large objects and therefore cannot be stored using standard functions. Please use <code>saveCaseControlsExposure</code> to save:</p>
+<p>When including covariates, the <code>caseControlsExposure</code> object uses <code>Andromeda</code> to store large objects and therefore cannot be stored using standard functions. Please use <code>saveCaseControlsExposure</code> to save:</p>
 <div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="fu"><a href="../reference/saveCaseControlsExposure.html">saveCaseControlsExposure</a></span>(<span class="no">caseControlsExposure</span>, <span class="st">"caseControlsExposure"</span>)</pre></body></html></div>
 </div>
 <div id="creating-case-control-data" class="section level1">
@@ -326,13 +336,13 @@ executeSql(connection, sql)</pre></body></html></div>
                                          <span class="kw">riskWindowEnd</span> <span class="kw">=</span> <span class="fl">0</span>)</pre></body></html></div>
 <p>Here we specify we are interested in all exposures, not just the first one, and that the exposure should overlap with the index date (the risk window starts and ends on day 0, the index date). The <code>caseControlData</code> object is a data frame with five columns:</p>
 <div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">caseControlData</span>)</pre></body></html></div>
-<pre><code>#&gt;   personId  indexDate isCase stratumId rowId exposed
-#&gt; 1        3 2009-10-10   TRUE         1     1       1
-#&gt; 2      123 2009-10-11  FALSE         1     2       0
-#&gt; 3      345 2009-10-09  FALSE         1     3       0
-#&gt; 4        6 2010-05-04   TRUE         2     4       0
-#&gt; 5      234 2010-05-04  FALSE         2     5       0
-#&gt; 6      567 2010-05-05  FALSE         2     6       0</code></pre>
+<pre><code>##   personId  indexDate isCase stratumId rowId exposed
+## 1        3 2009-10-10   TRUE         1     1       1
+## 2      123 2009-10-11  FALSE         1     2       0
+## 3      345 2009-10-09  FALSE         1     3       0
+## 4        6 2010-05-04   TRUE         2     4       0
+## 5      234 2010-05-04  FALSE         2     5       0
+## 6      567 2010-05-05  FALSE         2     6       0</code></pre>
 </div>
 <div id="fitting-the-model" class="section level1">
 <h1 class="hasAnchor">
@@ -344,68 +354,68 @@ executeSql(connection, sql)</pre></body></html></div>
                            <span class="kw">prior</span> <span class="kw">=</span> <span class="fu">createPrior</span>(<span class="st">"none"</span>))
 
 <span class="no">fit</span></pre></body></html></div>
-<pre><code>#&gt; Case-Control fitted model
-#&gt; Status: OK
-#&gt; 
-#&gt;           Estimate lower .95 upper .95   logRr seLogRr
-#&gt; treatment  1.05357   0.82739   1.33405 0.05218  0.1219</code></pre>
+<pre><code>## Case-Control fitted model
+## Status: OK
+## 
+## Counts
+##       Cases Controls Exposed cases Exposed controls
+## Count 17249    34497           361              726
+## 
+##           Estimate lower .95 upper .95    logRr seLogRr
+## treatment 1.090605  0.953409  1.245442 0.086733  0.0682</code></pre>
 <p>The generic functions <code>summary</code>, <code>coef</code>, and <code>confint</code> are implemented for the <code>fit</code> object:</p>
 <div class="sourceCode" id="cb25"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">fit</span>)</pre></body></html></div>
-<pre><code>#&gt; Case-Control fitted model
-#&gt; Status: OK
-#&gt; 
-#&gt;           Estimate lower .95 upper .95   logRr seLogRr
-#&gt; treatment  1.05357   0.82739   1.33405 0.05218  0.1219
-#&gt; 
-#&gt; Counts
-#&gt;       Cases Controls Exposed cases Exposed controls
-#&gt; Count  7569    15138           110              225</code></pre>
+<pre><code>##                               Length Class      Mode     
+## outcomeModelTreatmentEstimate 4      data.frame list     
+## outcomeModelCoefficients      4      -none-     numeric  
+## outcomeModelStatus            1      -none-     character
+## outcomeCounts                 4      data.frame list</code></pre>
 <div class="sourceCode" id="cb27"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span>(<span class="no">fit</span>)</pre></body></html></div>
-<pre><code>#&gt; [1] 0.05217973</code></pre>
+<pre><code>## [1] 0.08673273</code></pre>
 <div class="sourceCode" id="cb29"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/stats/confint.html">confint</a></span>(<span class="no">fit</span>)</pre></body></html></div>
-<pre><code>#&gt; [1] -0.1894850  0.2882181</code></pre>
+<pre><code>## [1] -0.04771128  0.21949066</code></pre>
 </div>
 <div id="acknowledgments" class="section level1">
 <h1 class="hasAnchor">
 <a href="#acknowledgments" class="anchor"></a>Acknowledgments</h1>
 <p>Considerable work has been dedicated to provide the <code>CaseControl</code> package.</p>
 <div class="sourceCode" id="cb31"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span>(<span class="st">"CaseControl"</span>)</pre></body></html></div>
-<pre><code>#&gt; 
-#&gt; To cite package 'CaseControl' in publications use:
-#&gt; 
-#&gt;   Martijn Schuemie (2019). CaseControl: Case-Control. R package version
-#&gt;   2.0.0. https://github.com/OHDSI/CaseControl
-#&gt; 
-#&gt; A BibTeX entry for LaTeX users is
-#&gt; 
-#&gt;   @Manual{,
-#&gt;     title = {CaseControl: Case-Control},
-#&gt;     author = {Martijn Schuemie},
-#&gt;     year = {2019},
-#&gt;     note = {R package version 2.0.0},
-#&gt;     url = {https://github.com/OHDSI/CaseControl},
-#&gt;   }</code></pre>
+<pre><code>## 
+## To cite package 'CaseControl' in publications use:
+## 
+##   Martijn Schuemie (2020). CaseControl: Case-Control.
+##   http://ohdsi.github.io/CaseControl,
+##   https://github.com/OHDSI/CaseControl.
+## 
+## A BibTeX entry for LaTeX users is
+## 
+##   @Manual{,
+##     title = {CaseControl: Case-Control},
+##     author = {Martijn Schuemie},
+##     year = {2020},
+##     note = {http://ohdsi.github.io/CaseControl, https://github.com/OHDSI/CaseControl},
+##   }</code></pre>
 <p>Furthermore, <code>CaseControl</code> makes extensive use of the <code>Cyclops</code> package.</p>
 <div class="sourceCode" id="cb33"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span>(<span class="st">"Cyclops"</span>)</pre></body></html></div>
-<pre><code>#&gt; 
-#&gt; To cite Cyclops in publications use:
-#&gt; 
-#&gt; Suchard MA, Simpson SE, Zorych I, Ryan P, Madigan D (2013). "Massive
-#&gt; parallelization of serial inference algorithms for complex generalized
-#&gt; linear models." _ACM Transactions on Modeling and Computer Simulation_,
-#&gt; *23*, 10. &lt;URL: http://dl.acm.org/citation.cfm?id=2414791&gt;.
-#&gt; 
-#&gt; A BibTeX entry for LaTeX users is
-#&gt; 
-#&gt;   @Article{,
-#&gt;     author = {M. A. Suchard and S. E. Simpson and I. Zorych and P. Ryan and D. Madigan},
-#&gt;     title = {Massive parallelization of serial inference algorithms for complex generalized linear models},
-#&gt;     journal = {ACM Transactions on Modeling and Computer Simulation},
-#&gt;     volume = {23},
-#&gt;     pages = {10},
-#&gt;     year = {2013},
-#&gt;     url = {http://dl.acm.org/citation.cfm?id=2414791},
-#&gt;   }</code></pre>
+<pre><code>## 
+## To cite Cyclops in publications use:
+## 
+## Suchard MA, Simpson SE, Zorych I, Ryan P, Madigan D (2013). "Massive
+## parallelization of serial inference algorithms for complex generalized
+## linear models." _ACM Transactions on Modeling and Computer Simulation_,
+## *23*, 10. &lt;URL: http://dl.acm.org/citation.cfm?id=2414791&gt;.
+## 
+## A BibTeX entry for LaTeX users is
+## 
+##   @Article{,
+##     author = {M. A. Suchard and S. E. Simpson and I. Zorych and P. Ryan and D. Madigan},
+##     title = {Massive parallelization of serial inference algorithms for complex generalized linear models},
+##     journal = {ACM Transactions on Modeling and Computer Simulation},
+##     volume = {23},
+##     pages = {10},
+##     year = {2013},
+##     url = {http://dl.acm.org/citation.cfm?id=2414791},
+##   }</code></pre>
 </div>
   </div>
 
@@ -424,7 +434,7 @@ executeSql(connection, sql)</pre></body></html></div>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

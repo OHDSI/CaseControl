@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Save the caseControlsExposure data to folder — saveCaseControlsExposure • CaseControl</title>
+<title>Check whether an object is a CaseData object — isCaseData • CaseControl</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Save the caseControlsExposure data to folder — saveCaseControlsExposure" />
-<meta property="og:description" content="saveCaseControlsExposure saves an object of type caseControlsExposure to folder." />
+<meta property="og:title" content="Check whether an object is a CaseData object — isCaseData" />
+<meta property="og:description" content="Check whether an object is a CaseData object" />
 
 
 
@@ -129,35 +129,29 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Save the caseControlsExposure data to folder</h1>
-    <small class="dont-index">Source: <a href='https://github.com/OHDSI/CaseControl/blob/master/R/GetExposureData.R'><code>R/GetExposureData.R</code></a></small>
-    <div class="hidden name"><code>saveCaseControlsExposure.Rd</code></div>
+    <h1>Check whether an object is a CaseData object</h1>
+    <small class="dont-index">Source: <a href='https://github.com/OHDSI/CaseControl/blob/master/R/CaseData.R'><code>R/CaseData.R</code></a></small>
+    <div class="hidden name"><code>isCaseData.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p><code>saveCaseControlsExposure</code> saves an object of type caseControlsExposure to folder.</p>
+    <p>Check whether an object is a CaseData object</p>
     </div>
 
-    <pre class="usage"><span class='fu'>saveCaseControlsExposure</span>(<span class='no'>caseControlsExposure</span>, <span class='no'>folder</span>)</pre>
+    <pre class="usage"><span class='fu'>isCaseData</span>(<span class='no'>x</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>caseControlsExposure</th>
-      <td><p>An object of type <code>caseControlsExposure</code> as generated using
-<code><a href='getDbExposureData.html'>getDbExposureData</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>folder</th>
-      <td><p>The name of the folder where the data will be written. The folder
-should not yet exist.</p></td>
+      <th>x</th>
+      <td><p>The object to check.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The data will be written to a set of files in the specified folder.</p>
+    <p>A logical value.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

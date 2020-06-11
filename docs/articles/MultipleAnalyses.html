@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CaseControl</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">3.0.0</span>
       </span>
     </div>
 
@@ -67,7 +67,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://ohdsi.github.io/MethodsLibrary">Methods Library</a>
+  <a href="https://ohdsi.github.io/Hades"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/CaseControl/">
@@ -91,7 +91,7 @@
       <h1 data-toc-skip>Running multiple analyses at once using the CaseControl package</h1>
                         <h4 class="author">Martijn J. Schuemie</h4>
             
-            <h4 class="date">2020-04-14</h4>
+            <h4 class="date">2020-06-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/CaseControl/blob/master/vignettes/MultipleAnalyses.Rmd"><code>vignettes/MultipleAnalyses.Rmd</code></a></small>
       <div class="hidden name"><code>MultipleAnalyses.Rmd</code></div>
@@ -420,41 +420,41 @@
                                   <span class="no">result</span>$<span class="no">outcomeId</span> <span class="kw">==</span> <span class="fl">1</span> <span class="kw">&amp;</span>
                                   <span class="no">result</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">1</span>]
 <span class="no">ccModel</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="no">outputFolder</span>, <span class="no">ccModelFile</span>))
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">ccModel</span>)</pre></body></html></div>
+<span class="no">ccModel</span></pre></body></html></div>
 <pre><code>#&gt; Case-Control fitted model
 #&gt; Status: OK
 #&gt; 
-#&gt;           Estimate lower .95 upper .95   logRr seLogRr
-#&gt; treatment  1.24638   1.13600   1.36658 0.22024  0.0471
-#&gt; 
 #&gt; Counts
 #&gt;        Cases Controls Exposed cases Exposed controls
-#&gt; Count 122036   244072           736             1183</code></pre>
+#&gt; Count  93244   186488           933             1485
+#&gt; 
+#&gt;           Estimate lower .95 upper .95   logRr seLogRr
+#&gt; treatment  1.25982   1.15991   1.36766 0.23097   0.042</code></pre>
 <p>Note that some of the file names will appear several times in the table. For example, all analysis share the same ccData object.</p>
 <p>We can create a summary of the results using <code><a href="../reference/summarizeCcAnalyses.html">summarizeCcAnalyses()</a></code>:</p>
 <div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="no">analysisSum</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/summarizeCcAnalyses.html">summarizeCcAnalyses</a></span>(<span class="no">result</span>, <span class="no">outputFolder</span>)
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">analysisSum</span>)</pre></body></html></div>
 <pre><code>#&gt;   analysisId exposureId nestingCohortId outcomeId        rr    ci95lb   ci95ub
-#&gt; 1          1    1124300               2         1 1.2463751 1.1360028 1.366585
-#&gt; 2          1     705178               2         1 1.4207650 1.1327024 1.777087
-#&gt; 3          1     705944               2         1 1.1824626 1.0304870 1.354807
-#&gt; 4          1     710650               2         1 0.8421053 0.5499942 1.259939
-#&gt; 5          1     714785               2         1 1.1977632 1.0760491 1.332069
-#&gt; 6          1     719174               2         1 1.2718659 1.1689306 1.383166
-#&gt;              p  cases controls exposedCases exposedControls      logRr
-#&gt; 1 2.987425e-06 122036   244072          736            1183  0.2202394
-#&gt; 2 2.237585e-03 122036   244072          130             183  0.3511955
-#&gt; 3 1.635079e-02 122036   244072          335             569  0.1675992
-#&gt; 4 4.164008e-01 122036   244072           32              76 -0.1718503
-#&gt; 5 9.190629e-04 122036   244072          547             915  0.1804558
-#&gt; 6 2.122890e-08 122036   244072          900            1420  0.2404850
+#&gt; 1          1    1124300               2         1 1.2598223 1.1599118 1.367657
+#&gt; 2          1     705178               2         1 1.1428571 0.7325838 1.752476
+#&gt; 3          1     705944               2         1 1.6923077 1.2928143 2.210783
+#&gt; 4          1     710650               2         1 1.7611940 1.3738149 2.254877
+#&gt; 5          1     714785               2         1 0.8837209 0.5036315 1.493254
+#&gt; 6          1     719174               2         1 2.0952381 1.5534348 2.827971
+#&gt;              p cases controls exposedCases exposedControls      logRr
+#&gt; 1 3.898963e-08 93244   186488          933            1485  0.2309706
+#&gt; 2 5.484229e-01 93244   186488           32              56  0.1335314
+#&gt; 3 1.211894e-04 93244   186488           99             117  0.5260931
+#&gt; 4 7.550134e-06 93244   186488          118             134  0.5659920
+#&gt; 5 6.557205e-01 93244   186488           19              43 -0.1236140
+#&gt; 6 1.300117e-06 93244   186488           88              84  0.7396672
 #&gt;      seLogRr
-#&gt; 1 0.04714348
-#&gt; 2 0.11489218
-#&gt; 3 0.06980422
-#&gt; 4 0.21146081
-#&gt; 5 0.05444930
-#&gt; 6 0.04293091</code></pre>
+#&gt; 1 0.04203006
+#&gt; 2 0.22250596
+#&gt; 3 0.13687126
+#&gt; 4 0.12640637
+#&gt; 5 0.27726744
+#&gt; 6 0.15283214</code></pre>
 <p>This tells us, per exposure-outcome-nesting cohort-analysis combination, the estimated relative risk and 95% confidence interval, as well as the number of cases, controls, and number of those that were exposed to the drug.</p>
 <div id="empirical-calibration" class="section level2">
 <h2 class="hasAnchor">
@@ -471,9 +471,8 @@
                       <span class="kw">logRrPositives</span> <span class="kw">=</span> <span class="no">ei</span>$<span class="no">logRr</span>,
                       <span class="kw">seLogRrPositives</span> <span class="kw">=</span> <span class="no">ei</span>$<span class="no">seLogRr</span>,
                       <span class="no">null</span>)</pre></body></html></div>
-<pre><code>#&gt; Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
 <p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-17-1.png" width="700"></p>
-<div class="sourceCode" id="cb18"><html><body><pre class="r"><span class="co"># Analysis 2: Nesting in rheumatoid arthritis</span>
+<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="co"># Analysis 2: Nesting in rheumatoid arthritis</span>
 <span class="no">negCons</span> <span class="kw">&lt;-</span> <span class="no">analysisSum</span>[<span class="no">analysisSum</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">2</span> <span class="kw">&amp;</span> <span class="no">analysisSum</span>$<span class="no">exposureId</span> <span class="kw">!=</span> <span class="fl">1124300</span>, ]
 <span class="no">ei</span> <span class="kw">&lt;-</span>  <span class="no">analysisSum</span>[<span class="no">analysisSum</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">2</span> <span class="kw">&amp;</span> <span class="no">analysisSum</span>$<span class="no">exposureId</span> <span class="kw">==</span> <span class="fl">1124300</span>, ]
 <span class="no">null</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span>(<span class="no">negCons</span>$<span class="no">logRr</span>, <span class="no">negCons</span>$<span class="no">seLogRr</span>)
@@ -482,11 +481,9 @@
                       <span class="kw">logRrPositives</span> <span class="kw">=</span> <span class="no">ei</span>$<span class="no">logRr</span>,
                       <span class="kw">seLogRrPositives</span> <span class="kw">=</span> <span class="no">ei</span>$<span class="no">seLogRr</span>,
                       <span class="no">null</span>)</pre></body></html></div>
-<pre><code>#&gt; Warning in fitNull(negCons$logRr, negCons$seLogRr): Estimate(s) with NA standard
-#&gt; error detected. Removing before fitting null distribution</code></pre>
-<pre><code>#&gt; Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<pre><code>#&gt; Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
 <p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
-<div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="co"># Analysis 3: Nesting and including covariates</span>
+<div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="co"># Analysis 3: Nesting and including covariates</span>
 <span class="no">negCons</span> <span class="kw">&lt;-</span> <span class="no">analysisSum</span>[<span class="no">analysisSum</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">3</span> <span class="kw">&amp;</span> <span class="no">analysisSum</span>$<span class="no">exposureId</span> <span class="kw">!=</span> <span class="fl">1124300</span>, ]
 <span class="no">ei</span> <span class="kw">&lt;-</span>  <span class="no">analysisSum</span>[<span class="no">analysisSum</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">3</span> <span class="kw">&amp;</span> <span class="no">analysisSum</span>$<span class="no">exposureId</span> <span class="kw">==</span> <span class="fl">1124300</span>, ]
 <span class="no">null</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span>(<span class="no">negCons</span>$<span class="no">logRr</span>, <span class="no">negCons</span>$<span class="no">seLogRr</span>)
@@ -495,11 +492,9 @@
                       <span class="kw">logRrPositives</span> <span class="kw">=</span> <span class="no">ei</span>$<span class="no">logRr</span>,
                       <span class="kw">seLogRrPositives</span> <span class="kw">=</span> <span class="no">ei</span>$<span class="no">seLogRr</span>,
                       <span class="no">null</span>)</pre></body></html></div>
-<pre><code>#&gt; Warning in fitNull(negCons$logRr, negCons$seLogRr): Estimate(s) with NA standard
-#&gt; error detected. Removing before fitting null distribution</code></pre>
-<pre><code>#&gt; Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<pre><code>#&gt; Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
 <p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-21-1.png" width="700"></p>
-<div class="sourceCode" id="cb24"><html><body><pre class="r"><span class="co"># Analysis 4: Nesting, including covariates, and matching on visit</span>
+<div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="co"># Analysis 4: Nesting, including covariates, and matching on visit</span>
 <span class="no">negCons</span> <span class="kw">&lt;-</span> <span class="no">analysisSum</span>[<span class="no">analysisSum</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">4</span> <span class="kw">&amp;</span> <span class="no">analysisSum</span>$<span class="no">exposureId</span> <span class="kw">!=</span> <span class="fl">1124300</span>, ]
 <span class="no">ei</span> <span class="kw">&lt;-</span>  <span class="no">analysisSum</span>[<span class="no">analysisSum</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">4</span> <span class="kw">&amp;</span> <span class="no">analysisSum</span>$<span class="no">exposureId</span> <span class="kw">==</span> <span class="fl">1124300</span>, ]
 <span class="no">null</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span>(<span class="no">negCons</span>$<span class="no">logRr</span>, <span class="no">negCons</span>$<span class="no">seLogRr</span>)
@@ -508,11 +503,9 @@
                       <span class="kw">logRrPositives</span> <span class="kw">=</span> <span class="no">ei</span>$<span class="no">logRr</span>,
                       <span class="kw">seLogRrPositives</span> <span class="kw">=</span> <span class="no">ei</span>$<span class="no">seLogRr</span>,
                       <span class="no">null</span>)</pre></body></html></div>
-<pre><code>#&gt; Warning in fitNull(negCons$logRr, negCons$seLogRr): Estimate(s) with NA standard
-#&gt; error detected. Removing before fitting null distribution</code></pre>
-<pre><code>#&gt; Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<pre><code>#&gt; Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
 <p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-23-1.png" width="700"></p>
-<div class="sourceCode" id="cb27"><html><body><pre class="r"><span class="co"># Analysis 5: Sampling controls, adjusting for age and gender</span>
+<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="co"># Analysis 5: Sampling controls, adjusting for age and gender</span>
 <span class="no">negCons</span> <span class="kw">&lt;-</span> <span class="no">analysisSum</span>[<span class="no">analysisSum</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">5</span> <span class="kw">&amp;</span> <span class="no">analysisSum</span>$<span class="no">exposureId</span> <span class="kw">!=</span> <span class="fl">1124300</span>, ]
 <span class="no">ei</span> <span class="kw">&lt;-</span>  <span class="no">analysisSum</span>[<span class="no">analysisSum</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">5</span> <span class="kw">&amp;</span> <span class="no">analysisSum</span>$<span class="no">exposureId</span> <span class="kw">==</span> <span class="fl">1124300</span>, ]
 <span class="no">null</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span>(<span class="no">negCons</span>$<span class="no">logRr</span>, <span class="no">negCons</span>$<span class="no">seLogRr</span>)
@@ -521,9 +514,8 @@
                       <span class="kw">logRrPositives</span> <span class="kw">=</span> <span class="no">ei</span>$<span class="no">logRr</span>,
                       <span class="kw">seLogRrPositives</span> <span class="kw">=</span> <span class="no">ei</span>$<span class="no">seLogRr</span>,
                       <span class="no">null</span>)</pre></body></html></div>
-<pre><code>#&gt; Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
 <p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-25-1.png" width="700"></p>
-<div class="sourceCode" id="cb29"><html><body><pre class="r"><span class="co"># Analysis 6: Sampling controls, adjusting for age and gender, nesting in indication</span>
+<div class="sourceCode" id="cb24"><html><body><pre class="r"><span class="co"># Analysis 6: Sampling controls, adjusting for age and gender, nesting in indication</span>
 <span class="no">negCons</span> <span class="kw">&lt;-</span> <span class="no">analysisSum</span>[<span class="no">analysisSum</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">6</span> <span class="kw">&amp;</span> <span class="no">analysisSum</span>$<span class="no">exposureId</span> <span class="kw">!=</span> <span class="fl">1124300</span>, ]
 <span class="no">ei</span> <span class="kw">&lt;-</span>  <span class="no">analysisSum</span>[<span class="no">analysisSum</span>$<span class="no">analysisId</span> <span class="kw">==</span> <span class="fl">6</span> <span class="kw">&amp;</span> <span class="no">analysisSum</span>$<span class="no">exposureId</span> <span class="kw">==</span> <span class="fl">1124300</span>, ]
 <span class="no">null</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span>(<span class="no">negCons</span>$<span class="no">logRr</span>, <span class="no">negCons</span>$<span class="no">seLogRr</span>)
@@ -539,24 +531,24 @@
 <h1 class="hasAnchor">
 <a href="#acknowledgments" class="anchor"></a>Acknowledgments</h1>
 <p>Considerable work has been dedicated to provide the <code>CaseControl</code> package.</p>
-<div class="sourceCode" id="cb30"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span>(<span class="st">"CaseControl"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb25"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span>(<span class="st">"CaseControl"</span>)</pre></body></html></div>
 <pre><code>#&gt; 
 #&gt; To cite package 'CaseControl' in publications use:
 #&gt; 
-#&gt;   Martijn Schuemie (2019). CaseControl: Case-Control. R package version
-#&gt;   2.0.0. https://github.com/OHDSI/CaseControl
+#&gt;   Martijn Schuemie (2020). CaseControl: Case-Control.
+#&gt;   http://ohdsi.github.io/CaseControl,
+#&gt;   https://github.com/OHDSI/CaseControl.
 #&gt; 
 #&gt; A BibTeX entry for LaTeX users is
 #&gt; 
 #&gt;   @Manual{,
 #&gt;     title = {CaseControl: Case-Control},
 #&gt;     author = {Martijn Schuemie},
-#&gt;     year = {2019},
-#&gt;     note = {R package version 2.0.0},
-#&gt;     url = {https://github.com/OHDSI/CaseControl},
+#&gt;     year = {2020},
+#&gt;     note = {http://ohdsi.github.io/CaseControl, https://github.com/OHDSI/CaseControl},
 #&gt;   }</code></pre>
 <p>Further, <code>CaseControl</code> makes extensive use of the <code>Cyclops</code> package.</p>
-<div class="sourceCode" id="cb32"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span>(<span class="st">"Cyclops"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb27"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span>(<span class="st">"Cyclops"</span>)</pre></body></html></div>
 <pre><code>#&gt; 
 #&gt; To cite Cyclops in publications use:
 #&gt; 
@@ -595,7 +587,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>
