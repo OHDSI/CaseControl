@@ -4,7 +4,7 @@ CaseControl
 [![Build Status](https://travis-ci.org/OHDSI/CaseControl.svg?branch=master)](https://travis-ci.org/OHDSI/CaseControl)
 [![codecov.io](https://codecov.io/github/OHDSI/CaseControl/coverage.svg?branch=master)](https://codecov.io/github/OHDSI/CaseControl?branch=master)
 
-CaseControl is part of [HADES](https://ohdsi.github.io/Hades).
+**This package is no longer being supported** It is provided as is.
 
 Introduction
 ============
@@ -66,4 +66,4 @@ CaseControl is being developed in R Studio.
 
 ### Development status
 
-Beta
+No longer supported.
