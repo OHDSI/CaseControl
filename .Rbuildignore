@@ -3,7 +3,7 @@
 .gitattributes
 extras
 standalone
-.travis.yml
+.github
 ^\.git
 deploy.sh
 compare_versions

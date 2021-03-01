@@ -55,6 +55,7 @@ fitCaseControlModel <- function(caseControlData,
   start <- Sys.time()
   coefficients <- NULL
   treatmentEstimate <- NULL
+  logLikelihood <- NA
   fit <- NULL
   status <- "NO MODEL FITTED"
   if (nrow(caseControlData) == 0 || max(caseControlData$exposed) == 0) {
@@ -150,16 +151,23 @@ fitCaseControlModel <- function(caseControlData,
       if (identical(ci, c(0, -Inf, Inf)))
         status <- "ERROR COMPUTING CI"
       seLogRr <- (ci[3] - ci[2])/(2 * qnorm(0.975))
+      llNull <- Cyclops::getCyclopsProfileLogLikelihood(object = fit,
+                                                        parm = treatmentVarId,
+                                                        x = 0,
+                                                        includePenalty = FALSE)$value
+      llr <- fit$log_likelihood - llNull
       treatmentEstimate <- data.frame(logRr = logRr,
                                       logLb95 = ci[2],
                                       logUb95 = ci[3],
-                                      seLogRr = seLogRr)
+                                      seLogRr = seLogRr,
+                                      llr = llr)
     }
   }
   outcomeModel <- list()
   outcomeModel$outcomeModelTreatmentEstimate <- treatmentEstimate
   outcomeModel$outcomeModelCoefficients <- coefficients
   outcomeModel$outcomeModelStatus <- status
+  outcomeModel$outcomeModelLogLikelihood <- logLikelihood
   if (nrow(caseControlData) == 0) {
     outcomeCounts <- data.frame(cases = 0,
                                 controls = 0,

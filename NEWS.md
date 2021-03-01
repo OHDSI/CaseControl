@@ -1,3 +1,11 @@
+CaseControl 3.0.1
+==================
+
+Changes:
+
+1. Adding log likelihood ratio to outcome model object.
+
+
 CaseControl 3.0.0
 ==================
 

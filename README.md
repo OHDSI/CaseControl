@@ -1,7 +1,7 @@
 CaseControl
 ===========
 
-[![Build Status](https://travis-ci.org/OHDSI/CaseControl.svg?branch=master)](https://travis-ci.org/OHDSI/CaseControl)
+[![Build Status](https://github.com/OHDSI/CaseControl/workflows/R-CMD-check/badge.svg)](https://github.com/OHDSI/CaseControl/actions?query=workflow%3AR-CMD-check)
 [![codecov.io](https://codecov.io/github/OHDSI/CaseControl/coverage.svg?branch=master)](https://codecov.io/github/OHDSI/CaseControl?branch=master)
 
 **This package is no longer being supported** It is provided as is.
