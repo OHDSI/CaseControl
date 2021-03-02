@@ -112,13 +112,13 @@ setMethod("show", "CaseData", function(object) {
 setMethod("summary", "CaseData", function(object) {
 
   populationCount <- object$nestingCohorts %>%
-    summarise(nestingCohorts = n_distinct(.data$nestingCohortId), persons = n_distinct(.data$personId)) %>%
+    summarise(nestingCohorts = n_distinct(.data$nestingCohortId), persons = n_distinct(.data$personSeqId)) %>%
     collect()
 
   outcomeCounts <- object$cases %>%
     inner_join(object$nestingCohorts, by = "nestingCohortId") %>%
     group_by(.data$outcomeId) %>%
-    summarise(events = n(), nestingCohorts = n_distinct(.data$nestingCohortId), persons = n_distinct(.data$personId)) %>%
+    summarise(events = n(), nestingCohorts = n_distinct(.data$nestingCohortId), persons = n_distinct(.data$personSeqId)) %>%
     collect()
 
   result <- list(metaData = attr(object, "metaData"),

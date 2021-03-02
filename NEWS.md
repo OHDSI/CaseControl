@@ -5,6 +5,8 @@ Changes:
 
 1. Adding log likelihood ratio to outcome model object.
 
+2. Internally replacing person_id, provider_id, and care_site_id with sequential IDs to avoid loss of precision when converting BIGINT to numeric.
+
 
 CaseControl 3.0.0
 ==================

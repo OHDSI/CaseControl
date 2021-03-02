@@ -22,27 +22,30 @@ library(DatabaseConnector)
 library(CaseControl)
 options(andromedaTempFolder = "s:/andromedaTemp")
 
-pw <- NULL
-dbms <- "pdw"
-user <- NULL
-cdmDatabaseSchema <- "CDM_IBM_MDCR_V1192.dbo"
-cohortDatabaseSchema <- "scratch.dbo"
+cdmDatabaseSchema <- "cdm"
+cohortDatabaseSchema <- "scratch_mschuemi2"
 oracleTempSchema <- NULL
 cohortTable <- "mschuemi_cc_vignette"
-server <- Sys.getenv("PDW_SERVER")
-port <- Sys.getenv("PDW_PORT")
 
-connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms,
-                                                                server = server,
-                                                                user = user,
-                                                                password = pw,
-                                                                port = port)
+connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = "redshift",
+                                                                connectionString = keyring::key_get("redShiftConnectionStringMdcd"),
+                                                                user = keyring::key_get("redShiftUserName"),
+                                                                password = keyring::key_get("redShiftPassword"))
+
+Sys.setenv("AWS_OBJECT_KEY" = "bulk")
+Sys.setenv("AWS_ACCESS_KEY_ID" = Sys.getenv("bulkUploadS3Key"))
+Sys.setenv("AWS_SECRET_ACCESS_KEY" = Sys.getenv("bulkUploadS3Secret"))
+Sys.setenv("AWS_BUCKET_NAME" = Sys.getenv("bulkUploadS3Bucket"))
+Sys.setenv("AWS_DEFAULT_REGION" = "us-east-1")
+Sys.setenv("AWS_SSE_TYPE" = "AES256")
+Sys.setenv("DATABASE_CONNECTOR_BULK_UPLOAD" = TRUE)
+
 
 connection <- DatabaseConnector::connect(connectionDetails)
 
 sql <- SqlRender::loadRenderTranslateSql("vignette.sql",
                                          packageName = "CaseControl",
-                                         dbms = dbms,
+                                         dbms = connectionDetails$dbms,
                                          cdmDatabaseSchema = cdmDatabaseSchema,
                                          cohortDatabaseSchema = cohortDatabaseSchema,
                                          cohortTable = cohortTable)
@@ -83,7 +86,9 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
 #                           nestingCohortTable = cohortTable,
 #                           nestingCohortId = 2,
 #                           useObservationEndAsNestingEndDate = TRUE,
-#                           getVisits = TRUE,
+#                           getVisits = FALSE,
+#                           maxNestingCohortSize = 1e5,
+#                           maxCasesPerOutcome = 1000,
 #                           getExposures = TRUE,
 #                           exposureDatabaseSchema = cdmDatabaseSchema,
 #                           exposureTable = "drug_era",

@@ -117,7 +117,7 @@ fitCaseControlModel <- function(caseControlData,
     } else {
       prior <- createPrior("none")  # Only one variable, which we're not going to regularize, so effectively no prior
       treatmentVarId <- "exposed"
-      if (is.null(caseControlData$stratumId)) {
+      if ("stratumId" %in% names(caseControlData)) {
         cyclopsData <- Cyclops::createCyclopsData(isCase ~ exposed,
                                                   data = caseControlData,
                                                   modelType = "lr")
@@ -161,6 +161,7 @@ fitCaseControlModel <- function(caseControlData,
                                       logUb95 = ci[3],
                                       seLogRr = seLogRr,
                                       llr = llr)
+      logLikelihood <- fit$log_likelihood
     }
   }
   outcomeModel <- list()
@@ -213,8 +214,8 @@ print.outcomeModel <- function(x, ...) {
   printCoefmat(d, P.values = FALSE, has.Pvalue = FALSE)
   writeLines("")
   d <- x$outcomeModelTreatmentEstimate
-  output <- data.frame(exp(d$logRr), exp(d$logLb95), exp(d$logUb95), d$logRr, d$seLogRr)
-  colnames(output) <- c("Estimate", "lower .95", "upper .95", "logRr", "seLogRr")
+  output <- data.frame(exp(d$logRr), exp(d$logLb95), exp(d$logUb95), d$logRr, d$seLogRr, d$llr)
+  colnames(output) <- c("Estimate", "lower .95", "upper .95", "logRr", "seLogRr", "Log Likelihood Ratio")
   rownames(output) <- "treatment"
   printCoefmat(output)
 }

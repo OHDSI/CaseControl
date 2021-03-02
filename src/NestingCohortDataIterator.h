@@ -30,9 +30,9 @@ namespace ohdsi {
 namespace caseControl {
 
 struct NestingCohortData {
-  NestingCohortData(int64_t _nestingCohortId, int64_t _personId, int _observationPeriodStartDate, int _startDate, int _endDate, int _dateOfBirth, int _genderConceptId, int64_t _providerId, int64_t _careSiteId) :
-  nestingCohortId(_nestingCohortId), personId(_personId), observationPeriodStartDate(_observationPeriodStartDate), startDate(_startDate), endDate(_endDate), dateOfBirth(_dateOfBirth), genderConceptId(_genderConceptId),
-  providerId(_providerId), careSiteId(_careSiteId), indexDates(), visitDates() {
+  NestingCohortData(int64_t _nestingCohortId, int64_t _personSeqId, int _observationPeriodStartDate, int _startDate, int _endDate, int _dateOfBirth, int _genderConceptId, int64_t _providerSeqId, int64_t _careSiteSeqId) :
+  nestingCohortId(_nestingCohortId), personSeqId(_personSeqId), observationPeriodStartDate(_observationPeriodStartDate), startDate(_startDate), endDate(_endDate), dateOfBirth(_dateOfBirth), genderConceptId(_genderConceptId),
+  providerSeqId(_providerSeqId), careSiteSeqId(_careSiteSeqId), indexDates(), visitDates() {
   }
 
   bool operator < (const NestingCohortData& other) const {
@@ -40,14 +40,14 @@ struct NestingCohortData {
   }
 
   int64_t nestingCohortId;
-  int64_t personId;
+  int64_t personSeqId;
   int observationPeriodStartDate;
   int startDate;
   int endDate;
   int dateOfBirth;
   int genderConceptId;
-  int64_t providerId;
-  int64_t careSiteId;
+  int64_t providerSeqId;
+  int64_t careSiteSeqId;
   std::vector<int> indexDates;
   std::vector<int> visitDates;
 };
@@ -63,14 +63,14 @@ private:
   AndromedaTableIterator casesIterator;
   AndromedaTableIterator visitsIterator;
   NumericVector nestingCohortsNestingCohortId;
-  NumericVector nestingCohortsPersonId;
+  NumericVector nestingCohortsPersonSeqId;
   NumericVector nestingCohortsStartDate;
   NumericVector nestingCohortsObservationPeriodStartDate;
   NumericVector nestingCohortsEndDate;
   NumericVector nestingCohortsDateOfBirth;
   NumericVector nestingCohortsGenderConceptId;
-  NumericVector nestingCohortsProviderId;
-  NumericVector nestingCohortsCareSiteId;
+  NumericVector nestingCohortsProviderSeqId;
+  NumericVector nestingCohortsCareSiteSeqId;
   NumericVector casesNestingCohortId;
   NumericVector casesIndexDate;
   NumericVector visitsNestingCohortId;

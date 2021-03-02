@@ -22,7 +22,7 @@ limitations under the License.
 {DEFAULT @exposure_ids = 1} 
 {DEFAULT @sample_nesting_cohorts = FALSE}
 
-SELECT exposure.person_id,
+SELECT person_seq_id,
   exposure_id,
   exposure_start_date,
   exposure_end_date

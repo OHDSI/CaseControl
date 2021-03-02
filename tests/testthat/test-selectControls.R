@@ -5,7 +5,7 @@ test_that("Washout period for cases", {
                                                   outcomeId = c(1),
                                                   indexDate = as.Date(c("2000-07-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1),
-                                                           personId = c(1),
+                                                           personSeqId = c(1),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01")),
                                                            endDate = as.Date(c("2010-01-01")),
@@ -19,7 +19,7 @@ test_that("Washout period for cases", {
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(removedUnmatchedCases = FALSE))
-  expect_equal(cc$personId, c(1))
+  expect_equal(cc$personSeqId, c(1))
 
   # Case before washout period:
   cc <- selectControls(caseData = caseData,
@@ -35,7 +35,7 @@ test_that("Washout period for controls", {
                                                   outcomeId = c(1),
                                                   indexDate = as.Date(c("2001-01-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
-                                                           personId = c(1, 2, 3),
+                                                           personSeqId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-11-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-11-01")),
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
@@ -49,7 +49,7 @@ test_that("Washout period for controls", {
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2))
-  expect_equal(cc$personId, c(1, 2))
+  expect_equal(cc$personSeqId, c(1, 2))
 
   # Both controls after washout period:
 
@@ -57,7 +57,7 @@ test_that("Washout period for controls", {
                        outcomeId = 1,
                        washoutPeriod = 0,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2))
-  expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
+  expect_equal(cc$personSeqId[order(cc$personSeqId)], c(1, 2, 3))
   close(caseData)
 })
 
@@ -66,7 +66,7 @@ test_that("Match on index date", {
                                                   outcomeId = c(1),
                                                   indexDate = as.Date(c("2001-01-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
-                                                           personId = c(1, 2, 3),
+                                                           personSeqId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2002-01-01", "2000-01-01")),
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
@@ -77,7 +77,7 @@ test_that("Match on index date", {
 
   # One control with overlapping cohort time:
   cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180)
-  expect_equal(cc$personId, c(1, 3))
+  expect_equal(cc$personSeqId, c(1, 3))
   expect_equal(cc$indexDate, as.Date(c("2001-01-01", "2001-01-01")))
   close(caseData)
 })
@@ -87,7 +87,7 @@ test_that("Match on gender", {
                                                   outcomeId = c(1),
                                                   indexDate = as.Date(c("2001-01-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
-                                                           personId = c(1, 2, 3),
+                                                           personSeqId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
@@ -101,14 +101,14 @@ test_that("Match on gender", {
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnGender = FALSE))
-  expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
+  expect_equal(cc$personSeqId[order(cc$personSeqId)], c(1, 2, 3))
 
   # One control with same gender:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnGender = TRUE))
-  expect_equal(cc$personId, c(1, 2))
+  expect_equal(cc$personSeqId, c(1, 2))
   close(caseData)
 })
 
@@ -117,7 +117,7 @@ test_that("Match on age", {
                                                   outcomeId = c(1),
                                                   indexDate = as.Date(c("2001-01-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
-                                                           personId = c(1, 2, 3),
+                                                           personSeqId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
@@ -131,14 +131,14 @@ test_that("Match on age", {
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnAge = FALSE))
-  expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
+  expect_equal(cc$personSeqId[order(cc$personSeqId)], c(1, 2, 3))
 
   # One control with simlar age:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnAge = TRUE, ageCaliper = 2))
-  expect_equal(cc$personId, c(1, 2))
+  expect_equal(cc$personSeqId, c(1, 2))
   close(caseData)
 })
 
@@ -147,7 +147,7 @@ test_that("Match on provider", {
                                                   outcomeId = c(1),
                                                   indexDate = as.Date(c("2001-01-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
-                                                           personId = c(1, 2, 3),
+                                                           personSeqId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
@@ -161,14 +161,14 @@ test_that("Match on provider", {
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnProvider = FALSE))
-  expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
+  expect_equal(cc$personSeqId[order(cc$personSeqId)], c(1, 2, 3))
 
   # One control with simlar provider:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnProvider = TRUE))
-  expect_equal(cc$personId, c(1, 3))
+  expect_equal(cc$personSeqId, c(1, 3))
   close(caseData)
 })
 
@@ -177,7 +177,7 @@ test_that("Match on care site", {
                                                   outcomeId = c(1),
                                                   indexDate = as.Date(c("2001-01-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
-                                                           personId = c(1, 2, 3),
+                                                           personSeqId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
@@ -191,14 +191,14 @@ test_that("Match on care site", {
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnCareSite = FALSE))
-  expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
+  expect_equal(cc$personSeqId[order(cc$personSeqId)], c(1, 2, 3))
 
   # One control with simlar care site:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnCareSite = TRUE))
-  expect_equal(cc$personId, c(1, 3))
+  expect_equal(cc$personSeqId, c(1, 3))
   close(caseData)
 })
 
@@ -207,7 +207,7 @@ test_that("Match on visit", {
                                                   outcomeId = c(1),
                                                   indexDate = as.Date(c("2001-01-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
-                                                           personId = c(1, 2, 3),
+                                                           personSeqId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
@@ -224,14 +224,14 @@ test_that("Match on visit", {
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnVisitDate = FALSE))
-  expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
+  expect_equal(cc$personSeqId[order(cc$personSeqId)], c(1, 2, 3))
 
   # One control with matching visit date:
   cc <- selectControls(caseData = caseData,
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnVisitDate = TRUE, visitDateCaliper = 30))
-  expect_equal(cc$personId, c(1, 2))
+  expect_equal(cc$personSeqId, c(1, 2))
   expect_equal(cc$indexDate, as.Date(c("2001-01-01", "2001-01-02")))
   close(caseData)
 })
@@ -241,7 +241,7 @@ test_that("Match on time in cohort", {
                                                   outcomeId = c(1),
                                                   indexDate = as.Date(c("2001-01-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
-                                                           personId = c(1, 2, 3),
+                                                           personSeqId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("1999-01-01", "1999-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "1999-01-01", "2000-01-01")),
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
@@ -259,7 +259,7 @@ test_that("Match on time in cohort", {
                                                                          matchOnAge = FALSE,
                                                                          matchOnGender = FALSE,
                                                                          matchOnTimeInCohort = FALSE))
-  expect_equal(cc$personId[order(cc$personId)], c(1, 2, 3))
+  expect_equal(cc$personSeqId[order(cc$personSeqId)], c(1, 2, 3))
 
   # One control with simlar time in cohort:
   cc <- selectControls(caseData = caseData,
@@ -270,7 +270,7 @@ test_that("Match on time in cohort", {
                                                                          matchOnGender = FALSE,
                                                                          matchOnTimeInCohort = TRUE,
                                                                          daysInCohortCaliper = 30))
-  expect_equal(cc$personId, c(1, 3))
+  expect_equal(cc$personSeqId, c(1, 3))
   close(caseData)
 })
 
@@ -279,7 +279,7 @@ test_that("Restrict on age", {
                                                   outcomeId = c(1),
                                                   indexDate = as.Date(c("2001-01-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
-                                                           personId = c(1, 2, 3),
+                                                           personSeqId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
@@ -293,7 +293,7 @@ test_that("Restrict on age", {
                        outcomeId = 1,
                        washoutPeriod = 180,
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnAge = TRUE))
-  expect_equal(cc$personId[order(cc$personId)], c(1, 2))
+  expect_equal(cc$personSeqId[order(cc$personSeqId)], c(1, 2))
 
   # No cases when restricting on age:
   cc <- selectControls(caseData = caseData,
@@ -302,7 +302,7 @@ test_that("Restrict on age", {
                        controlSelectionCriteria = createMatchingCriteria(controlsPerCase = 2, matchOnAge = TRUE),
                        minAge = 8,
                        maxAge = 12)
-  expect_equal(length(cc$personId), 0)
+  expect_equal(length(cc$personSeqId), 0)
   close(caseData)
 })
 
@@ -312,7 +312,7 @@ test_that("Sampling with replacement", {
                                                   outcomeId = c(1, 1),
                                                   indexDate = as.Date(c("2001-01-01", "2001-01-01"))),
                                    nestingCohorts = tibble(nestingCohortId = c(1, 2, 3),
-                                                           personId = c(1, 2, 3),
+                                                           personSeqId = c(1, 2, 3),
                                                            observationPeriodStartDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            startDate = as.Date(c("2000-01-01", "2000-01-01", "2000-01-01")),
                                                            endDate = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01")),
@@ -323,7 +323,7 @@ test_that("Sampling with replacement", {
 
   # Control should be used twice:
   cc <- selectControls(caseData = caseData, outcomeId = 1, washoutPeriod = 180)
-  expect_equal(cc$personId, c(1, 3, 2, 3))
+  expect_equal(cc$personSeqId, c(1, 3, 2, 3))
   close(caseData)
 })
 

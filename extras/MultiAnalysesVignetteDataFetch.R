@@ -22,22 +22,25 @@ library(DatabaseConnector)
 library(CaseControl)
 options(andromedaTempFolder = "s:/andromedaTemp")
 
-pw <- NULL
-dbms <- "pdw"
-user <- NULL
-cdmDatabaseSchema <- "CDM_IBM_MDCR_V1192.dbo"
-cohortDatabaseSchema <- "scratch.dbo"
-cohortTable <- "mschuemi_cc_vignette"
+cdmDatabaseSchema <- "cdm"
+cohortDatabaseSchema <- "scratch_mschuemi2"
 oracleTempSchema <- NULL
-outputFolder <- "s:/temp/vignetteCaseControl2"
-server <- Sys.getenv("PDW_SERVER")
-port <- Sys.getenv("PDW_PORT")
+cohortTable <- "mschuemi_cc_vignette"
 
-connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms,
-                                                                server = server,
-                                                                user = user,
-                                                                password = pw,
-                                                                port = port)
+connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = "redshift",
+                                                                connectionString = keyring::key_get("redShiftConnectionStringMdcd"),
+                                                                user = keyring::key_get("redShiftUserName"),
+                                                                password = keyring::key_get("redShiftPassword"))
+
+Sys.setenv("AWS_OBJECT_KEY" = "bulk")
+Sys.setenv("AWS_ACCESS_KEY_ID" = Sys.getenv("bulkUploadS3Key"))
+Sys.setenv("AWS_SECRET_ACCESS_KEY" = Sys.getenv("bulkUploadS3Secret"))
+Sys.setenv("AWS_BUCKET_NAME" = Sys.getenv("bulkUploadS3Bucket"))
+Sys.setenv("AWS_DEFAULT_REGION" = "us-east-1")
+Sys.setenv("AWS_SSE_TYPE" = "AES256")
+Sys.setenv("DATABASE_CONNECTOR_BULK_UPLOAD" = TRUE)
+
+outputFolder <- "s:/temp/vignetteCaseControl2"
 
 connection <- DatabaseConnector::connect(connectionDetails)
 
@@ -53,8 +56,8 @@ DatabaseConnector::executeSql(connection, sql)
 # Check number of subjects per cohort:
 sql <- "SELECT cohort_definition_id, COUNT(*) AS count FROM @cohortDatabaseSchema.@cohortTable GROUP BY cohort_definition_id"
 sql <- SqlRender::render(sql,
-                            cohortDatabaseSchema = cohortDatabaseSchema,
-                            cohortTable = cohortTable)
+                         cohortDatabaseSchema = cohortDatabaseSchema,
+                         cohortTable = cohortTable)
 sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms)
 DatabaseConnector::querySql(connection, sql)
 
@@ -98,11 +101,11 @@ for (exposureId in c(diclofenac, negativeControls)) {
 getDbCaseDataArgs1 <- createGetDbCaseDataArgs(useNestingCohort = FALSE, getVisits = FALSE)
 
 matchingCriteria1 <- createMatchingCriteria(controlsPerCase = 2,
-                                           matchOnAge = TRUE,
-                                           ageCaliper = 2,
-                                           matchOnGender = TRUE,
-                                           matchOnProvider = FALSE,
-                                           matchOnVisitDate = FALSE)
+                                            matchOnAge = TRUE,
+                                            ageCaliper = 2,
+                                            matchOnGender = TRUE,
+                                            matchOnProvider = FALSE,
+                                            matchOnVisitDate = FALSE)
 
 selectControlsArgs1 <- createSelectControlsArgs(firstOutcomeOnly = FALSE,
                                                 washoutPeriod = 180,

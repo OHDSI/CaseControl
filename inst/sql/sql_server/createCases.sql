@@ -43,13 +43,14 @@ IF OBJECT_ID('tempdb..#cases', 'U') IS NOT NULL
 ***********************************************************************/
 SELECT DISTINCT nesting_cohort_id,
 	person.person_id,
+	person_seq_id,
 	observation_period_start_date,
 	start_date,
 	end_date,
 	DATEFROMPARTS(year_of_birth, ISNULL(month_of_birth, 1), ISNULL(day_of_birth, 1)) AS date_of_birth,
 	gender_concept_id,
-	person.provider_id,
-	person.care_site_id
+	provider_seq_id,
+	care_site_seq_id
 INTO #nesting_cohort
 FROM (
 	SELECT person_id,
@@ -86,12 +87,12 @@ FROM (
 }
 		FROM @nesting_cohort_database_schema.@nesting_cohort_table cohort_table
 		INNER JOIN @cdm_database_schema.observation_period
-		ON cohort_table.subject_id = observation_period.person_id
+			ON cohort_table.subject_id = observation_period.person_id
 		WHERE cohort_table.cohort_definition_id = @nesting_cohort_id
 			AND cohort_table.cohort_start_date >= observation_period_start_date
 			AND cohort_table.cohort_start_date <= observation_period_end_date
 } : {
-		SELECT observation_period_id AS nesting_cohort_id,
+		SELECT ROW_NUMBER() OVER (ORDER BY person_id, observation_period_start_date) AS nesting_cohort_id,
 			person_id,
 			observation_period_start_date,
 			observation_period_start_date AS start_date,
@@ -105,7 +106,25 @@ FROM (
 {@study_end_date != '' } ? {		start_date < CAST('@study_end_date' AS DATE) }
 ) nesting_cohort
 INNER JOIN @cdm_database_schema.person
-ON nesting_cohort.person_id = person.person_id
+	ON nesting_cohort.person_id = person.person_id
+INNER JOIN (
+			SELECT DISTINCT person_id,
+				ROW_NUMBER() OVER (ORDER BY person_id) AS person_seq_id
+			FROM @cdm_database_schema.person
+		) unique_ids
+			ON person.person_id = unique_ids.person_id	
+LEFT JOIN (
+			SELECT DISTINCT provider_id,
+				ROW_NUMBER() OVER (ORDER BY provider_id) AS provider_seq_id
+			FROM @cdm_database_schema.person
+		) unique_provider_ids
+			ON person.provider_id = unique_provider_ids.provider_id	
+LEFT JOIN (
+			SELECT DISTINCT care_site_id,
+				ROW_NUMBER() OVER (ORDER BY care_site_id) AS care_site_seq_id
+			FROM @cdm_database_schema.person
+		) unique_care_site_ids
+			ON person.care_site_id = unique_care_site_ids.care_site_id
 {@case_crossover} ? {
 INNER JOIN (
 {@outcome_table == 'condition_occurrence'} ? {	
@@ -130,9 +149,9 @@ INNER JOIN (
 	}
 }
 	) outcome
-ON outcome.person_id = nesting_cohort.person_id
-AND outcome.index_date <= nesting_cohort.end_date
-AND	outcome.index_date >= nesting_cohort.observation_period_start_date
+	ON outcome.person_id = nesting_cohort.person_id
+		AND outcome.index_date <= nesting_cohort.end_date
+		AND	outcome.index_date >= nesting_cohort.observation_period_start_date
 }
 ;
 	

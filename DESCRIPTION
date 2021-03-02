@@ -26,7 +26,8 @@ Imports:
   ParallelLogger (>= 2.0.0),
   plyr,
   cli,
-  pillar
+  pillar,
+  bit64
 Suggests:
   testthat,
   knitr,

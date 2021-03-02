@@ -135,6 +135,7 @@ getDbCaseData <- function(connectionDetails,
   caseCrossover <- !is.null(attr(useNestingCohort, "caseCrossover"))
 
   conn <- connect(connectionDetails)
+  on.exit(DatabaseConnector::disconnect(conn))
   renderedSql <- SqlRender::loadRenderTranslateSql("createCases.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
@@ -264,7 +265,6 @@ getDbCaseData <- function(connectionDetails,
                                                    oracleTempSchema = oracleTempSchema,
                                                    sample_nesting_cohorts = sampleNestingCohorts)
   DatabaseConnector::executeSql(conn, renderedSql, progressBar = FALSE, reportOverallTime = FALSE)
-  DatabaseConnector::disconnect(conn)
 
   metaData <- list(outcomeIds = outcomeIds,
                    hasVisits = getVisits,

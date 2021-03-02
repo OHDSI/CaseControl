@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CaseControl</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">3.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">3.1.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -112,7 +112,7 @@
 </li>
 <li>
   <a href="https://github.com/OHDSI/CaseControl/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -138,16 +138,16 @@
     <p>Fit the case-control model</p>
     </div>
 
-    <pre class="usage"><span class='fu'>fitCaseControlModel</span>(
-  <span class='no'>caseControlData</span>,
-  <span class='kw'>useCovariates</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>excludeCovariateIds</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(),
-  <span class='kw'>includeCovariateIds</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(),
-  <span class='kw'>caseControlsExposure</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>prior</span> <span class='kw'>=</span> <span class='fu'>createPrior</span>(<span class='st'>"laplace"</span>, <span class='kw'>useCrossValidation</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>),
-  <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>createControl</span>(<span class='kw'>cvType</span> <span class='kw'>=</span> <span class='st'>"auto"</span>, <span class='kw'>startingVariance</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>2e-07</span>,
-    <span class='kw'>cvRepetitions</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>selectorType</span> <span class='kw'>=</span> <span class='st'>"byPid"</span>, <span class='kw'>noiseLevel</span> <span class='kw'>=</span> <span class='st'>"quiet"</span>)
-)</pre>
+    <pre class="usage"><span class='fu'>fitCaseControlModel</span><span class='op'>(</span>
+  <span class='va'>caseControlData</span>,
+  useCovariates <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  excludeCovariateIds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>)</span>,
+  includeCovariateIds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>)</span>,
+  caseControlsExposure <span class='op'>=</span> <span class='cn'>NULL</span>,
+  prior <span class='op'>=</span> <span class='fu'>createPrior</span><span class='op'>(</span><span class='st'>"laplace"</span>, useCrossValidation <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>,
+  control <span class='op'>=</span> <span class='fu'>createControl</span><span class='op'>(</span>cvType <span class='op'>=</span> <span class='st'>"auto"</span>, startingVariance <span class='op'>=</span> <span class='fl'>0.01</span>, tolerance <span class='op'>=</span> <span class='fl'>2e-07</span>,
+    cvRepetitions <span class='op'>=</span> <span class='fl'>10</span>, selectorType <span class='op'>=</span> <span class='st'>"byPid"</span>, noiseLevel <span class='op'>=</span> <span class='st'>"quiet"</span><span class='op'>)</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -209,7 +209,7 @@ determine the hyperparameters of the prior (if applicable). See
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

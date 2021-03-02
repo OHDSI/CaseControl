@@ -91,23 +91,23 @@ getDbExposureData <- function(caseControls,
       mutate(rowId = row_number())
 
     exposure <- caseData$exposures %>%
-      filter(.data$exposureId %in% exposureIds & .data$personId %in% local(caseControls$personId)) %>%
+      filter(.data$exposureId %in% exposureIds & .data$personSeqId %in% local(caseControls$personSeqId)) %>%
       collect()
 
     nestingCohorts <- caseData$nestingCohorts %>%
-      filter(.data$personId %in% local(caseControls$personId)) %>%
+      filter(.data$personSeqId %in% local(caseControls$personSeqId)) %>%
       collect()
 
     opStartDates <- caseControls %>%
-      select(.data$personId, .data$indexDate, .data$rowId) %>%
-      inner_join(nestingCohorts, by = "personId") %>%
+      select(.data$personSeqId, .data$indexDate, .data$rowId) %>%
+      inner_join(nestingCohorts, by = "personSeqId") %>%
       filter(.data$indexDate >= .data$observationPeriodStartDate) %>%
-      group_by(.data$rowId, .data$personId) %>%
+      group_by(.data$rowId, .data$personSeqId) %>%
       summarise(observationPeriodStartDate = max(.data$observationPeriodStartDate, na.rm = TRUE), .groups = "drop_last")
 
     exposure <- exposure %>%
-      inner_join(select(caseControls, .data$personId, .data$indexDate), by = "personId") %>%
-      inner_join(opStartDates, by = "personId") %>%
+      inner_join(select(caseControls, .data$personSeqId, .data$indexDate), by = "personSeqId") %>%
+      inner_join(opStartDates, by = "personSeqId") %>%
       mutate(daysPriorObservation = .data$exposureStartDate - .data$observationPeriodStartDate,
              daysSinceExposureStart = .data$indexDate - .data$exposureStartDate,
              daysSinceExposureEnd = .data$indexDate - .data$exposureEndDate) %>%
@@ -121,12 +121,15 @@ getDbExposureData <- function(caseControls,
     result$metaData$hasCovariates <- FALSE
   } else {
     connection <- DatabaseConnector::connect(connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
     ParallelLogger::logInfo("Uploading cases and controls to database temp table")
     start <- Sys.time()
     caseControls$rowId <- 1:nrow(caseControls)
-    data <- caseControls[, c("rowId", "personId", "indexDate")]
-    colnames(data)[colnames(data) == "personId"] <- "subjectId"
-    colnames(data)[colnames(data) == "indexDate"] <- "cohortStartDate"
+    data <- caseControls %>%
+      transmute(rowId = .data$rowId,
+                cohortDefinitionId = 1,
+                subjectId = bit64::as.integer64(.data$personId),
+                cohortStartDate = Andromeda::restoreDate(.data$indexDate))
     if (connection@dbms %in% c("pdw", "redshift") && !is.null(oracleTempSchema)) {
       ParallelLogger::logInfo("Attempting to use bulk load for MPP platform.")
       tableName <- paste(oracleTempSchema, paste(sample(letters, 20), collapse = ""), sep = ".")
@@ -190,7 +193,6 @@ getDbExposureData <- function(caseControls,
                                 targetDialect = connectionDetails$dbms,
                                 oracleTempSchema = oracleTempSchema)
     DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
-    DatabaseConnector::disconnect(connection)
 
     result <- list(caseControls = caseControls, exposure = exposure, metaData = attr(caseControls,
                                                                                      "metaData"))
@@ -203,6 +205,7 @@ getDbExposureData <- function(caseControls,
       result$metaData$hasCovariates <- FALSE
     }
   }
+  result$caseControls$personSeqId <- NULL
   result$caseControls$personId <- NULL
   result$caseControls$indexDate <- NULL
   class(result) <- "caseControlsExposure"

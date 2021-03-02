@@ -165,7 +165,6 @@ selectControls <- function(caseData,
   ParallelLogger::logInfo("Selecting up to ", controlSelectionCriteria$controlsPerCase, " controls per case for outcome ", outcomeId)
   cases <- caseData$cases %>%
     filter(.data$outcomeId == !!outcomeId) %>%
-    arrange(.data$nestingCohortId) %>%
     select(.data$nestingCohortId, .data$indexDate)
 
   eventCount <- cases %>%
@@ -176,34 +175,6 @@ selectControls <- function(caseData,
     pull()
   ParallelLogger::logDebug("Case data object has ", eventCount, " events with outcomeId ", outcomeId)
   if (eventCount > 0) {
-    nestingCohorts <- caseData$nestingCohorts %>%
-      arrange(.data$nestingCohortId)
-
-    if (matching) {
-      # Cannot iterate over multiple Andromeda tables simultaneously, so move smaller tables to
-      # their own temp Andromeda.
-      casesAndromeda <- Andromeda::andromeda()
-      casesAndromeda$cases <- cases
-      cases <- casesAndromeda$cases
-      on.exit(close(casesAndromeda))
-
-      if (controlSelectionCriteria$matchOnVisitDate && metaData$hasVisits) {
-        visits <- caseData$visits %>%
-          arrange(.data$nestingCohortId, .data$visitStartDate)
-
-        nestingCohortAndromeda <- Andromeda::andromeda()
-        nestingCohortAndromeda$nestingCohorts <- nestingCohorts
-        nestingCohorts <- nestingCohortAndromeda$nestingCohorts
-
-        on.exit(close(nestingCohortAndromeda), add = TRUE)
-      } else {
-        # Create a visits table with 1 dummy row:
-        visitAndromeda <- Andromeda::andromeda()
-        visitAndromeda$visits <- tibble(nestingCohortId = -1, visitStartDate = as.Date("1900-01-01"))
-        visits <- visitAndromeda$visits
-        on.exit(suppressWarnings(close(visitAndromeda)), add = TRUE)
-      }
-    }
     if (missing(minAge) || is.null(minAge)) {
       minAgeDays <- 0
     } else {
@@ -219,6 +190,34 @@ selectControls <- function(caseData,
       controlSelectionCriteria$seed = as.integer(Sys.time())
 
     if (matching) {
+      # Cannot iterate over multiple Andromeda tables simultaneously, so move smaller tables to
+      # their own temp Andromeda.
+      casesAndromeda <- Andromeda::andromeda()
+      casesAndromeda$cases <- cases
+      cases <- casesAndromeda$cases %>%
+        arrange(.data$nestingCohortId)
+      on.exit(close(casesAndromeda))
+
+      nestingCohortAndromeda <- Andromeda::andromeda()
+      nestingCohortAndromeda$nestingCohorts <- caseData$nestingCohorts %>%
+        arrange(.data$nestingCohortId)
+      nestingCohorts <- nestingCohortAndromeda$nestingCohorts
+
+      on.exit(close(nestingCohortAndromeda), add = TRUE)
+
+      if (controlSelectionCriteria$matchOnVisitDate && metaData$hasVisits) {
+        visits <- caseData$visits %>%
+          arrange(.data$nestingCohortId, .data$visitStartDate)
+
+
+      } else {
+        # Create a visits table with 1 dummy row:
+        visitAndromeda <- Andromeda::andromeda()
+        visitAndromeda$visits <- tibble(nestingCohortId = -1, visitStartDate = as.Date("1900-01-01"))
+        visits <- visitAndromeda$visits
+        on.exit(suppressWarnings(close(visitAndromeda)), add = TRUE)
+      }
+
       caseControls <- selectControlsInternal(nestingCohorts,
                                              cases,
                                              visits,
@@ -239,10 +238,15 @@ selectControls <- function(caseData,
                                              controlSelectionCriteria$seed)
       caseControls$indexDate <- as.Date(caseControls$indexDate, origin = "1970-01-01")
       caseControls <- as_tibble(caseControls)
+      caseControls <- caseData$nestingCohorts %>%
+        select(.data$personSeqId, .data$personId) %>%
+        inner_join(caseControls, copy = TRUE, by = "personSeqId") %>%
+        collect()
+
     } else {
       # Sampling
       cases <- cases %>%
-        inner_join(select(caseData$nestingCohorts, .data$nestingCohortId, .data$personId), by = "nestingCohortId") %>%
+        inner_join(select(caseData$nestingCohorts, .data$nestingCohortId, .data$personSeqId, .data$personId), by = "nestingCohortId") %>%
         collect()
       controls <- caseData$nestingCohorts %>%
         collect()
@@ -252,7 +256,7 @@ selectControls <- function(caseData,
                  .data$indexDate <= .data$endDate)
 
       controls <- controls %>%
-        left_join(select(cases, .data$personId, caseIndexDate = .data$indexDate), by = "personId") %>%
+        left_join(select(cases, .data$personSeqId, caseIndexDate = .data$indexDate), by = "personSeqId") %>%
         filter(is.na(.data$caseIndexDate) | .data$caseIndexDate > .data$indexDate)
 
       maxSampleSize <- controlSelectionCriteria$controlsPerCase * nrow(cases)
@@ -261,8 +265,8 @@ selectControls <- function(caseData,
       }
       controls$isCase <- FALSE
       cases$isCase <- TRUE
-      caseControls <- bind_rows(controls[, c("personId", "indexDate", "isCase")],
-                                cases[, c("personId", "indexDate", "isCase")])
+      caseControls <- bind_rows(controls[, c("personSeqId", "personId", "indexDate", "isCase")],
+                                cases[, c("personSeqId", "personId",  "indexDate", "isCase")])
       caseControls$indexDate <- Andromeda::restoreDate(caseControls$indexDate)
     }
     delta <- Sys.time() - start
@@ -285,7 +289,7 @@ selectControls <- function(caseData,
 
   if (washoutPeriod != 0) {
     eventCount <- sum(caseControls$isCase)
-    caseCount <- length(unique(caseControls$personId[caseControls$isCase]))
+    caseCount <- length(unique(caseControls$personSeqId[caseControls$isCase]))
     if (missing(minAge) | is.null(minAge) | missing(maxAge) | is.null(maxAge)) {
       description = paste("Require", washoutPeriod, "days of prior obs.")
     } else {
@@ -300,7 +304,7 @@ selectControls <- function(caseData,
     strataWithControls <- caseControls$stratumId[caseControls$isCase == FALSE]
     caseControls <- caseControls[caseControls$stratumId %in% strataWithControls, ]
     eventCount <- sum(caseControls$isCase)
-    caseCount <- length(unique(caseControls$personId[caseControls$isCase]))
+    caseCount <- length(unique(caseControls$personSeqId[caseControls$isCase]))
     counts <- rbind(counts, data.frame(description = paste("Remove unmatched controls"),
                                        eventCount = eventCount,
                                        caseCount = caseCount))

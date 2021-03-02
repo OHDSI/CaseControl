@@ -534,6 +534,8 @@ summarizeCcAnalyses <- function(outcomeReference, outputFolder) {
         NA else coef(model)
       result$seLogRr[i] <- if (is.null(coef(model)))
         NA else model$outcomeModelTreatmentEstimate$seLogRr
+      result$llr[i] <- if (is.null(coef(model)))
+        NA else model$outcomeModelTreatmentEstimate$llr
     }
   }
   return(result)

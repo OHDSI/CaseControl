@@ -42,28 +42,28 @@ struct IndexDate {
 
 struct CaseData {
   CaseData() = default;
-  CaseData(const int& _genderConceptId, const int& _dateOfBirth, const int64_t& _providerId, const int64_t& _careSiteId, const int& _startDate) : genderConceptId(_genderConceptId),
-  dateOfBirth(_dateOfBirth), providerId(_providerId), careSiteId(_careSiteId), startDate(_startDate), indexDates() {}
+  CaseData(const int& _genderConceptId, const int& _dateOfBirth, const int64_t& _providerSeqId, const int64_t& _careSiteSeqId, const int& _startDate) : genderConceptId(_genderConceptId),
+  dateOfBirth(_dateOfBirth), providerSeqId(_providerSeqId), careSiteSeqId(_careSiteSeqId), startDate(_startDate), indexDates() {}
   int genderConceptId;
   int dateOfBirth;
-  int64_t providerId;
-  int64_t careSiteId;
+  int64_t providerSeqId;
+  int64_t careSiteSeqId;
   int startDate;
   std::vector<IndexDate> indexDates;
 };
 
 struct Result {
-  Result() : personId(), indexDate(), isCase(), stratumId() {}
+  Result() : personSeqId(), indexDate(), isCase(), stratumId() {}
   DataFrame toDataFrame() {
-    return DataFrame::create(_["personId"] = personId, _["indexDate"] = indexDate, _["isCase"] = isCase, _["stratumId"] = stratumId);
+    return DataFrame::create(_["personSeqId"] = personSeqId, _["indexDate"] = indexDate, _["isCase"] = isCase, _["stratumId"] = stratumId);
   }
-  void add(const int64_t& _personId, const int& _indexDate, const bool& _isCase, const int& _stratumId) {
-    personId.push_back(_personId);
+  void add(const int64_t& _personSeqId, const int& _indexDate, const bool& _isCase, const int& _stratumId) {
+    personSeqId.push_back(_personSeqId);
     indexDate.push_back(_indexDate);
     isCase.push_back(_isCase);
     stratumId.push_back(_stratumId);
   }
-  std::vector<int64_t> personId;
+  std::vector<int64_t> personSeqId;
   std::vector<int> indexDate;
   std::vector<bool> isCase;
   std::vector<int> stratumId;
@@ -78,8 +78,8 @@ public:
   DataFrame selectControls();
 
 private:
-  void processCase(const int64_t& personId, CaseData& caseData);
-  void findControls(const int64_t& personId, const CaseData& caseData, const int& indexDate, const int& stratumId);
+  void processCase(const int64_t& personSeqId, CaseData& caseData);
+  void findControls(const int64_t& personSeqId, const CaseData& caseData, const int& indexDate, const int& stratumId);
   int isMatch(const NestingCohortData& controlData, const CaseData& caseData, const int& indexDate);
   int binarySearchDateOfBirthLowerBound(const int& key);
   int binarySearchDateOfBirthUpperBound(const int& _lowerBound, const int& key);
@@ -98,7 +98,7 @@ private:
   int minAgeDays;
   int maxAgeDays;
   std::vector<NestingCohortData> nestingCohortDatas;
-  std::map<int64_t, CaseData> personId2CaseData;
+  std::map<int64_t, CaseData> personSeqId2CaseData;
   std::mt19937 generator;
   std::uniform_int_distribution<int> *distribution;
   Result result;

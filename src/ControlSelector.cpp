@@ -39,7 +39,7 @@ ControlSelector::ControlSelector(const List& _nestingCohorts, const List& _cases
 firstOutcomeOnly(_firstOutcomeOnly), washoutPeriod(_washoutPeriod), controlsPerCase(_controlsPerCase), matchOnAge(_matchOnAge),
 ageCaliper(_ageCaliper), matchOnGender(_matchOnGender), matchOnProvider(_matchOnProvider), matchOnCareSite(_matchOnCareSite), matchOnVisitDate(_matchOnVisitDate),
 visitDateCaliper(_visitDateCaliper), matchOnTimeInCohort(_matchOnTimeInCohort), daysInCohortCaliper(_daysInCohortCaliper), minAgeDays(_minAgeDays), maxAgeDays(_maxAgeDays),
-nestingCohortDatas(), personId2CaseData(), generator(), stratumId(0) {
+nestingCohortDatas(), personSeqId2CaseData(), generator(), stratumId(0) {
   //Load all data in memory structures:
   if (_matchOnVisitDate) {
     Environment base = Environment::namespace_env("base");
@@ -49,18 +49,18 @@ nestingCohortDatas(), personId2CaseData(), generator(), stratumId(0) {
   NestingCohortDataIterator nestingCohortDataIterator(_nestingCohorts, _cases, _visits, _matchOnVisitDate);
   while (nestingCohortDataIterator.hasNext()){
     NestingCohortData nestingCohortData = nestingCohortDataIterator.next();
-    if ((!matchOnProvider || nestingCohortData.providerId != NA_INTEGER)
-          && (!matchOnCareSite || nestingCohortData.careSiteId != NA_INTEGER)) {
+    if ((!matchOnProvider || nestingCohortData.providerSeqId != NA_INTEGER)
+          && (!matchOnCareSite || nestingCohortData.careSiteSeqId != NA_INTEGER)) {
       nestingCohortDatas.push_back(nestingCohortData);
-      if (personId2CaseData.find(nestingCohortData.personId) == personId2CaseData.end()) {
-        CaseData caseData(nestingCohortData.genderConceptId, nestingCohortData.dateOfBirth, nestingCohortData.providerId, nestingCohortData.careSiteId, nestingCohortData.startDate);
-        personId2CaseData.insert(std::pair<int64_t,CaseData>(nestingCohortData.personId, caseData));
+      if (personSeqId2CaseData.find(nestingCohortData.personSeqId) == personSeqId2CaseData.end()) {
+        CaseData caseData(nestingCohortData.genderConceptId, nestingCohortData.dateOfBirth, nestingCohortData.providerSeqId, nestingCohortData.careSiteSeqId, nestingCohortData.startDate);
+        personSeqId2CaseData.insert(std::pair<int64_t,CaseData>(nestingCohortData.personSeqId, caseData));
       }
       for (int date : nestingCohortData.indexDates) {
         if (date <= std::min(nestingCohortData.dateOfBirth + maxAgeDays, nestingCohortData.endDate)) {
           bool washedOut = date < std::max(std::max(nestingCohortData.observationPeriodStartDate + washoutPeriod, nestingCohortData.dateOfBirth + minAgeDays), nestingCohortData.startDate);
           IndexDate indexDate(date, washedOut);
-          personId2CaseData[nestingCohortData.personId].indexDates.push_back(indexDate);
+          personSeqId2CaseData[nestingCohortData.personSeqId].indexDates.push_back(indexDate);
         }
       }
     }
@@ -80,11 +80,11 @@ int ControlSelector::isMatch(const NestingCohortData& controlData, const CaseDat
       return NO_MATCH;
   }
   if (matchOnProvider) {
-    if (caseData.providerId != controlData.providerId)
+    if (caseData.providerSeqId != controlData.providerSeqId)
       return NO_MATCH;
   }
   if (matchOnCareSite) {
-    if (caseData.careSiteId != controlData.careSiteId)
+    if (caseData.careSiteSeqId != controlData.careSiteSeqId)
       return NO_MATCH;
   }
   if (matchOnTimeInCohort) {
@@ -146,8 +146,8 @@ int ControlSelector::binarySearchDateOfBirthUpperBound(const int& _lowerBound, c
 }
 
 
-void ControlSelector::findControls(const int64_t& personId, const CaseData& caseData, const int& indexDate, const int& stratumId) {
-  std::set<int64_t> controlPersonIds;
+void ControlSelector::findControls(const int64_t& personSeqId, const CaseData& caseData, const int& indexDate, const int& stratumId) {
+  std::set<int64_t> controlPersonSeqIds;
   int lb;
   int ub;
   std::uniform_int_distribution<int> *dist;
@@ -166,53 +166,53 @@ void ControlSelector::findControls(const int64_t& personId, const CaseData& case
   // strategy 1: randonly pick people and see if they're a match:
 
   int iter = 0;
-  while (controlPersonIds.size() < controlsPerCase && iter < MAX_ITER) {
+  while (controlPersonSeqIds.size() < controlsPerCase && iter < MAX_ITER) {
     iter++;
     int idx;
     idx = (*dist)(generator);
     NestingCohortData controlData = nestingCohortDatas[idx];
     int value = isMatch(controlData, caseData, indexDate);
-    if (value != NO_MATCH && controlData.personId != personId && controlPersonIds.insert(controlData.personId).second) {
+    if (value != NO_MATCH && controlData.personSeqId != personSeqId && controlPersonSeqIds.insert(controlData.personSeqId).second) {
       if (matchOnVisitDate)
-        result.add(controlData.personId, value, false, stratumId);
+        result.add(controlData.personSeqId, value, false, stratumId);
       else
-        result.add(controlData.personId, indexDate, false, stratumId);
+        result.add(controlData.personSeqId, indexDate, false, stratumId);
     }
   }
   // If max iterations hit, fallback to strategy 2: iterate over all people and see which match. Then randomly sample from matches:
-  if (controlPersonIds.size() < controlsPerCase) {
+  if (controlPersonSeqIds.size() < controlsPerCase) {
     //std::cout << "Strategy 1 failed\n";
-    std::vector<int64_t> personIds;
+    std::vector<int64_t> personSeqIds;
     std::vector<int> indexDates;
     for (int i = lb; i <= ub; i++){
       NestingCohortData controlData = nestingCohortDatas[i];
       int value = isMatch(controlData, caseData, indexDate);
-      if (value != NO_MATCH && controlData.personId != personId && controlPersonIds.find(controlData.personId) == controlPersonIds.end()) {
-        personIds.push_back(controlData.personId);
+      if (value != NO_MATCH && controlData.personSeqId != personSeqId && controlPersonSeqIds.find(controlData.personSeqId) == controlPersonSeqIds.end()) {
+        personSeqIds.push_back(controlData.personSeqId);
         if (matchOnVisitDate)
           indexDates.push_back(value);
         else
           indexDates.push_back(indexDate);
       }
     }
-    while (controlPersonIds.size() < controlsPerCase && personIds.size() > 0) {
-      std::uniform_int_distribution<int> dist(0, personIds.size()-1);
+    while (controlPersonSeqIds.size() < controlsPerCase && personSeqIds.size() > 0) {
+      std::uniform_int_distribution<int> dist(0, personSeqIds.size()-1);
       int idx = dist(generator);
-      result.add(personIds[idx], indexDates[idx], false, stratumId);
-      controlPersonIds.insert(personIds[idx]);
-      personIds.erase(personIds.begin() + idx);
+      result.add(personSeqIds[idx], indexDates[idx], false, stratumId);
+      controlPersonSeqIds.insert(personSeqIds[idx]);
+      personSeqIds.erase(personSeqIds.begin() + idx);
       indexDates.erase(indexDates.begin() + idx);
     }
   }
 }
 
-void ControlSelector::processCase(const int64_t& personId, CaseData& caseData) {
+void ControlSelector::processCase(const int64_t& personSeqId, CaseData& caseData) {
   std::sort(caseData.indexDates.begin(), caseData.indexDates.end());
   for (IndexDate indexDate : caseData.indexDates) {
     if (!indexDate.washedOut) {
       stratumId++;
-      result.add(personId, indexDate.date, true, stratumId);
-      findControls(personId, caseData, indexDate.date, stratumId);
+      result.add(personSeqId, indexDate.date, true, stratumId);
+      findControls(personSeqId, caseData, indexDate.date, stratumId);
     }
     if (firstOutcomeOnly)
       break;
@@ -220,7 +220,7 @@ void ControlSelector::processCase(const int64_t& personId, CaseData& caseData) {
 }
 
 DataFrame ControlSelector::selectControls() {
-  if (personId2CaseData.size() == 0)
+  if (personSeqId2CaseData.size() == 0)
     return result.toDataFrame();
   Environment utils = Environment::namespace_env("utils");
   Environment base = Environment::namespace_env("base");
@@ -231,10 +231,10 @@ DataFrame ControlSelector::selectControls() {
 
   writeLines("Finding controls per case");
 
-  List progressBar = txtProgressBar(0, personId2CaseData.size(), 0, "=", NA_REAL, "" , "", 3, "");
+  List progressBar = txtProgressBar(0, personSeqId2CaseData.size(), 0, "=", NA_REAL, "" , "", 3, "");
 
   int i = 0;
-  for(std::map<int64_t, CaseData>::iterator iterator = personId2CaseData.begin(); iterator != personId2CaseData.end(); iterator++) {
+  for(std::map<int64_t, CaseData>::iterator iterator = personSeqId2CaseData.begin(); iterator != personSeqId2CaseData.end(); iterator++) {
     processCase(iterator->first, iterator->second);
     if (i++ % 100 == 0)
       setTxtProgressBar(progressBar, i);

@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CaseControl</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">3.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">3.1.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -112,7 +112,7 @@
 </li>
 <li>
   <a href="https://github.com/OHDSI/CaseControl/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -138,15 +138,15 @@
     <p>Select controls</p>
     </div>
 
-    <pre class="usage"><span class='fu'>selectControls</span>(
-  <span class='no'>caseData</span>,
-  <span class='no'>outcomeId</span>,
-  <span class='kw'>firstOutcomeOnly</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>washoutPeriod</span> <span class='kw'>=</span> <span class='fl'>180</span>,
-  <span class='kw'>controlSelectionCriteria</span> <span class='kw'>=</span> <span class='fu'><a href='createMatchingCriteria.html'>createMatchingCriteria</a></span>(),
-  <span class='kw'>minAge</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>maxAge</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
-)</pre>
+    <pre class="usage"><span class='fu'>selectControls</span><span class='op'>(</span>
+  <span class='va'>caseData</span>,
+  <span class='va'>outcomeId</span>,
+  firstOutcomeOnly <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  washoutPeriod <span class='op'>=</span> <span class='fl'>180</span>,
+  controlSelectionCriteria <span class='op'>=</span> <span class='fu'><a href='createMatchingCriteria.html'>createMatchingCriteria</a></span><span class='op'>(</span><span class='op'>)</span>,
+  minAge <span class='op'>=</span> <span class='cn'>NULL</span>,
+  maxAge <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -197,7 +197,7 @@ specified, no age restriction will be applied.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A data frame with these columns:</p><dl'>
+    <p>A data frame with these columns:</p><dl>
 <dt>personId</dt><dd><p>The person ID</p></dd> <dt>indexDate</dt><dd><p>The
 index date</p></dd> <dt>isCase</dt><dd><p>Is the person a case or a control?</p></dd> <dt>stratumId</dt><dd><p>The ID linking cases
 and controls in a matched set (only available when matching)</p></dd> 
@@ -223,7 +223,7 @@ and controls in a matched set (only available when matching)</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

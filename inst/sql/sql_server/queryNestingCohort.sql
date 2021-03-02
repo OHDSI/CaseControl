@@ -20,17 +20,18 @@ limitations under the License.
 {DEFAULT @sample_nesting_cohorts = FALSE}
 
 SELECT nesting_cohort.nesting_cohort_id,
-	person_id,
+	person_seq_id,
+	CAST(person_id AS VARCHAR(30)) AS person_id,
 	observation_period_start_date,
 	start_date,
 	end_date,
 	date_of_birth,
 	gender_concept_id,
-	provider_id,
-	care_site_id
+	provider_seq_id,
+	care_site_seq_id
 FROM #nesting_cohort nesting_cohort
 {@sample_nesting_cohorts} ? {
 INNER JOIN #sample_nesting sampled_nesting_cohorts
-ON nesting_cohort.nesting_cohort_id = sampled_nesting_cohorts.nesting_cohort_id
+	ON nesting_cohort.nesting_cohort_id = sampled_nesting_cohorts.nesting_cohort_id
 }
 ;
