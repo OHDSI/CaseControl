@@ -24,7 +24,6 @@ options(andromedaTempFolder = "s:/andromedaTemp")
 
 cdmDatabaseSchema <- "cdm"
 cohortDatabaseSchema <- "scratch_mschuemi2"
-oracleTempSchema <- NULL
 cohortTable <- "mschuemi_cc_vignette"
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = "redshift",
@@ -64,7 +63,6 @@ DatabaseConnector::disconnect(connection)
 
 caseData <- getDbCaseData(connectionDetails = connectionDetails,
                           cdmDatabaseSchema = cdmDatabaseSchema,
-                          oracleTempSchema = oracleTempSchema,
                           outcomeDatabaseSchema = cohortDatabaseSchema,
                           outcomeTable = cohortTable,
                           outcomeIds = 1,
@@ -77,7 +75,6 @@ caseData <- getDbCaseData(connectionDetails = connectionDetails,
 
 # caseData <- getDbCaseData(connectionDetails = connectionDetails,
 #                           cdmDatabaseSchema = cdmDatabaseSchema,
-#                           oracleTempSchema = oracleTempSchema,
 #                           outcomeDatabaseSchema = cohortDatabaseSchema,
 #                           outcomeTable = cohortTable,
 #                           outcomeIds = 1,
@@ -137,7 +134,6 @@ covariateSettings <- createCovariateSettings(useCharlsonIndex = TRUE,
 
 caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
                                           caseControls = caseControls,
-                                          oracleTempSchema = cohortDatabaseSchema,
                                           exposureDatabaseSchema = cdmDatabaseSchema,
                                           exposureTable = "drug_era",
                                           exposureIds = 1124300,
@@ -145,7 +141,6 @@ caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
 
 # caseControlsExposure <- getDbExposureData(connectionDetails = connectionDetails,
 #                                           caseControls = caseControls,
-#                                           oracleTempSchema = oracleTempSchema,
 #                                           exposureIds = 1124300,
 #                                           covariateSettings = NULL,
 #                                           caseData = caseData)

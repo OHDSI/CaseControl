@@ -7,7 +7,7 @@
 runCcAnalyses(
   connectionDetails,
   cdmDatabaseSchema,
-  oracleTempSchema = cdmDatabaseSchema,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   exposureDatabaseSchema = cdmDatabaseSchema,
   exposureTable = "drug_era",
   outcomeDatabaseSchema = cdmDatabaseSchema,
@@ -36,7 +36,9 @@ instance.  Requires read permissions to this database. On
 SQL Server, this should specify both the database and the
 schema, so for example 'cdm_instance.dbo'.}
 
-\item{oracleTempSchema}{A schema where temp tables can be created in Oracle.}
+\item{tempEmulationSchema}{Some database platforms like Oracle and Impala do not truly support temp tables. To
+emulate temp tables, provide a schema with write privileges where temp tables
+can be created.}
 
 \item{exposureDatabaseSchema}{The name of the database schema that is the location where
 the exposure data used to define the exposure cohorts is

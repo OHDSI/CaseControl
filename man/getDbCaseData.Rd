@@ -7,7 +7,7 @@
 getDbCaseData(
   connectionDetails,
   cdmDatabaseSchema,
-  oracleTempSchema = cdmDatabaseSchema,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   outcomeDatabaseSchema = cdmDatabaseSchema,
   outcomeTable = "condition_era",
   outcomeIds = c(),
@@ -38,7 +38,7 @@ database. On SQL Server, this should specify both the
 database and the schema, so for example
 'cdm_instance.dbo'.}
 
-\item{oracleTempSchema}{A schema where temp tables can be created in Oracle.}
+\item{tempEmulationSchema}{A schema where temp tables can be created in Oracle.}
 
 \item{outcomeDatabaseSchema}{The name of the database schema that is the location
 where the data used to define the outcome cohorts is

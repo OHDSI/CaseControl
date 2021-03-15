@@ -14,12 +14,12 @@ BugReports: https://github.com/OHDSI/CaseControl/issues
 Depends:
   R (>= 3.2.2),
   Cyclops (>= 3.0.0),
-  DatabaseConnector (>= 3.0.0),
+  DatabaseConnector (>= 4.0.0),
   Andromeda,
   survival,
   FeatureExtraction  (>= 3.0.0)
 Imports:
-  SqlRender (>= 1.6.0),
+  SqlRender (>= 1.7.0),
   rlang,
   dplyr,
   Rcpp (>= 0.11.2),

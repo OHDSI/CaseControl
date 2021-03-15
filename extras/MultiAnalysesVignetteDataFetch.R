@@ -24,7 +24,6 @@ options(andromedaTempFolder = "s:/andromedaTemp")
 
 cdmDatabaseSchema <- "cdm"
 cohortDatabaseSchema <- "scratch_mschuemi2"
-oracleTempSchema <- NULL
 cohortTable <- "mschuemi_cc_vignette"
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = "redshift",
@@ -213,7 +212,7 @@ ParallelLogger::addDefaultFileLogger(file.path(outputFolder, "log.txt"))
 
 result <- runCcAnalyses(connectionDetails = connectionDetails,
                         cdmDatabaseSchema = cdmDatabaseSchema,
-                        oracleTempSchema = cohortDatabaseSchema,
+                        tempEmulationSchema = cohortDatabaseSchema,
                         exposureDatabaseSchema = cdmDatabaseSchema,
                         exposureTable = "drug_era",
                         outcomeDatabaseSchema = cohortDatabaseSchema,

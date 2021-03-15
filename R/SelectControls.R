@@ -164,8 +164,7 @@ selectControls <- function(caseData,
   start <- Sys.time()
   ParallelLogger::logInfo("Selecting up to ", controlSelectionCriteria$controlsPerCase, " controls per case for outcome ", outcomeId)
   cases <- caseData$cases %>%
-    filter(.data$outcomeId == !!outcomeId) %>%
-    select(.data$nestingCohortId, .data$indexDate)
+    filter(.data$outcomeId == !!outcomeId)
 
   eventCount <- cases %>%
     count() %>%
@@ -193,7 +192,8 @@ selectControls <- function(caseData,
       # Cannot iterate over multiple Andromeda tables simultaneously, so move smaller tables to
       # their own temp Andromeda.
       casesAndromeda <- Andromeda::andromeda()
-      casesAndromeda$cases <- cases
+      casesAndromeda$cases <- cases %>%
+        select(.data$nestingCohortId, .data$indexDate)
       cases <- casesAndromeda$cases %>%
         arrange(.data$nestingCohortId)
       on.exit(close(casesAndromeda))
@@ -245,29 +245,47 @@ selectControls <- function(caseData,
 
     } else {
       # Sampling
-      cases <- cases %>%
-        inner_join(select(caseData$nestingCohorts, .data$nestingCohortId, .data$personSeqId, .data$personId), by = "nestingCohortId") %>%
+      filteredCases <- cases %>%
+        inner_join(caseData$nestingCohorts, by = "nestingCohortId") %>%
+        filter(.data$indexDate >= .data$startDate &
+                 .data$indexDate >= .data$observationPeriodStartDate + washoutPeriod &
+                 .data$indexDate <= .data$endDate) %>%
+        select(.data$indexDate, .data$nestingCohortId, .data$personSeqId, .data$personId) %>%
         collect()
-      controls <- caseData$nestingCohorts %>%
-        collect()
-      controls$indexDate <- sample(cases$indexDate, size = nrow(controls), replace = TRUE)
-      controls <- controls %>%
-        filter(.data$indexDate >= .data$startDate + washoutPeriod &
-                 .data$indexDate <= .data$endDate)
 
-      controls <- controls %>%
-        left_join(select(cases, .data$personSeqId, caseIndexDate = .data$indexDate), by = "personSeqId") %>%
-        filter(is.na(.data$caseIndexDate) | .data$caseIndexDate > .data$indexDate)
+      if (nrow(filteredCases) == 0) {
+        caseCount <- 0
+        eventCount <- 0
+        caseControls <- data.frame()
+      } else {
+        controls <- caseData$nestingCohorts %>%
+          select(.data$nestingCohortId, .data$personSeqId, .data$personId, .data$observationPeriodStartDate, .data$startDate, .data$endDate) %>%
+          collect()
+        controls$indexDate <- sample(filteredCases$indexDate, size = nrow(controls), replace = TRUE)
+        controls <- controls %>%
+          filter(.data$indexDate >= .data$startDate &
+                   .data$indexDate >= .data$observationPeriodStartDate + washoutPeriod &
+                   .data$indexDate <= .data$endDate)
+        if (firstOutcomeOnly) {
+          allCases <- cases %>%
+            inner_join(caseData$nestingCohorts, by = "nestingCohortId") %>%
+            select(caseIndexDate = .data$indexDate, .data$personSeqId) %>%
+            collect()
 
-      maxSampleSize <- controlSelectionCriteria$controlsPerCase * nrow(cases)
-      if (maxSampleSize < nrow(controls)) {
-        controls <- controls[sample.int(nrow(controls), maxSampleSize, replace = FALSE), ]
+          controls <- controls %>%
+            left_join(allCases, by = "personSeqId") %>%
+            filter(is.na(.data$caseIndexDate) | .data$caseIndexDate > .data$indexDate)
+        }
+        maxSampleSize <- controlSelectionCriteria$controlsPerCase * nrow(filteredCases)
+        if (maxSampleSize < nrow(controls)) {
+          controls <- controls[sample.int(nrow(controls), maxSampleSize, replace = FALSE), ]
+        }
+        controls$isCase <- FALSE
+        filteredCases$isCase <- TRUE
+        caseControls <- bind_rows(controls[, c("personSeqId", "personId", "indexDate", "isCase")],
+                                  filteredCases[, c("personSeqId", "personId",  "indexDate", "isCase")])
+        caseControls$indexDate <- Andromeda::restoreDate(caseControls$indexDate)
       }
-      controls$isCase <- FALSE
-      cases$isCase <- TRUE
-      caseControls <- bind_rows(controls[, c("personSeqId", "personId", "indexDate", "isCase")],
-                                cases[, c("personSeqId", "personId",  "indexDate", "isCase")])
-      caseControls$indexDate <- Andromeda::restoreDate(caseControls$indexDate)
     }
     delta <- Sys.time() - start
     ParallelLogger::logInfo(paste("Selection took", signif(delta, 3), attr(delta, "units")))

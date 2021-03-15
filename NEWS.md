@@ -7,6 +7,8 @@ Changes:
 
 2. Internally replacing person_id, provider_id, and care_site_id with sequential IDs to avoid loss of precision when converting BIGINT to numeric.
 
+3. Using `SqlRender`'s new `tempEmulationSchema` argument. Avoids deprecation warning.
+
 
 CaseControl 3.0.0
 ==================

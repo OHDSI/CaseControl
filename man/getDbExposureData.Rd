@@ -7,7 +7,7 @@
 getDbExposureData(
   caseControls,
   connectionDetails,
-  oracleTempSchema = NULL,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   exposureDatabaseSchema = NULL,
   exposureTable = "drug_era",
   exposureIds = c(),
@@ -24,7 +24,9 @@ function.}
 function \code{createConnectionDetails} in the
 \code{DatabaseConnector} package.}
 
-\item{oracleTempSchema}{A schema where temp tables can be created in Oracle.}
+\item{tempEmulationSchema}{Some database platforms like Oracle and Impala do not truly support temp tables. To
+emulate temp tables, provide a schema with write privileges where temp tables
+can be created.}
 
 \item{exposureDatabaseSchema}{The name of the database schema that is the location where the
 exposure data used to define the exposure cohorts is available. If
@@ -44,22 +46,23 @@ cohort_definition_id in the cohort-like table. If no exposureIds are
 provided, all drugs or cohorts in the exposureTable are included as
 exposures.}
 
-\item{cdmDatabaseSchema}{Needed when constructing covariates: the name of the database schema
+\item{cdmDatabaseSchema}{Needed when constructing covariates using FeatureExtraction: the name of the database schema
 that contains the OMOP CDM instance.  Requires read permissions to
 this database. On SQL Server, this should specify both the database
 and the schema, so for example 'cdm_instance.dbo'.}
 
-\item{covariateSettings}{An object of type \code{covariateSettings} as created using the
+\item{covariateSettings}{Either an object of type \code{covariateSettings} as created using the
 \code{createCovariateSettings} function in the
-\code{FeatureExtraction} package. If NULL then no covariate data is
-retrieved.}
+\code{FeatureExtraction} package, or an object of type \code{SimpleCovariateSettings}
+as created using the \code{\link{createSimpleCovariateSettings}} function.
+If NULL then no covariate data is retrieved.}
 
 \item{caseData}{An object of type \code{caseData} as generated using the
 \code{\link{getDbCaseData}} function. If caseData is provided and contains
 the exposure data (see getExposures in the  \code{\link{getDbCaseData}} function,
-and if no covariates need to constructed (covariateSettings = NULL), then the
-no connection to the database is used to create the exposure data. This may be
-much more efficient in some situations.}
+and if no covariates need to constructed (covariateSettings = NULL) or only simple
+covariates need to be constructed, then the no connection to the database is used
+to create the exposure data. This may be much more efficient in some situations.}
 }
 \description{
 If additional exposure data or covariate data is required, this function will send the information
@@ -67,6 +70,6 @@ on the cases and controls back to the server.
 
 Note: For PDW and RedShift, where uploading data can be excrutiatingly slow, you can use bulk loading
 by preparing the environment as described in the \code{\link[DatabaseConnector]{insertTable}} function
-in the DatabaseConnection package, and setting \code{oracleTempSchema} to a schema where you have write
+in the DatabaseConnection package, and setting \code{tempEmulationSchema} to a schema where you have write
 privileges (bulk import can only upload to permanent tables).
 }

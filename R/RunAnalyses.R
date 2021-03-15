@@ -35,7 +35,9 @@
 #'                                           instance.  Requires read permissions to this database. On
 #'                                           SQL Server, this should specify both the database and the
 #'                                           schema, so for example 'cdm_instance.dbo'.
-#' @param oracleTempSchema                   A schema where temp tables can be created in Oracle.
+#' @param tempEmulationSchema Some database platforms like Oracle and Impala do not truly support temp tables. To
+#'                            emulate temp tables, provide a schema with write privileges where temp tables
+#'                            can be created.
 #' @param outcomeDatabaseSchema              The name of the database schema that is the location where
 #'                                           the data used to define the outcome cohorts is available.
 #'                                           If outcomeTable = CONDITION_ERA, outcomeDatabaseSchema is
@@ -88,7 +90,7 @@
 #' @export
 runCcAnalyses <- function(connectionDetails,
                           cdmDatabaseSchema,
-                          oracleTempSchema = cdmDatabaseSchema,
+                          tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
                           exposureDatabaseSchema = cdmDatabaseSchema,
                           exposureTable = "drug_era",
                           outcomeDatabaseSchema = cdmDatabaseSchema,
@@ -161,11 +163,11 @@ runCcAnalyses <- function(connectionDetails,
         outcomeIds <- unique(outcomeReference$outcomeId[idx])
 
         cdFileName <- .createCaseDataFileName(d, nestingCohortId)
-        outcomeReference$caseDataFolder[idx] <- cdFileName
+        outcomeReference$caseDataFile[idx] <- cdFileName
         if (!file.exists(file.path(outputFolder, cdFileName))) {
           args <- list(connectionDetails = connectionDetails,
                        cdmDatabaseSchema = cdmDatabaseSchema,
-                       oracleTempSchema = oracleTempSchema,
+                       tempEmulationSchema = tempEmulationSchema,
                        outcomeDatabaseSchema = outcomeDatabaseSchema,
                        outcomeTable = outcomeTable,
                        nestingCohortDatabaseSchema = nestingCohortDatabaseSchema,
@@ -192,11 +194,11 @@ runCcAnalyses <- function(connectionDetails,
       outcomeIds <- unique(outcomeReference$outcomeId[idx])
       cdFileName <- .createCaseDataFileName(d)
       idx <- outcomeReference$analysisId %in% analysesIds
-      outcomeReference$caseDataFolder[idx] <- cdFileName
+      outcomeReference$caseDataFile[idx] <- cdFileName
       if (!file.exists(file.path(outputFolder, cdFileName))) {
         args <- list(connectionDetails = connectionDetails,
                      cdmDatabaseSchema = cdmDatabaseSchema,
-                     oracleTempSchema = oracleTempSchema,
+                     tempEmulationSchema = tempEmulationSchema,
                      outcomeDatabaseSchema = outcomeDatabaseSchema,
                      outcomeTable = outcomeTable,
                      nestingCohortDatabaseSchema = nestingCohortDatabaseSchema,
@@ -223,10 +225,10 @@ runCcAnalyses <- function(connectionDetails,
     selectControlsArgs <- selectControlsArgsList[[i]]
     analyses <- ParallelLogger::matchInList(ccAnalysisList, selectControlsArgs)
     analysesIds <- unlist(ParallelLogger::selectFromList(analyses, "analysisId"))
-    cdFileNames <- unique(outcomeReference$caseDataFolder[outcomeReference$analysisId %in% analysesIds])
+    cdFileNames <- unique(outcomeReference$caseDataFile[outcomeReference$analysisId %in% analysesIds])
     for (cdFileName in cdFileNames) {
-      cdId <- gsub("^.*caseData_", "", cdFileName)
-      idx <- outcomeReference$analysisId %in% analysesIds & outcomeReference$caseDataFolder ==
+      cdId <- gsub(".zip$", "", gsub("^.*caseData_", "", cdFileName))
+      idx <- outcomeReference$analysisId %in% analysesIds & outcomeReference$caseDataFile ==
         cdFileName
       outcomeIds <- unique(outcomeReference$outcomeId[idx])
       for (outcomeId in outcomeIds) {
@@ -261,13 +263,13 @@ runCcAnalyses <- function(connectionDetails,
       outcomeReference$exposureDataFile[idx] <- edFilename
       if (!file.exists(file.path(outputFolder, edFilename))) {
         args <- list(connectionDetails = connectionDetails,
-                     oracleTempSchema = oracleTempSchema,
+                     tempEmulationSchema = tempEmulationSchema,
                      exposureDatabaseSchema = exposureDatabaseSchema,
                      exposureTable = exposureTable,
                      exposureIds = exposureIds,
                      cdmDatabaseSchema = cdmDatabaseSchema)
         if (prefetchExposureData) {
-          cdFilename <- outcomeReference$caseDataFolder[outcomeReference$caseControlsFile == ccFilename][1]
+          cdFilename <- outcomeReference$caseDataFile[outcomeReference$caseControlsFile == ccFilename][1]
         } else {
           cdFilename <- NULL
         }
@@ -416,7 +418,7 @@ createExposureDataObject <- function(params) {
   exposureData <- do.call("getDbExposureData", params$args)
   # exposureData <- getDbExposureData(caseControls = params$args$caseControls,
   #                                   connectionDetails = params$args$connectionDetails,
-  #                                   oracleTempSchema = params$args$oracleTempSchema,
+  #                                   tempEmulationSchema = params$args$tempEmulationSchema,
   #                                   exposureDatabaseSchema = params$args$exposureDatabaseSchema,
   #                                   exposureTable = params$args$exposureTable,
   #                                   exposureIds = params$args$exposureIds,
@@ -446,9 +448,11 @@ createCaseControlModelObject <- function(params) {
 }
 
 .createCaseDataFileName <- function(loadId, nestingCohortId = NULL) {
-  name <- paste0("caseData_cd", loadId)
-  if (!is.null(nestingCohortId) && !is.na(nestingCohortId))
-    name <- paste0(name, "_n", nestingCohortId)
+  if (!is.null(nestingCohortId) && !is.na(nestingCohortId)) {
+    name <- sprintf("caseData_cd%d_n%s.zip", loadId, nestingCohortId)
+  } else {
+    name <- sprintf("caseData_cd%d.zip", loadId)
+  }
   return(name)
 }
 

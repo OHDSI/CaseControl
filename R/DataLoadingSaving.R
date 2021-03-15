@@ -34,7 +34,7 @@
 #'                                            database. On SQL Server, this should specify both the
 #'                                            database and the schema, so for example
 #'                                            'cdm_instance.dbo'.
-#' @param oracleTempSchema                    A schema where temp tables can be created in Oracle.
+#' @param tempEmulationSchema                 A schema where temp tables can be created in Oracle.
 #' @param outcomeDatabaseSchema               The name of the database schema that is the location
 #'                                            where the data used to define the outcome cohorts is
 #'                                            available. If outcomeTable = CONDITION_ERA,
@@ -97,7 +97,7 @@
 #' @export
 getDbCaseData <- function(connectionDetails,
                           cdmDatabaseSchema,
-                          oracleTempSchema = cdmDatabaseSchema,
+                          tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
                           outcomeDatabaseSchema = cdmDatabaseSchema,
                           outcomeTable = "condition_era",
                           outcomeIds = c(),
@@ -139,7 +139,7 @@ getDbCaseData <- function(connectionDetails,
   renderedSql <- SqlRender::loadRenderTranslateSql("createCases.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
-                                                   oracleTempSchema = oracleTempSchema,
+                                                   tempEmulationSchema = tempEmulationSchema,
                                                    cdm_database_schema = cdmDatabaseSchema,
                                                    outcome_database_schema = outcomeDatabaseSchema,
                                                    outcome_table = outcomeTable,
@@ -162,7 +162,7 @@ getDbCaseData <- function(connectionDetails,
     sampleNestingCohorts <- FALSE
   } else {
     sql <- "SELECT COUNT(*) FROM #nesting_cohort;"
-    sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms, oracleTempSchema = oracleTempSchema)
+    sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms, tempEmulationSchema = tempEmulationSchema)
     nestingCohortCount <- DatabaseConnector::querySql(conn, sql)[1, 1]
     if (nestingCohortCount > maxNestingCohortSize) {
       ParallelLogger::logInfo("Downsampling nesting cohort from ", nestingCohortCount, " to ", maxNestingCohortSize)
@@ -170,7 +170,7 @@ getDbCaseData <- function(connectionDetails,
       renderedSql <- SqlRender::loadRenderTranslateSql("sampleNestingCohort.sql",
                                                        packageName = "CaseControl",
                                                        dbms = connectionDetails$dbms,
-                                                       oracleTempSchema = oracleTempSchema,
+                                                       tempEmulationSchema = tempEmulationSchema,
                                                        max_nesting_cohort_size = maxNestingCohortSize)
       DatabaseConnector::executeSql(conn, renderedSql)
 
@@ -183,7 +183,7 @@ getDbCaseData <- function(connectionDetails,
   renderedSql <- SqlRender::loadRenderTranslateSql("queryNestingCohort.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
-                                                   oracleTempSchema = oracleTempSchema,
+                                                   tempEmulationSchema = tempEmulationSchema,
                                                    sample_nesting_cohorts = sampleNestingCohorts)
   DatabaseConnector::querySqlToAndromeda(connection = conn,
                                          sql = renderedSql,
@@ -197,7 +197,7 @@ getDbCaseData <- function(connectionDetails,
     sql <- SqlRender::loadRenderTranslateSql("queryCaseCounts.sql",
                                              packageName = "CaseControl",
                                              dbms = connectionDetails$dbms,
-                                             oracleTempSchema = oracleTempSchema,
+                                             tempEmulationSchema = tempEmulationSchema,
                                              sample_nesting_cohorts = sampleNestingCohorts)
     caseCounts <- DatabaseConnector::querySql(conn, sql, snakeCaseToCamelCase = TRUE)
     sampleCases <- FALSE
@@ -214,7 +214,7 @@ getDbCaseData <- function(connectionDetails,
   renderedSql <- SqlRender::loadRenderTranslateSql("queryCases.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
-                                                   oracleTempSchema = oracleTempSchema,
+                                                   tempEmulationSchema = tempEmulationSchema,
                                                    sample_nesting_cohorts = sampleNestingCohorts,
                                                    sample_cases = sampleCases,
                                                    max_cases_per_outcome = maxCasesPerOutcome)
@@ -229,7 +229,7 @@ getDbCaseData <- function(connectionDetails,
     renderedSql <- SqlRender::loadRenderTranslateSql("queryVisits.sql",
                                                      packageName = "CaseControl",
                                                      dbms = connectionDetails$dbms,
-                                                     oracleTempSchema = oracleTempSchema,
+                                                     tempEmulationSchema = tempEmulationSchema,
                                                      cdm_database_schema = cdmDatabaseSchema,
                                                      sample_nesting_cohorts = sampleNestingCohorts)
     DatabaseConnector::querySqlToAndromeda(connection = conn,
@@ -244,7 +244,7 @@ getDbCaseData <- function(connectionDetails,
     renderedSql <- SqlRender::loadRenderTranslateSql("queryAllExposures.sql",
                                                      packageName = "CaseControl",
                                                      dbms = connectionDetails$dbms,
-                                                     oracleTempSchema = oracleTempSchema,
+                                                     tempEmulationSchema = tempEmulationSchema,
                                                      exposure_database_schema = exposureDatabaseSchema,
                                                      exposure_table = exposureTable,
                                                      exposure_ids = exposureIds,
@@ -262,9 +262,12 @@ getDbCaseData <- function(connectionDetails,
   renderedSql <- SqlRender::loadRenderTranslateSql("removeTempTables.sql",
                                                    packageName = "CaseControl",
                                                    dbms = connectionDetails$dbms,
-                                                   oracleTempSchema = oracleTempSchema,
+                                                   tempEmulationSchema = tempEmulationSchema,
                                                    sample_nesting_cohorts = sampleNestingCohorts)
   DatabaseConnector::executeSql(conn, renderedSql, progressBar = FALSE, reportOverallTime = FALSE)
+
+  Andromeda::createIndex(caseData$nestingCohorts, "nestingCohortId")
+  Andromeda::createIndex(caseData$nestingCohorts, "personSeqId")
 
   metaData <- list(outcomeIds = outcomeIds,
                    hasVisits = getVisits,
@@ -340,8 +343,7 @@ insertDbPopulation <- function(caseControls,
                                  data = caseControls,
                                  dropTableIfExists = dropTableIfExists,
                                  createTable = createTable,
-                                 tempTable = FALSE,
-                                 oracleTempSchema = NULL)
+                                 tempTable = FALSE)
   DatabaseConnector::disconnect(connection)
   delta <- Sys.time() - start
   ParallelLogger::logInfo(paste("Inserting rows took", signif(delta, 3), attr(delta, "units")))
