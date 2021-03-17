@@ -33,9 +33,8 @@ Installation
 2. In R, use the following commands to download and install CaseControl:
 
   ```r
-  install.packages("drat")
-  drat::addRepo("OHDSI")
-  install.packages("CaseControl")
+  install.packages("remotes")
+  remotes::install_github("ohdsi/CaseControl")
   ```
 
 User Documentation

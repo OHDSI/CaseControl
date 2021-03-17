@@ -1,6 +1,6 @@
 # @file PackageMaintenance
 #
-# Copyright 2020 Observational Health Data Sciences and Informatics
+# Copyright 2021 Observational Health Data Sciences and Informatics
 #
 # This file is part of CaseControl
 #
@@ -41,7 +41,6 @@ rmarkdown::render("vignettes/MultipleAnalyses.Rmd",
 unlink("inst/doc/MultipleAnalyses.tex")
 
 pkgdown::build_site()
-OhdsiRTools::fixHadesLogo()
 
 # Create arg functions:
 library(CaseControl)

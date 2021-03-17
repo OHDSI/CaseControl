@@ -1,4 +1,4 @@
-CaseControl 3.0.1
+CaseControl 3.1.0
 ==================
 
 Changes:
@@ -8,6 +8,8 @@ Changes:
 2. Internally replacing person_id, provider_id, and care_site_id with sequential IDs to avoid loss of precision when converting BIGINT to numeric.
 
 3. Using `SqlRender`'s new `tempEmulationSchema` argument. Avoids deprecation warning.
+
+4. Adding `createSimpleCovariateSettings()` function to create covariates using only the data already available in the `CaseData` object (currently age and gender), so not requiring querying the database again.
 
 
 CaseControl 3.0.0

@@ -44,7 +44,7 @@
 on the cases and controls back to the server.
 Note: For PDW and RedShift, where uploading data can be excrutiatingly slow, you can use bulk loading
 by preparing the environment as described in the insertTable function
-in the DatabaseConnection package, and setting oracleTempSchema to a schema where you have write
+in the DatabaseConnection package, and setting tempEmulationSchema to a schema where you have write
 privileges (bulk import can only upload to permanent tables)." />
 
 
@@ -92,9 +92,6 @@ privileges (bulk import can only upload to permanent tables)." />
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
-<li>
-  <a href="../news/index.html">Changelog</a>
-</li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Articles
@@ -110,12 +107,12 @@ privileges (bulk import can only upload to permanent tables)." />
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://ohdsi.github.io/Hades"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
-</li>
-<li>
   <a href="https://github.com/OHDSI/CaseControl/">
     <span class="fab fa-github fa-lg"></span>
      
@@ -144,14 +141,14 @@ privileges (bulk import can only upload to permanent tables)." />
 on the cases and controls back to the server.</p>
 <p>Note: For PDW and RedShift, where uploading data can be excrutiatingly slow, you can use bulk loading
 by preparing the environment as described in the <code><a href='https://rdrr.io/pkg/DatabaseConnector/man/insertTable.html'>insertTable</a></code> function
-in the DatabaseConnection package, and setting <code>oracleTempSchema</code> to a schema where you have write
+in the DatabaseConnection package, and setting <code>tempEmulationSchema</code> to a schema where you have write
 privileges (bulk import can only upload to permanent tables).</p>
     </div>
 
     <pre class="usage"><span class='fu'>getDbExposureData</span><span class='op'>(</span>
   <span class='va'>caseControls</span>,
   <span class='va'>connectionDetails</span>,
-  oracleTempSchema <span class='op'>=</span> <span class='cn'>NULL</span>,
+  tempEmulationSchema <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/options.html'>getOption</a></span><span class='op'>(</span><span class='st'>"sqlRenderTempEmulationSchema"</span><span class='op'>)</span>,
   exposureDatabaseSchema <span class='op'>=</span> <span class='cn'>NULL</span>,
   exposureTable <span class='op'>=</span> <span class='st'>"drug_era"</span>,
   exposureIds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>)</span>,
@@ -175,8 +172,10 @@ function <code>createConnectionDetails</code> in the
 <code>DatabaseConnector</code> package.</p></td>
     </tr>
     <tr>
-      <th>oracleTempSchema</th>
-      <td><p>A schema where temp tables can be created in Oracle.</p></td>
+      <th>tempEmulationSchema</th>
+      <td><p>Some database platforms like Oracle and Impala do not truly support temp tables. To
+emulate temp tables, provide a schema with write privileges where temp tables
+can be created.</p></td>
     </tr>
     <tr>
       <th>exposureDatabaseSchema</th>
@@ -204,26 +203,27 @@ exposures.</p></td>
     </tr>
     <tr>
       <th>cdmDatabaseSchema</th>
-      <td><p>Needed when constructing covariates: the name of the database schema
+      <td><p>Needed when constructing covariates using FeatureExtraction: the name of the database schema
 that contains the OMOP CDM instance.  Requires read permissions to
 this database. On SQL Server, this should specify both the database
 and the schema, so for example 'cdm_instance.dbo'.</p></td>
     </tr>
     <tr>
       <th>covariateSettings</th>
-      <td><p>An object of type <code>covariateSettings</code> as created using the
+      <td><p>Either an object of type <code>covariateSettings</code> as created using the
 <code>createCovariateSettings</code> function in the
-<code>FeatureExtraction</code> package. If NULL then no covariate data is
-retrieved.</p></td>
+<code>FeatureExtraction</code> package, or an object of type <code>SimpleCovariateSettings</code>
+as created using the <code><a href='createSimpleCovariateSettings.html'>createSimpleCovariateSettings</a></code> function.
+If NULL then no covariate data is retrieved.</p></td>
     </tr>
     <tr>
       <th>caseData</th>
       <td><p>An object of type <code>caseData</code> as generated using the
 <code><a href='getDbCaseData.html'>getDbCaseData</a></code> function. If caseData is provided and contains
 the exposure data (see getExposures in the  <code><a href='getDbCaseData.html'>getDbCaseData</a></code> function,
-and if no covariates need to constructed (covariateSettings = NULL), then the
-no connection to the database is used to create the exposure data. This may be
-much more efficient in some situations.</p></td>
+and if no covariates need to constructed (covariateSettings = NULL) or only simple
+covariates need to be constructed, then the no connection to the database is used
+to create the exposure data. This may be much more efficient in some situations.</p></td>
     </tr>
     </table>
 

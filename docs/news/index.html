@@ -86,9 +86,6 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
-<li>
-  <a href="../news/index.html">Changelog</a>
-</li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Articles
@@ -104,12 +101,12 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://ohdsi.github.io/Hades"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
-</li>
-<li>
   <a href="https://github.com/OHDSI/CaseControl/">
     <span class="fab fa-github fa-lg"></span>
      
@@ -132,13 +129,15 @@
       <small>Source: <a href='https://github.com/OHDSI/CaseControl/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div id="casecontrol-301" class="section level1">
-<h1 class="page-header" data-toc-text="3.0.1">
-<a href="#casecontrol-301" class="anchor"></a>CaseControl 3.0.1</h1>
+    <div id="casecontrol-310" class="section level1">
+<h1 class="page-header" data-toc-text="3.1.0">
+<a href="#casecontrol-310" class="anchor"></a>CaseControl 3.1.0</h1>
 <p>Changes:</p>
 <ol>
 <li><p>Adding log likelihood ratio to outcome model object.</p></li>
 <li><p>Internally replacing person_id, provider_id, and care_site_id with sequential IDs to avoid loss of precision when converting BIGINT to numeric.</p></li>
+<li><p>Using <code>SqlRender</code>’s new <code>tempEmulationSchema</code> argument. Avoids deprecation warning.</p></li>
+<li><p>Adding <code><a href="../reference/createSimpleCovariateSettings.html">createSimpleCovariateSettings()</a></code> function to create covariates using only the data already available in the <code>CaseData</code> object (currently age and gender), so not requiring querying the database again.</p></li>
 </ol>
 </div>
     <div id="casecontrol-300" class="section level1">
