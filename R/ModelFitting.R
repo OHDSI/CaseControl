@@ -28,6 +28,9 @@
 #' @param includeCovariateIds    Include only these covariates in the model.
 #' @param caseControlsExposure   An object of type \code{caseControlsExposure} as created using the
 #'                               \code{\link{getDbExposureData}} function.
+#' @param profileGrid            A one-dimensional grid of points on the log(relative risk) scale where
+#'                               the likelihood for the treatment variable coefficient is sampled. Set to
+#'                               NULL to skip profiling.
 #' @param prior                  The prior used to fit the model. See
 #'                               \code{\link[Cyclops]{createPrior}} for details.
 #' @param control                The control object used to control the cross-validation used to
@@ -43,6 +46,7 @@ fitCaseControlModel <- function(caseControlData,
                                 excludeCovariateIds = c(),
                                 includeCovariateIds = c(),
                                 caseControlsExposure = NULL,
+                                profileGrid = seq(log(0.1), log(10), length.out = 1000),
                                 prior = createPrior("laplace", useCrossValidation = TRUE),
                                 control = createControl(cvType = "auto",
                                                         startingVariance = 0.01,
@@ -56,6 +60,7 @@ fitCaseControlModel <- function(caseControlData,
   coefficients <- NULL
   treatmentEstimate <- NULL
   logLikelihood <- NA
+  logLikelihoodProfile <- NULL
   fit <- NULL
   status <- "NO MODEL FITTED"
   if (nrow(caseControlData) == 0 || max(caseControlData$exposed) == 0) {
@@ -134,34 +139,45 @@ fitCaseControlModel <- function(caseControlData,
     })
     if (is.character(fit)) {
       status <- fit
-    } else if (fit$return_flag == "ILLCONDITIONED") {
-      status <- "ILL CONDITIONED, CANNOT FIT"
-    } else if (fit$return_flag == "MAX_ITERATIONS") {
-      status <- "REACHED MAXIMUM NUMBER OF ITERATIONS, CANNOT FIT"
     } else {
-      status <- "OK"
-      coefficients <- coef(fit)
-      logRr <- coefficients[names(coefficients) == treatmentVarId]
-      ci <- tryCatch({
-        confint(fit, parm = treatmentVarId, includePenalty = TRUE)
-      }, error = function(e) {
-        missing(e)  # suppresses R CMD check note
-        c(0, -Inf, Inf)
-      })
-      if (identical(ci, c(0, -Inf, Inf)))
-        status <- "ERROR COMPUTING CI"
-      seLogRr <- (ci[3] - ci[2])/(2 * qnorm(0.975))
-      llNull <- Cyclops::getCyclopsProfileLogLikelihood(object = fit,
-                                                        parm = treatmentVarId,
-                                                        x = 0,
-                                                        includePenalty = FALSE)$value
-      llr <- fit$log_likelihood - llNull
-      treatmentEstimate <- data.frame(logRr = logRr,
-                                      logLb95 = ci[2],
-                                      logUb95 = ci[3],
-                                      seLogRr = seLogRr,
-                                      llr = llr)
-      logLikelihood <- fit$log_likelihood
+      # Retrieve likelihood profile
+      if (!is.null(profileGrid)) {
+        logLikelihoodProfile <- Cyclops::getCyclopsProfileLogLikelihood(object = fit,
+                                                                        parm = treatmentVarId,
+                                                                        x = profileGrid,
+                                                                        includePenalty = TRUE)$value
+        names(logLikelihoodProfile) <- profileGrid
+      }
+
+      if (fit$return_flag == "ILLCONDITIONED") {
+        status <- "ILL CONDITIONED, CANNOT FIT"
+      } else if (fit$return_flag == "MAX_ITERATIONS") {
+        status <- "REACHED MAXIMUM NUMBER OF ITERATIONS, CANNOT FIT"
+      } else {
+        status <- "OK"
+        coefficients <- coef(fit)
+        logRr <- coefficients[names(coefficients) == treatmentVarId]
+        ci <- tryCatch({
+          confint(fit, parm = treatmentVarId, includePenalty = TRUE)
+        }, error = function(e) {
+          missing(e)  # suppresses R CMD check note
+          c(0, -Inf, Inf)
+        })
+        if (identical(ci, c(0, -Inf, Inf)))
+          status <- "ERROR COMPUTING CI"
+        seLogRr <- (ci[3] - ci[2])/(2 * qnorm(0.975))
+        llNull <- Cyclops::getCyclopsProfileLogLikelihood(object = fit,
+                                                          parm = treatmentVarId,
+                                                          x = 0,
+                                                          includePenalty = FALSE)$value
+        llr <- fit$log_likelihood - llNull
+        treatmentEstimate <- data.frame(logRr = logRr,
+                                        logLb95 = ci[2],
+                                        logUb95 = ci[3],
+                                        seLogRr = seLogRr,
+                                        llr = llr)
+        logLikelihood <- fit$log_likelihood
+      }
     }
   }
   outcomeModel <- list()
@@ -169,6 +185,7 @@ fitCaseControlModel <- function(caseControlData,
   outcomeModel$outcomeModelCoefficients <- coefficients
   outcomeModel$outcomeModelStatus <- status
   outcomeModel$outcomeModelLogLikelihood <- logLikelihood
+  outcomeModel$logLikelihoodProfile <- logLikelihoodProfile
   if (nrow(caseControlData) == 0) {
     outcomeCounts <- data.frame(cases = 0,
                                 controls = 0,

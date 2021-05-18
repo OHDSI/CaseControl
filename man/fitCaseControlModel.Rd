@@ -10,6 +10,7 @@ fitCaseControlModel(
   excludeCovariateIds = c(),
   includeCovariateIds = c(),
   caseControlsExposure = NULL,
+  profileGrid = seq(log(0.1), log(10), length.out = 1000),
   prior = createPrior("laplace", useCrossValidation = TRUE),
   control = createControl(cvType = "auto", startingVariance = 0.01, tolerance = 2e-07,
     cvRepetitions = 10, selectorType = "byPid", noiseLevel = "quiet")
@@ -27,6 +28,10 @@ function.}
 
 \item{caseControlsExposure}{An object of type \code{caseControlsExposure} as created using the
 \code{\link{getDbExposureData}} function.}
+
+\item{profileGrid}{A one-dimensional grid of points on the log(relative risk) scale where
+the likelihood for the treatment variable coefficient is sampled. Set to
+NULL to skip profiling.}
 
 \item{prior}{The prior used to fit the model. See
 \code{\link[Cyclops]{createPrior}} for details.}

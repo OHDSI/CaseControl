@@ -1,3 +1,11 @@
+CaseControl 3.2.0
+==================
+
+Changes:
+
+1. Adding likelihood profile to outcome model object.
+
+
 CaseControl 3.1.0
 ==================
 
