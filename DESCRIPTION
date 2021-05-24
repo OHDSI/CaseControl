@@ -13,7 +13,7 @@ URL: http://ohdsi.github.io/CaseControl, https://github.com/OHDSI/CaseControl
 BugReports: https://github.com/OHDSI/CaseControl/issues
 Depends:
   R (>= 3.2.2),
-  Cyclops (>= 3.0.0),
+  Cyclops (>= 3.1.1),
   DatabaseConnector (>= 4.0.0),
   Andromeda,
   survival,

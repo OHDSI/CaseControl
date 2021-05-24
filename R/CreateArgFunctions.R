@@ -81,9 +81,11 @@ createSelectControlsArgs <- function(firstOutcomeOnly = TRUE,
 #' @details
 #' Create an object defining the parameter values.
 #'
-#' @param covariateSettings   An object of type covariateSettings as created using the
-#'                            createCovariateSettings function in the FeatureExtraction package. If
-#'                            NULL then no covariate data is retrieved.
+#' @param covariateSettings   Either an object of type covariateSettings as created using the
+#'                            createCovariateSettings function in the FeatureExtraction package, or an
+#'                            object of type SimpleCovariateSettings as created using the
+#'                            createSimpleCovariateSettings function. If NULL then no covariate data is
+#'                            retrieved.
 #'
 #' @export
 createGetDbExposureDataArgs <- function(covariateSettings = NULL) {
@@ -129,6 +131,10 @@ createCreateCaseControlDataArgs <- function(firstExposureOnly = FALSE,
 #' @param useCovariates         Whether to use the covariates in the caseControlsExposure.
 #' @param excludeCovariateIds   Exclude these covariates from the model.
 #' @param includeCovariateIds   Include only these covariates in the model.
+#' @param profileGrid           A one-dimensional grid of points on the log(relative risk) scale where
+#'                              the likelihood for coefficient of variables is sampled. See details.
+#' @param profileBounds         The bounds (on the log relative risk scale) for the adaptive sampling
+#'                              of the likelihood function.
 #' @param prior                 The prior used to fit the model. See createPrior for details.
 #' @param control               The control object used to control the cross-validation used to
 #'                              determine the hyperparameters of the prior (if applicable). See
@@ -138,6 +144,8 @@ createCreateCaseControlDataArgs <- function(firstExposureOnly = FALSE,
 createFitCaseControlModelArgs <- function(useCovariates = FALSE,
                                           excludeCovariateIds = c(),
                                           includeCovariateIds = c(),
+                                          profileGrid = NULL,
+                                          profileBounds = c(log(0.1), log(10)),
                                           prior = createPrior("laplace", useCrossValidation = TRUE),
                                           control = createControl(cvType = "auto",
                                                                   startingVariance = 0.01,

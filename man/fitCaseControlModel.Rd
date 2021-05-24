@@ -10,7 +10,8 @@ fitCaseControlModel(
   excludeCovariateIds = c(),
   includeCovariateIds = c(),
   caseControlsExposure = NULL,
-  profileGrid = seq(log(0.1), log(10), length.out = 1000),
+  profileGrid = NULL,
+  profileBounds = c(log(0.1), log(10)),
   prior = createPrior("laplace", useCrossValidation = TRUE),
   control = createControl(cvType = "auto", startingVariance = 0.01, tolerance = 2e-07,
     cvRepetitions = 10, selectorType = "byPid", noiseLevel = "quiet")
@@ -30,8 +31,10 @@ function.}
 \code{\link{getDbExposureData}} function.}
 
 \item{profileGrid}{A one-dimensional grid of points on the log(relative risk) scale where
-the likelihood for the treatment variable coefficient is sampled. Set to
-NULL to skip profiling.}
+the likelihood for coefficient of variables is sampled. See details.}
+
+\item{profileBounds}{The bounds (on the log relative risk scale) for the adaptive sampling
+of the likelihood function.}
 
 \item{prior}{The prior used to fit the model. See
 \code{\link[Cyclops]{createPrior}} for details.}
@@ -48,4 +51,8 @@ Fit the case-control model
 }
 \details{
 Fits the model using a conditional logistic regression.
+
+For likelihood profiling, either specify the `profileGrid` for a completely user- defined grid, or
+`profileBounds` for an adaptive grid. Both should be defined on the log IRR scale. When both
+`profileGrid` and `profileGrid` are `NULL` likelihood profiling is disabled.
 }
