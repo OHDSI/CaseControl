@@ -156,8 +156,10 @@ fitCaseControlModel <- function(caseControlData,
                                                                         bounds = profileBounds,
                                                                         tolerance = 0.1,
                                                                         includePenalty = FALSE)
-        names(logLikelihoodProfile$value) <- logLikelihoodProfile$point
-        logLikelihoodProfile <- logLikelihoodProfile$value
+        if (!is.null(logLikelihoodProfile)) {
+          names(logLikelihoodProfile$value) <- logLikelihoodProfile$point
+          logLikelihoodProfile <- logLikelihoodProfile$value
+        }
       }
 
       if (fit$return_flag == "ILLCONDITIONED") {
