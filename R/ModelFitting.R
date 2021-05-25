@@ -155,7 +155,7 @@ fitCaseControlModel <- function(caseControlData,
                                                                         x = profileGrid,
                                                                         bounds = profileBounds,
                                                                         tolerance = 0.1,
-                                                                        includePenalty = FALSE)
+                                                                        includePenalty = TRUE)
         if (!is.null(logLikelihoodProfile)) {
           names(logLikelihoodProfile$value) <- logLikelihoodProfile$point
           logLikelihoodProfile <- logLikelihoodProfile$value
