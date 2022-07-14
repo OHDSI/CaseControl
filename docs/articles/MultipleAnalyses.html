@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,23 +33,17 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CaseControl</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">3.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.2.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -67,7 +63,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/OHDSI/CaseControl/">
+  <a href="https://github.com/OHDSI/CaseControl/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -82,32 +78,51 @@
 
       
 
-      </header><script src="MultipleAnalyses_files/header-attrs-2.6/header-attrs.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Running multiple analyses at once using the CaseControl package</h1>
-                        <h4 class="author">Martijn J. Schuemie</h4>
+      <h1 data-toc-skip>Running multiple analyses at once using the
+CaseControl package</h1>
+                        <h4 data-toc-skip class="author">Martijn J.
+Schuemie</h4>
             
-            <h4 class="date">2021-03-17</h4>
+            <h4 data-toc-skip class="date">2022-07-14</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/OHDSI/CaseControl/blob/master/vignettes/MultipleAnalyses.Rmd"><code>vignettes/MultipleAnalyses.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/OHDSI/CaseControl/blob/HEAD/vignettes/MultipleAnalyses.Rmd" class="external-link"><code>vignettes/MultipleAnalyses.Rmd</code></a></small>
       <div class="hidden name"><code>MultipleAnalyses.Rmd</code></div>
 
     </div>
 
     
     
-<div id="introduction" class="section level1">
-<h1 class="hasAnchor">
-<a href="#introduction" class="anchor"></a>Introduction</h1>
-<p>In this vignette we focus on running several different analyses on several exposure-outcome-nesting cohort triplets This can be useful when we want to explore the sensitivity to analyses choices, include controls, or run an experiment similar to the OMOP experiment to empirically identify the optimal analysis choices for a particular research question.</p>
-<p>This vignette assumes you are already familiar with the <code>CaseControl</code> package and are able to perform single studies. We will walk through all the steps needed to perform an exemplar set of analyses, and we have selected the well-studied topic of the effect of nonsteroidal anti-inflammatory drugs (NSAIDs) on gastrointestinal (GI) bleeding-related hospitalization. For simplicity, we focus on one NSAID: diclofenac. We will execute various variations of an analysis for the primary exposure pair and a large set of negative control exposures.</p>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
+<p>In this vignette we focus on running several different analyses on
+several exposure-outcome-nesting cohort triplets This can be useful when
+we want to explore the sensitivity to analyses choices, include
+controls, or run an experiment similar to the OMOP experiment to
+empirically identify the optimal analysis choices for a particular
+research question.</p>
+<p>This vignette assumes you are already familiar with the
+<code>CaseControl</code> package and are able to perform single studies.
+We will walk through all the steps needed to perform an exemplar set of
+analyses, and we have selected the well-studied topic of the effect of
+nonsteroidal anti-inflammatory drugs (NSAIDs) on gastrointestinal (GI)
+bleeding-related hospitalization. For simplicity, we focus on one NSAID:
+diclofenac. We will execute various variations of an analysis for the
+primary exposure pair and a large set of negative control exposures.</p>
 </div>
-<div id="general-approach" class="section level1">
-<h1 class="hasAnchor">
-<a href="#general-approach" class="anchor"></a>General approach</h1>
-<p>The general approach to running a set of analyses is that you specify all the function arguments of the functions you would normally call, and create sets of these function arguments. The final models as well as intermediate data objects will all be saved to disk for later extraction.</p>
-<p>An analysis will be executed by calling these functions in sequence:</p>
+<div class="section level2">
+<h2 id="general-approach">General approach<a class="anchor" aria-label="anchor" href="#general-approach"></a>
+</h2>
+<p>The general approach to running a set of analyses is that you specify
+all the function arguments of the functions you would normally call, and
+create sets of these function arguments. The final models as well as
+intermediate data objects will all be saved to disk for later
+extraction.</p>
+<p>An analysis will be executed by calling these functions in
+sequence:</p>
 <ol style="list-style-type: decimal">
 <li><code><a href="../reference/getDbCaseData.html">getDbCaseData()</a></code></li>
 <li><code><a href="../reference/selectControls.html">selectControls()</a></code></li>
@@ -115,35 +130,72 @@
 <li><code><a href="../reference/createCaseControlData.html">createCaseControlData()</a></code></li>
 <li><code><a href="../reference/fitCaseControlModel.html">fitCaseControlModel()</a></code></li>
 </ol>
-<p>When you provide several analyses to the <code>CaseControl</code> package, it will determine whether any of the analyses and exposure-outcome-nesting triplets cohort triplets have anything in common, and will take advantage of this fact. For example, if we specify several exposure-outcome-nesting triplets with the same outcome and nesting cohort, the data for the cases will be extracted only once.</p>
-<p>The function arguments you need to define have been divided into four groups:</p>
+<p>When you provide several analyses to the <code>CaseControl</code>
+package, it will determine whether any of the analyses and
+exposure-outcome-nesting triplets cohort triplets have anything in
+common, and will take advantage of this fact. For example, if we specify
+several exposure-outcome-nesting triplets with the same outcome and
+nesting cohort, the data for the cases will be extracted only once.</p>
+<p>The function arguments you need to define have been divided into four
+groups:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Hypothesis of interest</strong>: arguments that are specific to a hypothesis of interest, in the case of the case-control design this is a combination of exposure, outcome, and optionally a cohort in which the analysis is nested.</li>
+<strong>Hypothesis of interest</strong>: arguments that are specific
+to a hypothesis of interest, in the case of the case-control design this
+is a combination of exposure, outcome, and optionally a cohort in which
+the analysis is nested.</li>
 <li>
-<strong>Analyses</strong>: arguments that are not directly specific to a hypothesis of interest, such as the washout window, number of controls per case, whether to match on age and gender, etc.</li>
-<li>Arguments that are the output of a previous function in the <code>CaseControl</code> package, such as the <code>caseData</code> argument of the <code>selectControls</code> function. These cannot be specified by the user.</li>
-<li>Arguments that are specific to an environment, such as the connection details for connecting to the server, and the name of the schema holding the CDM data.</li>
+<strong>Analyses</strong>: arguments that are not directly specific
+to a hypothesis of interest, such as the washout window, number of
+controls per case, whether to match on age and gender, etc.</li>
+<li>Arguments that are the output of a previous function in the
+<code>CaseControl</code> package, such as the <code>caseData</code>
+argument of the <code>selectControls</code> function. These cannot be
+specified by the user.</li>
+<li>Arguments that are specific to an environment, such as the
+connection details for connecting to the server, and the name of the
+schema holding the CDM data.</li>
 </ol>
 </div>
-<div id="preparation-for-the-example" class="section level1">
-<h1 class="hasAnchor">
-<a href="#preparation-for-the-example" class="anchor"></a>Preparation for the example</h1>
-<p>We need to tell R how to connect to the server where the data are. <code>CaseControl</code> uses the <code>DatabaseConnector</code> package, which provides the <code>createConnectionDetails</code> function. Type <code>?createConnectionDetails</code> for the specific settings required for the various database management systems (DBMS). For example, one might connect to a PostgreSQL database using this code:</p>
+<div class="section level2">
+<h2 id="preparation-for-the-example">Preparation for the example<a class="anchor" aria-label="anchor" href="#preparation-for-the-example"></a>
+</h2>
+<p>We need to tell R how to connect to the server where the data are.
+<code>CaseControl</code> uses the <code>DatabaseConnector</code>
+package, which provides the <code>createConnectionDetails</code>
+function. Type <code>?createConnectionDetails</code> for the specific
+settings required for the various database management systems (DBMS).
+For example, one might connect to a PostgreSQL database using this
+code:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">connectionDetails</span> <span class="op">&lt;-</span> <span class="fu">createConnectionDetails</span><span class="op">(</span>dbms <span class="op">=</span> <span class="st">"postgresql"</span>, 
-                                             server <span class="op">=</span> <span class="st">"localhost/ohdsi"</span>, 
-                                             user <span class="op">=</span> <span class="st">"joe"</span>, 
-                                             password <span class="op">=</span> <span class="st">"supersecret"</span><span class="op">)</span>
-
-<span class="va">outputFolder</span> <span class="op">&lt;-</span> <span class="st">"/home/caseControlOutput"</span>
-
-<span class="va">cdmDatabaseSchema</span> <span class="op">&lt;-</span> <span class="st">"my_cdm_data"</span>
-<span class="va">cohortDatabaseSchema</span> <span class="op">&lt;-</span> <span class="st">"my_work_schema"</span>
-<span class="va">cohortTable</span> <span class="op">&lt;-</span> <span class="st">"vignette_cohorts"</span></code></pre></div>
-<p>The last two lines define the <code>cdmDatabaseSchema</code> and <code>cohortDatabaseSchema</code> variables. We’ll use these later to tell R where the data in CDM format live, and where we want to store the outcome and nesting cohorts. Note that for Microsoft SQL Server, databaseschemas need to specify both the database and the schema, so for example <code>cdmDatabaseSchema &lt;- "my_cdm_data.dbo"</code>.</p>
-<p>We also need to prepare our exposures, outcomes and nesting cohorts of interest. The <code>drug_era</code> table in the OMOP Common Data Model already contains prespecified cohorts of users at the ingredient level, so we will use that for the exposures. For the outcomes, we want to restrict our analysis only to those events that are recorded in an inpatient setting, so we will need to create a custom cohort table. For this example, we are only interested in GI bleed (concept ID 192671). Some of the analyses we’d like to nest in a population with previous diagnoses of rheumatoid arthritis, so we will need to create a custom cohort for this as well.</p>
-<p>We create a text file called <em>vignette.sql</em> with the following content:</p>
+<code class="sourceCode R"><span><span class="va">connectionDetails</span> <span class="op">&lt;-</span> <span class="fu">createConnectionDetails</span><span class="op">(</span>dbms <span class="op">=</span> <span class="st">"postgresql"</span>, </span>
+<span>                                             server <span class="op">=</span> <span class="st">"localhost/ohdsi"</span>, </span>
+<span>                                             user <span class="op">=</span> <span class="st">"joe"</span>, </span>
+<span>                                             password <span class="op">=</span> <span class="st">"supersecret"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">outputFolder</span> <span class="op">&lt;-</span> <span class="st">"/home/caseControlOutput"</span></span>
+<span></span>
+<span><span class="va">cdmDatabaseSchema</span> <span class="op">&lt;-</span> <span class="st">"my_cdm_data"</span></span>
+<span><span class="va">cohortDatabaseSchema</span> <span class="op">&lt;-</span> <span class="st">"my_work_schema"</span></span>
+<span><span class="va">cohortTable</span> <span class="op">&lt;-</span> <span class="st">"vignette_cohorts"</span></span></code></pre></div>
+<p>The last two lines define the <code>cdmDatabaseSchema</code> and
+<code>cohortDatabaseSchema</code> variables. We’ll use these later to
+tell R where the data in CDM format live, and where we want to store the
+outcome and nesting cohorts. Note that for Microsoft SQL Server,
+databaseschemas need to specify both the database and the schema, so for
+example <code>cdmDatabaseSchema &lt;- "my_cdm_data.dbo"</code>.</p>
+<p>We also need to prepare our exposures, outcomes and nesting cohorts
+of interest. The <code>drug_era</code> table in the OMOP Common Data
+Model already contains prespecified cohorts of users at the ingredient
+level, so we will use that for the exposures. For the outcomes, we want
+to restrict our analysis only to those events that are recorded in an
+inpatient setting, so we will need to create a custom cohort table. For
+this example, we are only interested in GI bleed (concept ID 192671).
+Some of the analyses we’d like to nest in a population with previous
+diagnoses of rheumatoid arthritis, so we will need to create a custom
+cohort for this as well.</p>
+<p>We create a text file called <em>vignette.sql</em> with the following
+content:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">/***********************************</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">File vignette.sql </span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">***********************************/</span></span>
@@ -179,417 +231,522 @@
 <span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="kw">WHERE</span> ancestor_concept_id <span class="op">=</span> <span class="dv">80809</span> <span class="co">-- rheumatoid arthritis</span></span>
 <span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> person_id;</span></code></pre></div>
-<p>This is parameterized SQL which can be used by the <code>SqlRender</code> package. We use parameterized SQL so we do not have to pre-specify the names of the CDM and result schemas. That way, if we want to run the SQL on a different schema, we only need to change the parameter values; we do not have to change the SQL code. By also making use of translation functionality in <code>SqlRender</code>, we can make sure the SQL code can be run in many different environments.</p>
+<p>This is parameterized SQL which can be used by the
+<code>SqlRender</code> package. We use parameterized SQL so we do not
+have to pre-specify the names of the CDM and result schemas. That way,
+if we want to run the SQL on a different schema, we only need to change
+the parameter values; we do not have to change the SQL code. By also
+making use of translation functionality in <code>SqlRender</code>, we
+can make sure the SQL code can be run in many different
+environments.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ohdsi.github.io/SqlRender/">SqlRender</a></span><span class="op">)</span>
-<span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SqlRender/man/readSql.html">readSql</a></span><span class="op">(</span><span class="st">"vignette.sql"</span><span class="op">)</span>
-<span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SqlRender/man/render.html">render</a></span><span class="op">(</span><span class="va">sql</span>,
-              cdmDatabaseSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>, 
-              cohortDatabaseSchema <span class="op">=</span> <span class="va">cohortDatabaseSchema</span>,
-              cohortTable <span class="op">=</span> <span class="va">cohortTable</span><span class="op">)</span>
-<span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SqlRender/man/translate.html">translate</a></span><span class="op">(</span><span class="va">sql</span>, targetDialect <span class="op">=</span> <span class="va">connectionDetails</span><span class="op">$</span><span class="va">dbms</span><span class="op">)</span>
-
-<span class="va">connection</span> <span class="op">&lt;-</span> <span class="fu">connect</span><span class="op">(</span><span class="va">connectionDetails</span><span class="op">)</span>
-<span class="fu">executeSql</span><span class="op">(</span><span class="va">connection</span>, <span class="va">sql</span><span class="op">)</span></code></pre></div>
-<p>In this code, we first read the SQL from the file into memory. In the next line, we replace the two parameter names with the actual values. We then translate the SQL into the dialect appropriate for the DBMS we already specified in the <code>connectionDetails</code>. Next, we connect to the server, and submit the rendered and translated SQL.</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ohdsi.github.io/SqlRender/" class="external-link">SqlRender</a></span><span class="op">)</span></span>
+<span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ohdsi.github.io/SqlRender/reference/readSql.html" class="external-link">readSql</a></span><span class="op">(</span><span class="st">"vignette.sql"</span><span class="op">)</span></span>
+<span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ohdsi.github.io/SqlRender/reference/render.html" class="external-link">render</a></span><span class="op">(</span><span class="va">sql</span>,</span>
+<span>              cdmDatabaseSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>, </span>
+<span>              cohortDatabaseSchema <span class="op">=</span> <span class="va">cohortDatabaseSchema</span>,</span>
+<span>              cohortTable <span class="op">=</span> <span class="va">cohortTable</span><span class="op">)</span></span>
+<span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ohdsi.github.io/SqlRender/reference/translate.html" class="external-link">translate</a></span><span class="op">(</span><span class="va">sql</span>, targetDialect <span class="op">=</span> <span class="va">connectionDetails</span><span class="op">$</span><span class="va">dbms</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">connection</span> <span class="op">&lt;-</span> <span class="fu">connect</span><span class="op">(</span><span class="va">connectionDetails</span><span class="op">)</span></span>
+<span><span class="fu">executeSql</span><span class="op">(</span><span class="va">connection</span>, <span class="va">sql</span><span class="op">)</span></span></code></pre></div>
+<p>In this code, we first read the SQL from the file into memory. In the
+next line, we replace the two parameter names with the actual values. We
+then translate the SQL into the dialect appropriate for the DBMS we
+already specified in the <code>connectionDetails</code>. Next, we
+connect to the server, and submit the rendered and translated SQL.</p>
 </div>
-<div id="specifying-hypotheses-of-interest" class="section level1">
-<h1 class="hasAnchor">
-<a href="#specifying-hypotheses-of-interest" class="anchor"></a>Specifying hypotheses of interest</h1>
-<p>The first group of arguments define the exposure, outcome, and optionally the nesting cohort. Here we demonstrate how to create a list of exposure-outcome-nesting cohort triplets:</p>
+<div class="section level2">
+<h2 id="specifying-hypotheses-of-interest">Specifying hypotheses of interest<a class="anchor" aria-label="anchor" href="#specifying-hypotheses-of-interest"></a>
+</h2>
+<p>The first group of arguments define the exposure, outcome, and
+optionally the nesting cohort. Here we demonstrate how to create a list
+of exposure-outcome-nesting cohort triplets:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">negativeControls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">705178</span>,
-                      <span class="fl">705944</span>,
-                      <span class="fl">710650</span>,
-                      <span class="fl">714785</span>,
-                      <span class="fl">719174</span>,
-                      <span class="fl">719311</span>,
-                      <span class="fl">735340</span>,
-                      <span class="fl">742185</span>,
-                      <span class="fl">780369</span>,
-                      <span class="fl">781182</span>,
-                      <span class="fl">924724</span>,
-                      <span class="fl">990760</span>,
-                      <span class="fl">1110942</span>,
-                      <span class="fl">1111706</span>,
-                      <span class="fl">1136601</span>,
-                      <span class="fl">1317967</span>,
-                      <span class="fl">1501309</span>,
-                      <span class="fl">1505346</span>,
-                      <span class="fl">1551673</span>,
-                      <span class="fl">1560278</span>,
-                      <span class="fl">1584910</span>,
-                      <span class="fl">19010309</span>,
-                      <span class="fl">40163731</span><span class="op">)</span>
-<span class="va">diclofenac</span> <span class="op">&lt;-</span> <span class="fl">1124300</span>
-<span class="va">giBleed</span> <span class="op">&lt;-</span> <span class="fl">1</span>
-<span class="va">rheumatoidArthritis</span> <span class="op">&lt;-</span> <span class="fl">2</span>
-
-<span class="va">exposureOutcomeNcList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span>
-<span class="kw">for</span> <span class="op">(</span><span class="va">exposureId</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">diclofenac</span>, <span class="va">negativeControls</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">exposureOutcomeNc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createExposureOutcomeNestingCohort.html">createExposureOutcomeNestingCohort</a></span><span class="op">(</span>exposureId <span class="op">=</span> <span class="va">exposureId</span>,
-                                                          outcomeId <span class="op">=</span> <span class="va">giBleed</span>,
-                                                          nestingCohortId <span class="op">=</span> <span class="va">rheumatoidArthritis</span><span class="op">)</span>
-  <span class="va">exposureOutcomeNcList</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">exposureOutcomeNcList</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">exposureOutcomeNc</span>
-<span class="op">}</span></code></pre></div>
-<p>We defined the outcome of interest to be the custom cohort with ID 1 we defined in the SQL above. The exposures include diclofenac (concept ID 1124300) and a large number of negative control exposures. For each hypothesis we specify the same nesting cohort with ID 2, as defined in the SQL above.</p>
-<p>A convenient way to save <code>exposureOutcomeNcList</code> to file is by using the <code>saveExposureOutcomeNestingCohortList</code> function, and we can load it again using the <code>loadExposureOutcomeNestingCohortList</code> function.</p>
+<code class="sourceCode R"><span><span class="va">negativeControls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">705178</span>,</span>
+<span>                      <span class="fl">705944</span>,</span>
+<span>                      <span class="fl">710650</span>,</span>
+<span>                      <span class="fl">714785</span>,</span>
+<span>                      <span class="fl">719174</span>,</span>
+<span>                      <span class="fl">719311</span>,</span>
+<span>                      <span class="fl">735340</span>,</span>
+<span>                      <span class="fl">742185</span>,</span>
+<span>                      <span class="fl">780369</span>,</span>
+<span>                      <span class="fl">781182</span>,</span>
+<span>                      <span class="fl">924724</span>,</span>
+<span>                      <span class="fl">990760</span>,</span>
+<span>                      <span class="fl">1110942</span>,</span>
+<span>                      <span class="fl">1111706</span>,</span>
+<span>                      <span class="fl">1136601</span>,</span>
+<span>                      <span class="fl">1317967</span>,</span>
+<span>                      <span class="fl">1501309</span>,</span>
+<span>                      <span class="fl">1505346</span>,</span>
+<span>                      <span class="fl">1551673</span>,</span>
+<span>                      <span class="fl">1560278</span>,</span>
+<span>                      <span class="fl">1584910</span>,</span>
+<span>                      <span class="fl">19010309</span>,</span>
+<span>                      <span class="fl">40163731</span><span class="op">)</span></span>
+<span><span class="va">diclofenac</span> <span class="op">&lt;-</span> <span class="fl">1124300</span></span>
+<span><span class="va">giBleed</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span><span class="va">rheumatoidArthritis</span> <span class="op">&lt;-</span> <span class="fl">2</span></span>
+<span></span>
+<span><span class="va">exposureOutcomeNcList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">exposureId</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">diclofenac</span>, <span class="va">negativeControls</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">exposureOutcomeNc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createExposureOutcomeNestingCohort.html">createExposureOutcomeNestingCohort</a></span><span class="op">(</span>exposureId <span class="op">=</span> <span class="va">exposureId</span>,</span>
+<span>                                                          outcomeId <span class="op">=</span> <span class="va">giBleed</span>,</span>
+<span>                                                          nestingCohortId <span class="op">=</span> <span class="va">rheumatoidArthritis</span><span class="op">)</span></span>
+<span>  <span class="va">exposureOutcomeNcList</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">exposureOutcomeNcList</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">exposureOutcomeNc</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>We defined the outcome of interest to be the custom cohort with ID 1
+we defined in the SQL above. The exposures include diclofenac (concept
+ID 1124300) and a large number of negative control exposures. For each
+hypothesis we specify the same nesting cohort with ID 2, as defined in
+the SQL above.</p>
+<p>A convenient way to save <code>exposureOutcomeNcList</code> to file
+is by using the <code>saveExposureOutcomeNestingCohortList</code>
+function, and we can load it again using the
+<code>loadExposureOutcomeNestingCohortList</code> function.</p>
 </div>
-<div id="specifying-analyses" class="section level1">
-<h1 class="hasAnchor">
-<a href="#specifying-analyses" class="anchor"></a>Specifying analyses</h1>
-<p>The second group of arguments are not specific to a hypothesis of interest, and comprise the majority of arguments. For each function that will be called during the execution of the analyses, a companion function is available that has (almost) the same arguments. For example, for the <code><a href="../reference/getDbCaseData.html">getDbCaseData()</a></code> function there is the <code><a href="../reference/createGetDbCaseDataArgs.html">createGetDbCaseDataArgs()</a></code> function. These companion functions can be used to create the arguments to be used during execution:</p>
+<div class="section level2">
+<h2 id="specifying-analyses">Specifying analyses<a class="anchor" aria-label="anchor" href="#specifying-analyses"></a>
+</h2>
+<p>The second group of arguments are not specific to a hypothesis of
+interest, and comprise the majority of arguments. For each function that
+will be called during the execution of the analyses, a companion
+function is available that has (almost) the same arguments. For example,
+for the <code><a href="../reference/getDbCaseData.html">getDbCaseData()</a></code> function there is the
+<code><a href="../reference/createGetDbCaseDataArgs.html">createGetDbCaseDataArgs()</a></code> function. These companion
+functions can be used to create the arguments to be used during
+execution:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">getDbCaseDataArgs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createGetDbCaseDataArgs.html">createGetDbCaseDataArgs</a></span><span class="op">(</span>useNestingCohort <span class="op">=</span> <span class="cn">FALSE</span>,
-                                              getVisits <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="va">matchingCriteria1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createMatchingCriteria.html">createMatchingCriteria</a></span><span class="op">(</span>controlsPerCase <span class="op">=</span> <span class="fl">2</span>,
-                                           matchOnAge <span class="op">=</span> <span class="cn">TRUE</span>,
-                                           ageCaliper <span class="op">=</span> <span class="fl">2</span>,
-                                           matchOnGender <span class="op">=</span> <span class="cn">TRUE</span>,
-                                           matchOnProvider <span class="op">=</span> <span class="cn">FALSE</span>,
-                                           matchOnVisitDate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="va">selectControlsArgs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSelectControlsArgs.html">createSelectControlsArgs</a></span><span class="op">(</span>firstOutcomeOnly <span class="op">=</span> <span class="cn">FALSE</span>,
-                                                washoutPeriod <span class="op">=</span> <span class="fl">180</span>,
-                                                controlSelectionCriteria <span class="op">=</span> <span class="va">matchingCriteria1</span><span class="op">)</span>
-
-<span class="va">getDbExposureDataArgs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createGetDbExposureDataArgs.html">createGetDbExposureDataArgs</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="va">createCaseControlDataArgs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCreateCaseControlDataArgs.html">createCreateCaseControlDataArgs</a></span><span class="op">(</span>firstExposureOnly <span class="op">=</span> <span class="cn">FALSE</span>,
-                                                              riskWindowStart <span class="op">=</span> <span class="fl">0</span>,
-                                                              riskWindowEnd <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>
-
-<span class="va">fitCaseControlModelArgs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createFitCaseControlModelArgs.html">createFitCaseControlModelArgs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p>Any argument that is not explicitly specified by the user will assume the default value specified in the function. Note that in this example, even though we specified a nesting cohort for each exposure-outcome-nesting cohort triplet, we have specified <code>useNestingCohort = FALSE</code>, meaning we will not nest this analysis but rather use the entire population to draw cases and controls.</p>
-<p>We can now combine the arguments for the various functions into a single analysis:</p>
+<code class="sourceCode R"><span><span class="va">getDbCaseDataArgs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createGetDbCaseDataArgs.html">createGetDbCaseDataArgs</a></span><span class="op">(</span>useNestingCohort <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                              getVisits <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">matchingCriteria1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createMatchingCriteria.html">createMatchingCriteria</a></span><span class="op">(</span>controlsPerCase <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                                           matchOnAge <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                           ageCaliper <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                                           matchOnGender <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                           matchOnProvider <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                           matchOnVisitDate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">selectControlsArgs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSelectControlsArgs.html">createSelectControlsArgs</a></span><span class="op">(</span>firstOutcomeOnly <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                                washoutPeriod <span class="op">=</span> <span class="fl">180</span>,</span>
+<span>                                                controlSelectionCriteria <span class="op">=</span> <span class="va">matchingCriteria1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">getDbExposureDataArgs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createGetDbExposureDataArgs.html">createGetDbExposureDataArgs</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">createCaseControlDataArgs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCreateCaseControlDataArgs.html">createCreateCaseControlDataArgs</a></span><span class="op">(</span>firstExposureOnly <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                                              riskWindowStart <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>                                                              riskWindowEnd <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fitCaseControlModelArgs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createFitCaseControlModelArgs.html">createFitCaseControlModelArgs</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Any argument that is not explicitly specified by the user will assume
+the default value specified in the function. Note that in this example,
+even though we specified a nesting cohort for each
+exposure-outcome-nesting cohort triplet, we have specified
+<code>useNestingCohort = FALSE</code>, meaning we will not nest this
+analysis but rather use the entire population to draw cases and
+controls.</p>
+<p>We can now combine the arguments for the various functions into a
+single analysis:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ccAnalysis1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">1</span>,
-                                description <span class="op">=</span> <span class="st">"Matching on age and gender"</span>,
-                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs1</span>,
-                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs1</span>,
-                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs1</span>,
-                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,
-                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs1</span><span class="op">)</span></code></pre></div>
-<p>Note that we have assigned an analysis ID (1) to this set of arguments. We can use this later to link the results back to this specific set of choices. We also include a short description of the analysis.</p>
-<p>We can easily create more analyses, for example by using nesting and matching on visit dates:</p>
+<code class="sourceCode R"><span><span class="va">ccAnalysis1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                                description <span class="op">=</span> <span class="st">"Matching on age and gender"</span>,</span>
+<span>                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs1</span>,</span>
+<span>                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs1</span>,</span>
+<span>                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs1</span>,</span>
+<span>                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,</span>
+<span>                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs1</span><span class="op">)</span></span></code></pre></div>
+<p>Note that we have assigned an analysis ID (1) to this set of
+arguments. We can use this later to link the results back to this
+specific set of choices. We also include a short description of the
+analysis.</p>
+<p>We can easily create more analyses, for example by using nesting and
+matching on visit dates:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">getDbCaseDataArgs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createGetDbCaseDataArgs.html">createGetDbCaseDataArgs</a></span><span class="op">(</span>useNestingCohort <span class="op">=</span> <span class="cn">TRUE</span>,
-                                              getVisits <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-
-<span class="va">ccAnalysis2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">2</span>,
-                                description <span class="op">=</span> <span class="st">"Matching on age and gender, nesting in indication"</span>,
-                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs2</span>,
-                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs1</span>,
-                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs1</span>,
-                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,
-                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs1</span><span class="op">)</span>
-
-<span class="va">covariateSettings</span> <span class="op">&lt;-</span> <span class="fu">createCovariateSettings</span><span class="op">(</span>useCharlsonIndex <span class="op">=</span> <span class="cn">TRUE</span>,
-                                             useChads2 <span class="op">=</span> <span class="cn">TRUE</span>,
-                                             useDcsi <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-
-<span class="va">getDbExposureDataArgs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createGetDbExposureDataArgs.html">createGetDbExposureDataArgs</a></span><span class="op">(</span>covariateSettings <span class="op">=</span> <span class="va">covariateSettings</span><span class="op">)</span>
-
-<span class="va">fitCaseControlModelArgs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createFitCaseControlModelArgs.html">createFitCaseControlModelArgs</a></span><span class="op">(</span>useCovariates <span class="op">=</span> <span class="cn">TRUE</span>,
-                                                          prior <span class="op">=</span> <span class="fu">createPrior</span><span class="op">(</span><span class="st">"none"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="va">ccAnalysis3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">3</span>,
-                                description <span class="op">=</span> <span class="st">"Matching on age and gender, nesting in indication, using covars"</span>,
-                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs2</span>,
-                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs1</span>,
-                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs2</span>,
-                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,
-                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs2</span><span class="op">)</span>
-
-<span class="va">matchingCriteria2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createMatchingCriteria.html">createMatchingCriteria</a></span><span class="op">(</span>controlsPerCase <span class="op">=</span> <span class="fl">2</span>,
-                                            matchOnAge <span class="op">=</span> <span class="cn">TRUE</span>,
-                                            ageCaliper <span class="op">=</span> <span class="fl">2</span>,
-                                            matchOnGender <span class="op">=</span> <span class="cn">TRUE</span>,
-                                            matchOnProvider <span class="op">=</span> <span class="cn">FALSE</span>,
-                                            matchOnVisitDate <span class="op">=</span> <span class="cn">TRUE</span>,
-                                            visitDateCaliper <span class="op">=</span> <span class="fl">30</span><span class="op">)</span>
-
-<span class="va">selectControlsArgs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSelectControlsArgs.html">createSelectControlsArgs</a></span><span class="op">(</span>firstOutcomeOnly <span class="op">=</span> <span class="cn">FALSE</span>,
-                                                washoutPeriod <span class="op">=</span> <span class="fl">180</span>,
-                                                controlSelectionCriteria <span class="op">=</span> <span class="va">matchingCriteria2</span><span class="op">)</span>
-
-<span class="va">ccAnalysis4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">4</span>,
-                                description <span class="op">=</span> <span class="st">"Matching on age, gender and visit, nesting in indication, using covars"</span>,
-                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs2</span>,
-                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs2</span>,
-                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs2</span>,
-                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,
-                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs2</span><span class="op">)</span>
-
-<span class="va">samplingCriteria</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSamplingCriteria.html">createSamplingCriteria</a></span><span class="op">(</span>controlsPerCase <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>
-
-<span class="va">selectControlsArgs3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSelectControlsArgs.html">createSelectControlsArgs</a></span><span class="op">(</span>firstOutcomeOnly <span class="op">=</span> <span class="cn">FALSE</span>,
-                                                washoutPeriod <span class="op">=</span> <span class="fl">180</span>,
-                                                controlSelectionCriteria <span class="op">=</span> <span class="va">samplingCriteria</span><span class="op">)</span>
-
-<span class="va">covariateSettings</span> <span class="op">&lt;-</span> <span class="fu">createCovariateSettings</span><span class="op">(</span>useDemographicsAgeGroup <span class="op">=</span> <span class="cn">TRUE</span>,
-                                             useDemographicsGender <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-
-<span class="va">getDbExposureDataArgs3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createGetDbExposureDataArgs.html">createGetDbExposureDataArgs</a></span><span class="op">(</span>covariateSettings <span class="op">=</span> <span class="va">covariateSettings</span><span class="op">)</span>
-
-<span class="va">ccAnalysis5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">5</span>,
-                                description <span class="op">=</span> <span class="st">"Sampling controls, adjusting for age and gender"</span>,
-                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs1</span>,
-                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs3</span>,
-                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs3</span>,
-                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,
-                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs2</span><span class="op">)</span>
-
-<span class="va">ccAnalysis6</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">6</span>,
-                                description <span class="op">=</span> <span class="st">"Sampling controls, adjusting for age and gender, nesting in indication"</span>,
-                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs2</span>,
-                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs3</span>,
-                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs3</span>,
-                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,
-                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs2</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">getDbCaseDataArgs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createGetDbCaseDataArgs.html">createGetDbCaseDataArgs</a></span><span class="op">(</span>useNestingCohort <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                              getVisits <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ccAnalysis2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                                description <span class="op">=</span> <span class="st">"Matching on age and gender, nesting in indication"</span>,</span>
+<span>                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs2</span>,</span>
+<span>                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs1</span>,</span>
+<span>                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs1</span>,</span>
+<span>                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,</span>
+<span>                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">covariateSettings</span> <span class="op">&lt;-</span> <span class="fu">createCovariateSettings</span><span class="op">(</span>useCharlsonIndex <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                             useChads2 <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                             useDcsi <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">getDbExposureDataArgs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createGetDbExposureDataArgs.html">createGetDbExposureDataArgs</a></span><span class="op">(</span>covariateSettings <span class="op">=</span> <span class="va">covariateSettings</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fitCaseControlModelArgs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createFitCaseControlModelArgs.html">createFitCaseControlModelArgs</a></span><span class="op">(</span>useCovariates <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                                          prior <span class="op">=</span> <span class="fu">createPrior</span><span class="op">(</span><span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ccAnalysis3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                                description <span class="op">=</span> <span class="st">"Matching on age and gender, nesting in indication, using covars"</span>,</span>
+<span>                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs2</span>,</span>
+<span>                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs1</span>,</span>
+<span>                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs2</span>,</span>
+<span>                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,</span>
+<span>                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">matchingCriteria2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createMatchingCriteria.html">createMatchingCriteria</a></span><span class="op">(</span>controlsPerCase <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                                            matchOnAge <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                            ageCaliper <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                                            matchOnGender <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                            matchOnProvider <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                            matchOnVisitDate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                            visitDateCaliper <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">selectControlsArgs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSelectControlsArgs.html">createSelectControlsArgs</a></span><span class="op">(</span>firstOutcomeOnly <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                                washoutPeriod <span class="op">=</span> <span class="fl">180</span>,</span>
+<span>                                                controlSelectionCriteria <span class="op">=</span> <span class="va">matchingCriteria2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ccAnalysis4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>                                description <span class="op">=</span> <span class="st">"Matching on age, gender and visit, nesting in indication, using covars"</span>,</span>
+<span>                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs2</span>,</span>
+<span>                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs2</span>,</span>
+<span>                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs2</span>,</span>
+<span>                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,</span>
+<span>                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">samplingCriteria</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSamplingCriteria.html">createSamplingCriteria</a></span><span class="op">(</span>controlsPerCase <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">selectControlsArgs3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSelectControlsArgs.html">createSelectControlsArgs</a></span><span class="op">(</span>firstOutcomeOnly <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                                washoutPeriod <span class="op">=</span> <span class="fl">180</span>,</span>
+<span>                                                controlSelectionCriteria <span class="op">=</span> <span class="va">samplingCriteria</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">covariateSettings</span> <span class="op">&lt;-</span> <span class="fu">createCovariateSettings</span><span class="op">(</span>useDemographicsAgeGroup <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                             useDemographicsGender <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">getDbExposureDataArgs3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createGetDbExposureDataArgs.html">createGetDbExposureDataArgs</a></span><span class="op">(</span>covariateSettings <span class="op">=</span> <span class="va">covariateSettings</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ccAnalysis5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>                                description <span class="op">=</span> <span class="st">"Sampling controls, adjusting for age and gender"</span>,</span>
+<span>                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs1</span>,</span>
+<span>                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs3</span>,</span>
+<span>                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs3</span>,</span>
+<span>                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,</span>
+<span>                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ccAnalysis6</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>                                description <span class="op">=</span> <span class="st">"Sampling controls, adjusting for age and gender, nesting in indication"</span>,</span>
+<span>                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs2</span>,</span>
+<span>                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs3</span>,</span>
+<span>                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs3</span>,</span>
+<span>                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,</span>
+<span>                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs2</span><span class="op">)</span></span></code></pre></div>
 <p>These analyses can be combined in a list:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ccAnalysisList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">ccAnalysis1</span>, <span class="va">ccAnalysis2</span>, <span class="va">ccAnalysis3</span>, <span class="va">ccAnalysis4</span>, <span class="va">ccAnalysis5</span>, <span class="va">ccAnalysis6</span><span class="op">)</span></code></pre></div>
-<p>A convenient way to save <code>ccAnalysisList</code> to file is by using the <code>saveCcAnalysisList</code> function, and we can load it again using the <code>loadCcAnalysisList</code> function.</p>
-<div id="exposure-outcome-and-nesting-cohort-selection-strategies" class="section level2">
-<h2 class="hasAnchor">
-<a href="#exposure-outcome-and-nesting-cohort-selection-strategies" class="anchor"></a>Exposure, outcome, and nesting cohort selection strategies</h2>
-<p>Often we would like to evaluate different definitions of the exposure and/or outcome, or we want to consider different strategies for identifying the nesting cohort. We could include these by created extra exposure-outcome-nesting cohort triplets, but that would mean that all defined analyses would be executed against these variations of the definitions, and this may not be what we want. Perhaps we would like to define just a single sensitivity analyses with a different outcome definition, in which case we could argue that the strategy of selecting the outcome becomes part of the analysis.</p>
-<p>In such a case, we can define the multiple strategies using a list:</p>
+<code class="sourceCode R"><span><span class="va">ccAnalysisList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">ccAnalysis1</span>, <span class="va">ccAnalysis2</span>, <span class="va">ccAnalysis3</span>, <span class="va">ccAnalysis4</span>, <span class="va">ccAnalysis5</span>, <span class="va">ccAnalysis6</span><span class="op">)</span></span></code></pre></div>
+<p>A convenient way to save <code>ccAnalysisList</code> to file is by
+using the <code>saveCcAnalysisList</code> function, and we can load it
+again using the <code>loadCcAnalysisList</code> function.</p>
+<div class="section level3">
+<h3 id="exposure-outcome-and-nesting-cohort-selection-strategies">Exposure, outcome, and nesting cohort selection strategies<a class="anchor" aria-label="anchor" href="#exposure-outcome-and-nesting-cohort-selection-strategies"></a>
+</h3>
+<p>Often we would like to evaluate different definitions of the exposure
+and/or outcome, or we want to consider different strategies for
+identifying the nesting cohort. We could include these by created extra
+exposure-outcome-nesting cohort triplets, but that would mean that all
+defined analyses would be executed against these variations of the
+definitions, and this may not be what we want. Perhaps we would like to
+define just a single sensitivity analyses with a different outcome
+definition, in which case we could argue that the strategy of selecting
+the outcome becomes part of the analysis.</p>
+<p>In such a case, we can define the multiple strategies using a
+list:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">outcomeIds</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>narrowDefinition <span class="op">=</span> <span class="fl">1</span>,
-                  broadDefinition <span class="op">=</span> <span class="fl">11</span><span class="op">)</span>
-
-<span class="va">exposureOutcomeNc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createExposureOutcomeNestingCohort.html">createExposureOutcomeNestingCohort</a></span><span class="op">(</span>exposureId <span class="op">=</span> <span class="fl">1124300</span>,
-                                                        outcomeId <span class="op">=</span> <span class="va">outcomeIds</span>,
-                                                        nestingCohortId <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></code></pre></div>
-<p>When we specify an analysis, we can then refer to one definition or the other:</p>
+<code class="sourceCode R"><span><span class="va">outcomeIds</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>narrowDefinition <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                  broadDefinition <span class="op">=</span> <span class="fl">11</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">exposureOutcomeNc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createExposureOutcomeNestingCohort.html">createExposureOutcomeNestingCohort</a></span><span class="op">(</span>exposureId <span class="op">=</span> <span class="fl">1124300</span>,</span>
+<span>                                                        outcomeId <span class="op">=</span> <span class="va">outcomeIds</span>,</span>
+<span>                                                        nestingCohortId <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p>When we specify an analysis, we can then refer to one definition or
+the other:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ccAnalysis1A</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">1</span>,
-                                description <span class="op">=</span> <span class="st">"Matching on age and gender, using narrow def."</span>,
-                                outcomeType <span class="op">=</span> <span class="st">"narrowDefinition"</span>,
-                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs1</span>,
-                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs1</span>,
-                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs1</span>,
-                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,
-                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs1</span><span class="op">)</span>
-
-<span class="va">ccAnalysis1B</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">2</span>,
-                                description <span class="op">=</span> <span class="st">"Matching on age and gender, using broad def."</span>,
-                                outcomeType <span class="op">=</span> <span class="st">"broadDefinition"</span>,
-                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs1</span>,
-                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs1</span>,
-                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs1</span>,
-                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,
-                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs1</span><span class="op">)</span>
-
-<span class="va">ccAnalysisList2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">ccAnalysis1A</span>, <span class="va">ccAnalysis1B</span><span class="op">)</span></code></pre></div>
-<p>In this example, the first analysis (analysisId = 1) will use cohort definition 1 as outcome, whilst the second analysis analysis (analysisId = 2) will use cohort definition 11 as outcome.</p>
-<p>The same mechanism can be used to specify types for the exposureId and nestingCohortId.</p>
+<code class="sourceCode R"><span><span class="va">ccAnalysis1A</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                                description <span class="op">=</span> <span class="st">"Matching on age and gender, using narrow def."</span>,</span>
+<span>                                outcomeType <span class="op">=</span> <span class="st">"narrowDefinition"</span>,</span>
+<span>                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs1</span>,</span>
+<span>                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs1</span>,</span>
+<span>                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs1</span>,</span>
+<span>                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,</span>
+<span>                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ccAnalysis1B</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCcAnalysis.html">createCcAnalysis</a></span><span class="op">(</span>analysisId <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                                description <span class="op">=</span> <span class="st">"Matching on age and gender, using broad def."</span>,</span>
+<span>                                outcomeType <span class="op">=</span> <span class="st">"broadDefinition"</span>,</span>
+<span>                                getDbCaseDataArgs <span class="op">=</span> <span class="va">getDbCaseDataArgs1</span>,</span>
+<span>                                selectControlsArgs <span class="op">=</span> <span class="va">selectControlsArgs1</span>,</span>
+<span>                                getDbExposureDataArgs <span class="op">=</span> <span class="va">getDbExposureDataArgs1</span>,</span>
+<span>                                createCaseControlDataArgs <span class="op">=</span> <span class="va">createCaseControlDataArgs1</span>,</span>
+<span>                                fitCaseControlModelArgs <span class="op">=</span> <span class="va">fitCaseControlModelArgs1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ccAnalysisList2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">ccAnalysis1A</span>, <span class="va">ccAnalysis1B</span><span class="op">)</span></span></code></pre></div>
+<p>In this example, the first analysis (analysisId = 1) will use cohort
+definition 1 as outcome, whilst the second analysis analysis (analysisId
+= 2) will use cohort definition 11 as outcome.</p>
+<p>The same mechanism can be used to specify types for the exposureId
+and nestingCohortId.</p>
 </div>
 </div>
-<div id="executing-multiple-analyses" class="section level1">
-<h1 class="hasAnchor">
-<a href="#executing-multiple-analyses" class="anchor"></a>Executing multiple analyses</h1>
-<p>We can now run the analyses against the hypotheses of interest using the <code><a href="../reference/runCcAnalyses.html">runCcAnalyses()</a></code>function. This function will run all specified analyses against all hypotheses of interest, meaning that the total number of outcome models is <code>length(ccAnalysisList) * length(exposureOutcomeNcList)</code>.</p>
+<div class="section level2">
+<h2 id="executing-multiple-analyses">Executing multiple analyses<a class="anchor" aria-label="anchor" href="#executing-multiple-analyses"></a>
+</h2>
+<p>We can now run the analyses against the hypotheses of interest using
+the <code><a href="../reference/runCcAnalyses.html">runCcAnalyses()</a></code>function. This function will run all
+specified analyses against all hypotheses of interest, meaning that the
+total number of outcome models is
+<code>length(ccAnalysisList) * length(exposureOutcomeNcList)</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/runCcAnalyses.html">runCcAnalyses</a></span><span class="op">(</span>connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,
-                        cdmDatabaseSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>,
-                        oracleTempSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>,
-                        exposureDatabaseSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>,
-                        exposureTable <span class="op">=</span> <span class="st">"drug_era"</span>,
-                        outcomeDatabaseSchema <span class="op">=</span> <span class="va">cohortDatabaseSchema</span>,
-                        outcomeTable <span class="op">=</span> <span class="va">cohortTable</span>,
-                        nestingCohortDatabaseSchema <span class="op">=</span> <span class="va">cohortDatabaseSchema</span>,
-                        nestingCohortTable <span class="op">=</span> <span class="va">cohortTable</span>,
-                        outputFolder <span class="op">=</span> <span class="va">outputFolder</span>,
-                        exposureOutcomeNestingCohortList <span class="op">=</span> <span class="va">exposureOutcomeNcList</span>,
-                        ccAnalysisList <span class="op">=</span> <span class="va">ccAnalysisList</span>,
-                        getDbCaseDataThreads <span class="op">=</span> <span class="fl">1</span>,
-                        selectControlsThreads <span class="op">=</span> <span class="fl">2</span>,
-                        getDbExposureDataThreads <span class="op">=</span> <span class="fl">3</span>,
-                        createCaseControlDataThreads <span class="op">=</span> <span class="fl">5</span>,
-                        fitCaseControlModelThreads <span class="op">=</span> <span class="fl">5</span>,
-                        cvThreads <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></code></pre></div>
-<p>In the code above, we provide the arguments for connecting to the database, which schemas and tables to use, as well as the analyses and hypotheses of interest. The <code>outputFolder</code> specifies where the outcome models and intermediate files will be written. We also instruct <code>CaseControl</code> to use multiple threads for various stages in the analyses, meaning these will be executed in parallel on multiple CPUs in the computer. Multithreading can significantly reduce execution time, but will require more system resources such as memory and temporary disk space.</p>
-<div id="restarting" class="section level2">
-<h2 class="hasAnchor">
-<a href="#restarting" class="anchor"></a>Restarting</h2>
-<p>If for some reason the execution was interrupted, you can restart by re-issuing the <code><a href="../reference/runCcAnalyses.html">runCcAnalyses()</a></code> command. Any intermediate and final products that have already been completed and written to disk will be skipped.</p>
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/runCcAnalyses.html">runCcAnalyses</a></span><span class="op">(</span>connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
+<span>                        cdmDatabaseSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>,</span>
+<span>                        oracleTempSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>,</span>
+<span>                        exposureDatabaseSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>,</span>
+<span>                        exposureTable <span class="op">=</span> <span class="st">"drug_era"</span>,</span>
+<span>                        outcomeDatabaseSchema <span class="op">=</span> <span class="va">cohortDatabaseSchema</span>,</span>
+<span>                        outcomeTable <span class="op">=</span> <span class="va">cohortTable</span>,</span>
+<span>                        nestingCohortDatabaseSchema <span class="op">=</span> <span class="va">cohortDatabaseSchema</span>,</span>
+<span>                        nestingCohortTable <span class="op">=</span> <span class="va">cohortTable</span>,</span>
+<span>                        outputFolder <span class="op">=</span> <span class="va">outputFolder</span>,</span>
+<span>                        exposureOutcomeNestingCohortList <span class="op">=</span> <span class="va">exposureOutcomeNcList</span>,</span>
+<span>                        ccAnalysisList <span class="op">=</span> <span class="va">ccAnalysisList</span>,</span>
+<span>                        getDbCaseDataThreads <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                        selectControlsThreads <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                        getDbExposureDataThreads <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                        createCaseControlDataThreads <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>                        fitCaseControlModelThreads <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>                        cvThreads <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<p>In the code above, we provide the arguments for connecting to the
+database, which schemas and tables to use, as well as the analyses and
+hypotheses of interest. The <code>outputFolder</code> specifies where
+the outcome models and intermediate files will be written. We also
+instruct <code>CaseControl</code> to use multiple threads for various
+stages in the analyses, meaning these will be executed in parallel on
+multiple CPUs in the computer. Multithreading can significantly reduce
+execution time, but will require more system resources such as memory
+and temporary disk space.</p>
+<div class="section level3">
+<h3 id="restarting">Restarting<a class="anchor" aria-label="anchor" href="#restarting"></a>
+</h3>
+<p>If for some reason the execution was interrupted, you can restart by
+re-issuing the <code><a href="../reference/runCcAnalyses.html">runCcAnalyses()</a></code> command. Any intermediate
+and final products that have already been completed and written to disk
+will be skipped.</p>
 </div>
 </div>
-<div id="retrieving-the-results" class="section level1">
-<h1 class="hasAnchor">
-<a href="#retrieving-the-results" class="anchor"></a>Retrieving the results</h1>
-<p>The result of the <code><a href="../reference/runCcAnalyses.html">runCcAnalyses()</a></code> is a data frame with one row per exposure-outcome-nesting cohort-analysis combination. It provides the file names of the intermediate and end-result files that were constructed. For example, we can retrieve the fitted model for the combination of our drug of interest, outcome, and first analysis:</p>
+<div class="section level2">
+<h2 id="retrieving-the-results">Retrieving the results<a class="anchor" aria-label="anchor" href="#retrieving-the-results"></a>
+</h2>
+<p>The result of the <code><a href="../reference/runCcAnalyses.html">runCcAnalyses()</a></code> is a data frame with
+one row per exposure-outcome-nesting cohort-analysis combination. It
+provides the file names of the intermediate and end-result files that
+were constructed. For example, we can retrieve the fitted model for the
+combination of our drug of interest, outcome, and first analysis:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ccModelFile</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">modelFile</span><span class="op">[</span><span class="va">result</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span> <span class="op">&amp;</span> 
-                                  <span class="va">result</span><span class="op">$</span><span class="va">outcomeId</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">&amp;</span>
-                                  <span class="va">result</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">1</span><span class="op">]</span>
-<span class="va">ccModel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">outputFolder</span>, <span class="va">ccModelFile</span><span class="op">)</span><span class="op">)</span>
-<span class="va">ccModel</span></code></pre></div>
-<pre><code>#&gt; Case-Control fitted model
-#&gt; Status: OK
-#&gt; 
-#&gt; Counts
-#&gt;        Cases Controls Exposed cases Exposed controls
-#&gt; Count  93903   182623           580              871
-#&gt; 
-#&gt;           Estimate lower .95 upper .95   logRr seLogRr Log Likelihood Ratio
-#&gt; treatment  1.29688   1.16676   1.44046 0.25996 0.05376                11.47</code></pre>
-<p>Note that some of the file names will appear several times in the table. For example, all analysis share the same ccData object.</p>
-<p>We can create a summary of the results using <code><a href="../reference/summarizeCcAnalyses.html">summarizeCcAnalyses()</a></code>:</p>
+<code class="sourceCode R"><span><span class="va">ccModelFile</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">modelFile</span><span class="op">[</span><span class="va">result</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span> <span class="op">&amp;</span> </span>
+<span>                                  <span class="va">result</span><span class="op">$</span><span class="va">outcomeId</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">&amp;</span></span>
+<span>                                  <span class="va">result</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">ccModel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputFolder</span>, <span class="va">ccModelFile</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ccModel</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Case-Control fitted model</span></span>
+<span><span class="co">#&gt; Status: OK</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Counts</span></span>
+<span><span class="co">#&gt;        Cases Controls Exposed cases Exposed controls</span></span>
+<span><span class="co">#&gt; Count  93903   182623           580              871</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;           Estimate lower .95 upper .95   logRr seLogRr Log Likelihood Ratio</span></span>
+<span><span class="co">#&gt; treatment  1.29688   1.16676   1.44046 0.25996 0.05376                11.47</span></span></code></pre>
+<p>Note that some of the file names will appear several times in the
+table. For example, all analysis share the same ccData object.</p>
+<p>We can create a summary of the results using
+<code><a href="../reference/summarizeCcAnalyses.html">summarizeCcAnalyses()</a></code>:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">analysisSum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarizeCcAnalyses.html">summarizeCcAnalyses</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">outputFolder</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">analysisSum</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt;   analysisId exposureId nestingCohortId outcomeId        rr    ci95lb   ci95ub
-#&gt; 1          1    1124300               2         1 1.2968817 1.1667583 1.440461
-#&gt; 2          1     705178               2         1 1.2495695 0.9655508 1.609490
-#&gt; 3          1     705944               2         1 1.2452252 1.0702936 1.446373
-#&gt; 4          1     710650               2         1 0.8839713 0.5419904 1.401811
-#&gt; 5          1     714785               2         1 1.2449900 1.1093374 1.395879
-#&gt; 6          1     719174               2         1 1.3320666 1.2113000 1.464070
-#&gt;              p cases controls exposedCases exposedControls      logRr
-#&gt; 1 1.327163e-06 93903   182623          580             871  0.2599627
-#&gt; 2 8.741421e-02 93903   182623           97             151  0.2227991
-#&gt; 3 4.304137e-03 93903   182623          279             436  0.2193164
-#&gt; 4 6.109298e-01 93903   182623           25              55 -0.1233307
-#&gt; 5 1.851163e-04 93903   182623          479             749  0.2191275
-#&gt; 6 3.021948e-09 93903   182623          726            1062  0.2867316
-#&gt;      seLogRr        llr
-#&gt; 1 0.05375969 11.4701701
-#&gt; 2 0.13035295  1.4383537
-#&gt; 3 0.07681926  4.0086266
-#&gt; 4 0.24242068  0.1326407
-#&gt; 5 0.05861363  6.8588850
-#&gt; 6 0.04834944 17.2408208</code></pre>
-<p>This tells us, per exposure-outcome-nesting cohort-analysis combination, the estimated relative risk and 95% confidence interval, as well as the number of cases, controls, and number of those that were exposed to the drug.</p>
-<div id="empirical-calibration" class="section level2">
-<h2 class="hasAnchor">
-<a href="#empirical-calibration" class="anchor"></a>Empirical calibration</h2>
-<p>Now that we have produced estimates for all outcomes including our negative controls, we can perform empirical calibration to estimate the bias of the various analyses included in our study. We will create the calibration effect plots for every analysis ID. In each plot, the blue dots represent our negative control exposures, and the yellow diamond represents our exposure of interest: diclofenac. An unbiased, well-calibrated analysis should have 95% of the negative controls between the dashed lines (ie. 95% should have p &gt; .05).</p>
+<code class="sourceCode R"><span><span class="va">analysisSum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarizeCcAnalyses.html">summarizeCcAnalyses</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">outputFolder</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">analysisSum</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt;   analysisId exposureId nestingCohortId outcomeId        rr    ci95lb   ci95ub</span></span>
+<span><span class="co">#&gt; 1          1    1124300               2         1 1.2968817 1.1667583 1.440461</span></span>
+<span><span class="co">#&gt; 2          1     705178               2         1 1.2495695 0.9655508 1.609490</span></span>
+<span><span class="co">#&gt; 3          1     705944               2         1 1.2452252 1.0702936 1.446373</span></span>
+<span><span class="co">#&gt; 4          1     710650               2         1 0.8839713 0.5419904 1.401811</span></span>
+<span><span class="co">#&gt; 5          1     714785               2         1 1.2449900 1.1093374 1.395879</span></span>
+<span><span class="co">#&gt; 6          1     719174               2         1 1.3320666 1.2113000 1.464070</span></span>
+<span><span class="co">#&gt;              p cases controls exposedCases exposedControls      logRr</span></span>
+<span><span class="co">#&gt; 1 1.327163e-06 93903   182623          580             871  0.2599627</span></span>
+<span><span class="co">#&gt; 2 8.741421e-02 93903   182623           97             151  0.2227991</span></span>
+<span><span class="co">#&gt; 3 4.304137e-03 93903   182623          279             436  0.2193164</span></span>
+<span><span class="co">#&gt; 4 6.109298e-01 93903   182623           25              55 -0.1233307</span></span>
+<span><span class="co">#&gt; 5 1.851163e-04 93903   182623          479             749  0.2191275</span></span>
+<span><span class="co">#&gt; 6 3.021948e-09 93903   182623          726            1062  0.2867316</span></span>
+<span><span class="co">#&gt;      seLogRr        llr</span></span>
+<span><span class="co">#&gt; 1 0.05375969 11.4701701</span></span>
+<span><span class="co">#&gt; 2 0.13035295  1.4383537</span></span>
+<span><span class="co">#&gt; 3 0.07681926  4.0086266</span></span>
+<span><span class="co">#&gt; 4 0.24242068  0.1326407</span></span>
+<span><span class="co">#&gt; 5 0.05861363  6.8588850</span></span>
+<span><span class="co">#&gt; 6 0.04834944 17.2408208</span></span></code></pre>
+<p>This tells us, per exposure-outcome-nesting cohort-analysis
+combination, the estimated relative risk and 95% confidence interval, as
+well as the number of cases, controls, and number of those that were
+exposed to the drug.</p>
+<div class="section level3">
+<h3 id="empirical-calibration">Empirical calibration<a class="anchor" aria-label="anchor" href="#empirical-calibration"></a>
+</h3>
+<p>Now that we have produced estimates for all outcomes including our
+negative controls, we can perform empirical calibration to estimate the
+bias of the various analyses included in our study. We will create the
+calibration effect plots for every analysis ID. In each plot, the blue
+dots represent our negative control exposures, and the yellow diamond
+represents our exposure of interest: diclofenac. An unbiased,
+well-calibrated analysis should have 95% of the negative controls
+between the dashed lines (ie. 95% should have p &gt; .05).</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ohdsi.github.io/EmpiricalCalibration">EmpiricalCalibration</a></span><span class="op">)</span>
-
-<span class="co"># Analysis 1: Simplest model</span>
-<span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/plotCalibrationEffect.html">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      <span class="va">null</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt; Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ohdsi.github.io/EmpiricalCalibration/" class="external-link">EmpiricalCalibration</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Analysis 1: Simplest model</span></span>
+<span><span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/fitNull.html" class="external-link">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/plotCalibrationEffect.html" class="external-link">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      <span class="va">null</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Warning in checkWithinLimits(log(xLimits), c(logRrNegatives, logRrPositives), :</span></span>
+<span><span class="co">#&gt; Values are outside plotted range. Consider adjusting xLimits parameter</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 1 rows containing missing values (geom_vline).</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 2 rows containing missing values (geom_point).</span></span></code></pre>
 <p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-17-1.png" width="700"></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Analysis 2: Nesting in rheumatoid arthritis</span>
-<span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/plotCalibrationEffect.html">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      <span class="va">null</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt; Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
-<p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Analysis 3: Nesting and including covariates</span>
-<span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">3</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">3</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/plotCalibrationEffect.html">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      <span class="va">null</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt; Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<code class="sourceCode R"><span><span class="co"># Analysis 2: Nesting in rheumatoid arthritis</span></span>
+<span><span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/fitNull.html" class="external-link">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/plotCalibrationEffect.html" class="external-link">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      <span class="va">null</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Warning in checkWithinLimits(log(xLimits), c(logRrNegatives, logRrPositives), :</span></span>
+<span><span class="co">#&gt; Values are outside plotted range. Consider adjusting xLimits parameter</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 1 rows containing missing values (geom_vline).</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 1 rows containing missing values (geom_point).</span></span></code></pre>
+<p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Analysis 3: Nesting and including covariates</span></span>
+<span><span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">3</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">3</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/fitNull.html" class="external-link">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/plotCalibrationEffect.html" class="external-link">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      <span class="va">null</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Warning in checkWithinLimits(log(xLimits), c(logRrNegatives, logRrPositives), :</span></span>
+<span><span class="co">#&gt; Values are outside plotted range. Consider adjusting xLimits parameter</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 1 rows containing missing values (geom_vline).</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 2 rows containing missing values (geom_point).</span></span></code></pre>
 <p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-21-1.png" width="700"></p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Analysis 4: Nesting, including covariates, and matching on visit</span>
-<span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">4</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">4</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/plotCalibrationEffect.html">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      <span class="va">null</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Analysis 4: Nesting, including covariates, and matching on visit</span></span>
+<span><span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">4</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">4</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/fitNull.html" class="external-link">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/plotCalibrationEffect.html" class="external-link">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      <span class="va">null</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Warning: Removed 1 rows containing missing values (geom_vline).</span></span></code></pre>
 <p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-23-1.png" width="700"></p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Analysis 5: Sampling controls, adjusting for age and gender</span>
-<span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">5</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">5</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/plotCalibrationEffect.html">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      <span class="va">null</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt; Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Analysis 5: Sampling controls, adjusting for age and gender</span></span>
+<span><span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">5</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">5</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/fitNull.html" class="external-link">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/plotCalibrationEffect.html" class="external-link">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      <span class="va">null</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Warning in checkWithinLimits(yLimits, c(seLogRrNegatives, seLogRrPositives), :</span></span>
+<span><span class="co">#&gt; Values are outside plotted range. Consider adjusting yLimits parameter</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning in checkWithinLimits(log(xLimits), c(logRrNegatives, logRrPositives), :</span></span>
+<span><span class="co">#&gt; Values are outside plotted range. Consider adjusting xLimits parameter</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 1 rows containing missing values (geom_vline).</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 3 rows containing missing values (geom_point).</span></span></code></pre>
 <p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-25-1.png" width="700"></p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Analysis 6: Sampling controls, adjusting for age and gender, nesting in indication</span>
-<span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">6</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">6</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span>
-<span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/fitNull.html">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/EmpiricalCalibration/man/plotCalibrationEffect.html">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, 
-                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, 
-                      <span class="va">null</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt; Warning in fitNull(negCons$logRr, negCons$seLogRr): Estimate(s) with NA standard
-#&gt; error detected. Removing before fitting null distribution</code></pre>
-<pre><code>#&gt; Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Analysis 6: Sampling controls, adjusting for age and gender, nesting in indication</span></span>
+<span><span class="va">negCons</span> <span class="op">&lt;-</span> <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">6</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">!=</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">ei</span> <span class="op">&lt;-</span>  <span class="va">analysisSum</span><span class="op">[</span><span class="va">analysisSum</span><span class="op">$</span><span class="va">analysisId</span> <span class="op">==</span> <span class="fl">6</span> <span class="op">&amp;</span> <span class="va">analysisSum</span><span class="op">$</span><span class="va">exposureId</span> <span class="op">==</span> <span class="fl">1124300</span>, <span class="op">]</span></span>
+<span><span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/fitNull.html" class="external-link">fitNull</a></span><span class="op">(</span><span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ohdsi.github.io/EmpiricalCalibration/reference/plotCalibrationEffect.html" class="external-link">plotCalibrationEffect</a></span><span class="op">(</span>logRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrNegatives <span class="op">=</span> <span class="va">negCons</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      logRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">logRr</span>, </span>
+<span>                      seLogRrPositives <span class="op">=</span> <span class="va">ei</span><span class="op">$</span><span class="va">seLogRr</span>, </span>
+<span>                      <span class="va">null</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Warning in fitNull(negCons$logRr, negCons$seLogRr): Estimate(s) with NA standard</span></span>
+<span><span class="co">#&gt; error detected. Removing before fitting null distribution</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 1 rows containing missing values (geom_vline).</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 1 rows containing missing values (geom_point).</span></span></code></pre>
 <p><img src="MultipleAnalyses_files/figure-html/unnamed-chunk-27-1.png" width="700"></p>
 </div>
 </div>
-<div id="acknowledgments" class="section level1">
-<h1 class="hasAnchor">
-<a href="#acknowledgments" class="anchor"></a>Acknowledgments</h1>
-<p>Considerable work has been dedicated to provide the <code>CaseControl</code> package.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span><span class="op">(</span><span class="st">"CaseControl"</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt; 
-#&gt; To cite package 'CaseControl' in publications use:
-#&gt; 
-#&gt;   Martijn Schuemie (2021). CaseControl: Case-Control.
-#&gt;   http://ohdsi.github.io/CaseControl,
-#&gt;   https://github.com/OHDSI/CaseControl.
-#&gt; 
-#&gt; A BibTeX entry for LaTeX users is
-#&gt; 
-#&gt;   @Manual{,
-#&gt;     title = {CaseControl: Case-Control},
-#&gt;     author = {Martijn Schuemie},
-#&gt;     year = {2021},
-#&gt;     note = {http://ohdsi.github.io/CaseControl, https://github.com/OHDSI/CaseControl},
-#&gt;   }</code></pre>
-<p>Further, <code>CaseControl</code> makes extensive use of the <code>Cyclops</code> package.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span><span class="op">(</span><span class="st">"Cyclops"</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt; 
-#&gt; To cite Cyclops in publications use:
-#&gt; 
-#&gt; Suchard MA, Simpson SE, Zorych I, Ryan P, Madigan D (2013). "Massive
-#&gt; parallelization of serial inference algorithms for complex generalized
-#&gt; linear models." _ACM Transactions on Modeling and Computer Simulation_,
-#&gt; *23*, 10. &lt;URL: https://dl.acm.org/doi/10.1145/2414416.2414791&gt;.
-#&gt; 
-#&gt; A BibTeX entry for LaTeX users is
-#&gt; 
-#&gt;   @Article{,
-#&gt;     author = {M. A. Suchard and S. E. Simpson and I. Zorych and P. Ryan and D. Madigan},
-#&gt;     title = {Massive parallelization of serial inference algorithms for complex generalized linear models},
-#&gt;     journal = {ACM Transactions on Modeling and Computer Simulation},
-#&gt;     volume = {23},
-#&gt;     pages = {10},
-#&gt;     year = {2013},
-#&gt;     url = {https://dl.acm.org/doi/10.1145/2414416.2414791},
-#&gt;   }</code></pre>
-<p>This work is supported in part through the National Science Foundation grant IIS 1251151.</p>
+<div class="section level2">
+<h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
+</h2>
+<p>Considerable work has been dedicated to provide the
+<code>CaseControl</code> package.</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"CaseControl"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; To cite package 'CaseControl' in publications use:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Schuemie M (2022). _CaseControl: Case-Control_.</span></span>
+<span><span class="co">#&gt;   http://ohdsi.github.io/CaseControl,</span></span>
+<span><span class="co">#&gt;   https://github.com/OHDSI/CaseControl.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   @Manual{,</span></span>
+<span><span class="co">#&gt;     title = {CaseControl: Case-Control},</span></span>
+<span><span class="co">#&gt;     author = {Martijn Schuemie},</span></span>
+<span><span class="co">#&gt;     year = {2022},</span></span>
+<span><span class="co">#&gt;     note = {http://ohdsi.github.io/CaseControl,</span></span>
+<span><span class="co">#&gt; https://github.com/OHDSI/CaseControl},</span></span>
+<span><span class="co">#&gt;   }</span></span></code></pre>
+<p>Further, <code>CaseControl</code> makes extensive use of the
+<code>Cyclops</code> package.</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"Cyclops"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; To cite Cyclops in publications use:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Suchard MA, Simpson SE, Zorych I, Ryan P, Madigan D (2013). "Massive</span></span>
+<span><span class="co">#&gt;   parallelization of serial inference algorithms for complex</span></span>
+<span><span class="co">#&gt;   generalized linear models." _ACM Transactions on Modeling and</span></span>
+<span><span class="co">#&gt;   Computer Simulation_, *23*, 10.</span></span>
+<span><span class="co">#&gt;   &lt;https://dl.acm.org/doi/10.1145/2414416.2414791&gt;.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   @Article{,</span></span>
+<span><span class="co">#&gt;     author = {M. A. Suchard and S. E. Simpson and I. Zorych and P. Ryan and D. Madigan},</span></span>
+<span><span class="co">#&gt;     title = {Massive parallelization of serial inference algorithms for complex generalized linear models},</span></span>
+<span><span class="co">#&gt;     journal = {ACM Transactions on Modeling and Computer Simulation},</span></span>
+<span><span class="co">#&gt;     volume = {23},</span></span>
+<span><span class="co">#&gt;     pages = {10},</span></span>
+<span><span class="co">#&gt;     year = {2013},</span></span>
+<span><span class="co">#&gt;     url = {https://dl.acm.org/doi/10.1145/2414416.2414791},</span></span>
+<span><span class="co">#&gt;   }</span></span></code></pre>
+<p>This work is supported in part through the National Science
+Foundation grant IIS 1251151.</p>
 </div>
   </div>
 
@@ -604,11 +761,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Martijn Schuemie.</p>
+  <p></p>
+<p>Developed by Martijn Schuemie.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer>
@@ -616,6 +775,8 @@
 
   
 
+
+  
 
   </body>
 </html>

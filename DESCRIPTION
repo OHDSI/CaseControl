@@ -2,7 +2,7 @@ Package: CaseControl
 Type: Package
 Title: Case-Control
 Version: 3.2.0
-Date: 2021-05-18
+Date: 2022-07-14
 Authors@R: c(
     person("Martijn", "Schuemie", , "schuemie@ohdsi.org", role = c("aut", "cre"))
     )
@@ -38,5 +38,5 @@ Remotes:
 License: Apache License 2.0
 LinkingTo: Rcpp
 NeedsCompilation: yes
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
 Encoding: UTF-8

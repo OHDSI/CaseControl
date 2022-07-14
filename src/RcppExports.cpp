@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // selectControlsInternal
 DataFrame selectControlsInternal(const List& nestingCohorts, const List& cases, const List& visits, const bool firstOutcomeOnly, const int washoutPeriod, const int controlsPerCase, const bool matchOnAge, const double ageCaliper, const bool matchOnGender, const bool matchOnProvider, const bool matchOnCareSite, const bool matchOnVisitDate, const int visitDateCaliper, const bool matchOnTimeInCohort, const int daysInCohortCaliper, const int minAgeDays, const int maxAgeDays, const int seed);
 RcppExport SEXP _CaseControl_selectControlsInternal(SEXP nestingCohortsSEXP, SEXP casesSEXP, SEXP visitsSEXP, SEXP firstOutcomeOnlySEXP, SEXP washoutPeriodSEXP, SEXP controlsPerCaseSEXP, SEXP matchOnAgeSEXP, SEXP ageCaliperSEXP, SEXP matchOnGenderSEXP, SEXP matchOnProviderSEXP, SEXP matchOnCareSiteSEXP, SEXP matchOnVisitDateSEXP, SEXP visitDateCaliperSEXP, SEXP matchOnTimeInCohortSEXP, SEXP daysInCohortCaliperSEXP, SEXP minAgeDaysSEXP, SEXP maxAgeDaysSEXP, SEXP seedSEXP) {
