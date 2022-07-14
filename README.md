@@ -2,7 +2,7 @@ CaseControl
 ===========
 
 [![Build Status](https://github.com/OHDSI/CaseControl/workflows/R-CMD-check/badge.svg)](https://github.com/OHDSI/CaseControl/actions?query=workflow%3AR-CMD-check)
-[![codecov.io](https://codecov.io/github/OHDSI/CaseControl/coverage.svg?branch=master)](https://codecov.io/github/OHDSI/CaseControl?branch=master)
+[![codecov.io](https://codecov.io/github/OHDSI/CaseControl/coverage.svg?branch=main)](https://codecov.io/github/OHDSI/CaseControl?branch=main)
 
 **This package is no longer being supported** It is provided as is.
 
@@ -42,9 +42,9 @@ User Documentation
 Documentation can be found on the [package website](https://ohdsi.github.io/CaseControl).
 
 PDF versions of the documentation are also available:
-* Vignette: [Single studies using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/SingleStudies.pdf)
-* Vignette: [Running multiple analyses at once using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/master/inst/doc/MultipleAnalyses.pdf)
-* Package manual: [CaseControl.pdf](https://raw.githubusercontent.com/OHDSI/CaseControl/master/extras/CaseControl.pdf)
+* Vignette: [Single studies using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/main/inst/doc/SingleStudies.pdf)
+* Vignette: [Running multiple analyses at once using the CaseControl package](https://raw.githubusercontent.com/OHDSI/CaseControl/main/inst/doc/MultipleAnalyses.pdf)
+* Package manual: [CaseControl.pdf](https://raw.githubusercontent.com/OHDSI/CaseControl/main/extras/CaseControl.pdf)
 
 Support
 =======
